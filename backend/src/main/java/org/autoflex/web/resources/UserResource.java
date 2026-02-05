@@ -1,5 +1,6 @@
-package org.autoflex.web.resource;
+package org.autoflex.web.resources;
 
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.Consumes;
@@ -9,23 +10,24 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriBuilder;
-import org.autoflex.web.dto.ProductRequestDTO;
-import org.autoflex.domain.entities.Product;
-import org.autoflex.application.services.ProductService;
+import org.autoflex.application.services.UserService;
+import org.autoflex.web.dto.UserRequestDTO;
+import org.autoflex.web.dto.UserResponseDTO;
 
-@Path("/product")
+@Path("/user")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-public class ProductResource {
+public class UserResource {
 
     @Inject
-    ProductService productService;
+    UserService userService;
 
     @POST
-    public Response insert(@Valid ProductRequestDTO dto) {
-        Product created = productService.insert(dto);
+    @RolesAllowed("ADMIN")
+    public Response insert(@Valid UserRequestDTO dto) {
+        UserResponseDTO created = userService.insert(dto);
 
-        var location = UriBuilder.fromPath("/products/{id}")
+        var location = UriBuilder.fromPath("/user/{id}")
                 .build(created.getId());
 
         return Response.created(location).entity(created).build();

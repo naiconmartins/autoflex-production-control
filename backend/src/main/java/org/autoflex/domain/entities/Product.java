@@ -28,7 +28,7 @@ public class Product extends PanacheEntityBase {
     private Long id;
 
     @NotBlank(message = "Product code is required")
-    @Column(nullable = false, length = 50, updatable = false)
+    @Column(nullable = false, length = 50)
     private String code;
 
     @NotBlank(message = "Product name is required")

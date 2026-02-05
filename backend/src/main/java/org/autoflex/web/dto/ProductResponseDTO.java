@@ -1,0 +1,27 @@
+package org.autoflex.web.dto;
+
+import lombok.Getter;
+import org.autoflex.domain.entities.Product;
+
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Getter
+public class ProductResponseDTO {
+
+    public Long id;
+    public String code;
+    public String name;
+    public BigDecimal price;
+    public List<ProductRawMaterialResponseDTO> rawMaterials;
+
+    public ProductResponseDTO(Product entity) {
+        this.code = entity.getCode();
+        this.name = entity.getName();
+        this.price = entity.getPrice();
+        this.rawMaterials = entity.getRawMaterials().stream()
+                .map(ProductRawMaterialResponseDTO::new)
+                .collect(Collectors.toList());
+    }
+}
