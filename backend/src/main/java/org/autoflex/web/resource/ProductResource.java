@@ -1,4 +1,4 @@
-package org.autoflex.resource;
+package org.autoflex.web.resource;
 
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
@@ -9,9 +9,9 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriBuilder;
-import org.autoflex.dto.ProductRequestDTO;
-import org.autoflex.entity.Product;
-import org.autoflex.service.ProductService;
+import org.autoflex.web.dto.ProductRequestDTO;
+import org.autoflex.domain.entities.Product;
+import org.autoflex.application.services.ProductService;
 
 @Path("/product")
 @Consumes(MediaType.APPLICATION_JSON)

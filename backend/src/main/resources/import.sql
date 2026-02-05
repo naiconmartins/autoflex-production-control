@@ -1,6 +1,7 @@
--- This file allow to write SQL commands that will be emitted in test and dev.
--- The commands are commented as their support depends of the database
--- insert into myentity (id, field) values(1, 'field-1');
--- insert into myentity (id, field) values(2, 'field-2');
--- insert into myentity (id, field) values(3, 'field-3');
--- alter sequence myentity_seq restart with 4;
+WITH u AS (
+INSERT INTO users(email, password_hash, first_name, last_name, active, created_at)
+VALUES ('adm@autoflex.com', '$2a$10$7RI3TeWZC47XYC2g3x92luLY75IOV9PAWN53nY54eZ/Dfm2XDvJ5S', 'Amanda', 'Ribeiro', true, now())
+    RETURNING id
+    )
+INSERT INTO user_roles(user_id, role)
+SELECT id, 'ADMIN' FROM u;

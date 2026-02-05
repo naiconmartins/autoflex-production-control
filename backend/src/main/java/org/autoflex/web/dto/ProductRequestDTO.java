@@ -1,9 +1,8 @@
-package org.autoflex.dto;
+package org.autoflex.web.dto;
 
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import org.autoflex.entity.ProductRawMaterial;
 
 import java.math.BigDecimal;
 import java.util.List;

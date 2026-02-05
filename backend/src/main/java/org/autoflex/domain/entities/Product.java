@@ -1,4 +1,4 @@
-package org.autoflex.entity;
+package org.autoflex.domain.entities;
 
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import jakarta.persistence.*;

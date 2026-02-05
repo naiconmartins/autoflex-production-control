@@ -1,11 +1,11 @@
-package org.autoflex.service;
+package org.autoflex.application.services;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
-import org.autoflex.dto.ProductRequestDTO;
-import org.autoflex.entity.Product;
+import org.autoflex.web.dto.ProductRequestDTO;
+import org.autoflex.domain.entities.Product;
 
 @ApplicationScoped
 public class ProductService {

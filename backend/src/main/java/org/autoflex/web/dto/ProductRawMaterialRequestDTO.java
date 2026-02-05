@@ -1,4 +1,4 @@
-package org.autoflex.dto;
+package org.autoflex.web.dto;
 
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;

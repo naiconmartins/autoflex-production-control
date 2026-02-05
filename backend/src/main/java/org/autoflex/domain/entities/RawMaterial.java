@@ -1,4 +1,4 @@
-package org.autoflex.entity;
+package org.autoflex.domain.entities;
 
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import jakarta.persistence.*;
@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
+import org.autoflex.web.exceptions.InvalidDataException;
 
 import java.math.BigDecimal;
 
@@ -53,10 +54,10 @@ public class RawMaterial extends PanacheEntityBase {
 
     public void consumeStock(BigDecimal quantity) {
         if (quantity.signum() < 0) {
-            throw new IllegalArgumentException("Quantity must be positive");
+            throw new InvalidDataException("Quantity must be positive");
         }
         if (this.stockQuantity.subtract(quantity).signum() < 0) {
-            throw new IllegalStateException("Insufficient stock");
+            throw new InvalidDataException("Insufficient stock");
         }
         this.stockQuantity = this.stockQuantity.subtract(quantity);
     }

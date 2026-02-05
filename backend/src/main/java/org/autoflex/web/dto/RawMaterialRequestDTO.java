@@ -1,4 +1,4 @@
-package org.autoflex.dto;
+package org.autoflex.web.dto;
 
 
 public class RawMaterialRequestDTO {
