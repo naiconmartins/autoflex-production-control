@@ -1,11 +1,17 @@
 package org.autoflex.web.dto;
 
 import io.quarkus.hibernate.orm.panache.PanacheQuery;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
 public class PageResponseDTO<T> {
-    public List<T> items;
+    public List<T> content;
     public long totalElements;
     public int totalPages;
     public int page;
@@ -18,7 +24,7 @@ public class PageResponseDTO<T> {
             int size
     ) {
         PageResponseDTO<T> r = new PageResponseDTO<>();
-        r.items = items;
+        r.content = items;
         r.totalElements = query.count();
         r.totalPages = query.pageCount();
         r.page = page;

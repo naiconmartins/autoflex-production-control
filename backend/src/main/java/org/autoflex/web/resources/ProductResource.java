@@ -26,7 +26,7 @@ public class ProductResource {
     public Response insert(@Valid ProductRequestDTO dto) {
         ProductResponseDTO created = productService.insert(dto);
 
-        var location = UriBuilder.fromPath("/products/{id}")
+        var location = UriBuilder.fromPath("/product/{id}")
                 .build(created.getId());
 
         return Response.created(location).entity(created).build();

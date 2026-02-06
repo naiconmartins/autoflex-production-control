@@ -275,7 +275,7 @@ public class ProductServiceTest {
         PageResponseDTO<ProductResponseDTO> result = productService.findAll(pageRequest);
 
         assertNotNull(result);
-        assertEquals(3, result.items.size());
+        assertEquals(3, result.content.size());
         assertEquals(3L, result.totalElements);
     }
 
@@ -287,7 +287,7 @@ public class ProductServiceTest {
 
         PageResponseDTO<ProductResponseDTO> result = productService.findAll(pageRequest);
         assertNotNull(result);
-        assertEquals("PROD003", result.items.get(0).code);
+        assertEquals("PROD003", result.content.get(0).code);
     }
 
     @Test
@@ -297,7 +297,7 @@ public class ProductServiceTest {
 
         PageResponseDTO<ProductResponseDTO> result = productService.findAll(pageRequest);
 
-        assertEquals(0, result.items.size());
+        assertEquals(0, result.content.size());
     }
 
     @Test
@@ -308,7 +308,7 @@ public class ProductServiceTest {
 
         PageResponseDTO<ProductResponseDTO> result = productService.findAll(pageRequest);
 
-        assertEquals(2, result.items.size());
+        assertEquals(2, result.content.size());
         assertEquals(1, result.page);
     }
 }

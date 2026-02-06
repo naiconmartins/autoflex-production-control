@@ -16,7 +16,18 @@ public class ProductResponseDTO {
     public BigDecimal price;
     public List<ProductRawMaterialResponseDTO> rawMaterials;
 
+    public ProductResponseDTO() {}
+
+    public ProductResponseDTO(Long id, String code, String name, BigDecimal price, List<ProductRawMaterialResponseDTO> rawMaterials) {
+        this.id = id;
+        this.code = code;
+        this.name = name;
+        this.price = price;
+        this.rawMaterials = rawMaterials;
+    }
+
     public ProductResponseDTO(Product entity) {
+        this.id = entity.getId();
         this.code = entity.getCode();
         this.name = entity.getName();
         this.price = entity.getPrice();

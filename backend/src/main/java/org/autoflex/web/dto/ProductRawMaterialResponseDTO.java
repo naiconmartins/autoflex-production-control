@@ -5,15 +5,22 @@ import org.autoflex.domain.entities.ProductRawMaterial;
 import java.math.BigDecimal;
 
 public class ProductRawMaterialResponseDTO {
-    public Long rawMaterialId;
-    public String rawMaterialCode;
-    public String rawMaterialName;
+    public Long id;
+    public String code;
+    public String name;
     public BigDecimal requiredQuantity;
 
+    public ProductRawMaterialResponseDTO(Long id, String code, String name, BigDecimal requiredQuantity) {
+        this.id = id;
+        this.code = code;
+        this.name = name;
+        this.requiredQuantity = requiredQuantity;
+    }
+
     public ProductRawMaterialResponseDTO(ProductRawMaterial entity) {
-        this.rawMaterialId = entity.getRawMaterial().getId();
-        this.rawMaterialCode = entity.getRawMaterial().getCode();
-        this.rawMaterialName = entity.getRawMaterial().getName();
+        this.id = entity.getRawMaterial().getId();
+        this.code = entity.getRawMaterial().getCode();
+        this.name = entity.getRawMaterial().getName();
         this.requiredQuantity = entity.getRequiredQuantity();
     }
 }

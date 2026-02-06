@@ -42,6 +42,13 @@ public class ProductRawMaterial extends PanacheEntityBase {
 
     public ProductRawMaterial() {}
 
+    public ProductRawMaterial(Long id, Product product, RawMaterial rawMaterial, BigDecimal requiredQuantity) {
+        this.id = id;
+        this.product = product;
+        this.rawMaterial = rawMaterial;
+        this.requiredQuantity = requiredQuantity;
+    }
+
     public ProductRawMaterial(Product product, RawMaterial rawMaterial, BigDecimal requiredQuantity) {
         this.product = product;
         this.rawMaterial = rawMaterial;

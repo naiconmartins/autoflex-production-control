@@ -215,7 +215,7 @@ public class RawMaterialServiceTest {
         PageResponseDTO<RawMaterialResponseDTO> result = rawMaterialService.findAll(pageRequest);
 
         assertNotNull(result);
-        assertEquals(3, result.items.size());
+        assertEquals(3, result.content.size());
         assertEquals(3L, result.totalElements);
         assertEquals(1, result.totalPages);
         assertEquals(0, result.page);
@@ -237,8 +237,8 @@ public class RawMaterialServiceTest {
         PageResponseDTO<RawMaterialResponseDTO> result = rawMaterialService.findAll(pageRequest);
 
         assertNotNull(result);
-        assertEquals(3, result.items.size());
-        assertEquals("CODE3", result.items.get(0).code);
+        assertEquals(3, result.content.size());
+        assertEquals("CODE3", result.content.get(0).code);
     }
 
     @Test
@@ -250,7 +250,7 @@ public class RawMaterialServiceTest {
         PageResponseDTO<RawMaterialResponseDTO> result = rawMaterialService.findAll(pageRequest);
 
         assertNotNull(result);
-        assertEquals(0, result.items.size());
+        assertEquals(0, result.content.size());
         assertEquals(0L, result.totalElements);
         assertEquals(0, result.totalPages);
     }
@@ -269,7 +269,7 @@ public class RawMaterialServiceTest {
         PageResponseDTO<RawMaterialResponseDTO> result = rawMaterialService.findAll(pageRequest);
 
         assertNotNull(result);
-        assertEquals(2, result.items.size());
+        assertEquals(2, result.content.size());
         assertEquals(5L, result.totalElements);
         assertEquals(3, result.totalPages);
         assertEquals(1, result.page);

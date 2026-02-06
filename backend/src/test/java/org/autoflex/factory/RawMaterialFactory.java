@@ -14,14 +14,9 @@ public class RawMaterialFactory {
         return dto;
     }
 
-    public static RawMaterial createCustomRawMaterial(
-            String code,
-            String name,
-            BigDecimal stockQuantity) {
-        RawMaterial entity = new RawMaterial();
-        entity.setCode(code);
-        entity.setName(name);
-        entity.setStockQuantity(stockQuantity);
+    public static RawMaterial createCustomRawMaterial(Long id) {
+        RawMaterial entity = new RawMaterial("RAW001", "RawTest", new  BigDecimal("100.00"));
+        entity.setId(id);
         return entity;
     }
 
@@ -34,10 +29,6 @@ public class RawMaterialFactory {
     }
 
     public static RawMaterial createRawMaterialWithCode(String code) {
-        RawMaterial entity = new RawMaterial();
-        entity.setCode(code);
-        entity.setName("Screwdriver");
-        entity.setStockQuantity(new BigDecimal("50.00"));
-        return entity;
+        return new RawMaterial(code, "Screwdriver", new BigDecimal("50.00"));
     }
 }

@@ -30,10 +30,10 @@ public class ProductService {
         product.persist();
 
         for (ProductRawMaterialRequestDTO rawMaterialDto : dto.rawMaterials) {
-            Optional<RawMaterial> rawMaterialOpt = RawMaterial.findByIdOptional(rawMaterialDto.rawMaterialId);
+            Optional<RawMaterial> rawMaterialOpt = RawMaterial.findByIdOptional(rawMaterialDto.id);
 
             if (rawMaterialOpt.isEmpty())
-                throw new ResourceNotFoundException("Raw material with id " + rawMaterialDto.rawMaterialId + " not found");
+                throw new ResourceNotFoundException("Raw material with id " + rawMaterialDto.id + " not found");
 
             ProductRawMaterial prodRawMaterial = new ProductRawMaterial();
             prodRawMaterial.setProduct(product);
@@ -112,10 +112,10 @@ public class ProductService {
     @NonNull
     private ProductResponseDTO getProductResponseDTO(ProductRequestDTO dto, Product entity) {
         for (ProductRawMaterialRequestDTO productRawMaterial : dto.rawMaterials) {
-            Optional<RawMaterial> rawMaterialOpt = RawMaterial.findByIdOptional(productRawMaterial.rawMaterialId);
+            Optional<RawMaterial> rawMaterialOpt = RawMaterial.findByIdOptional(productRawMaterial.id);
 
             if (rawMaterialOpt.isEmpty())
-                throw new ResourceNotFoundException("Raw material with id " + productRawMaterial.rawMaterialId + " not found");
+                throw new ResourceNotFoundException("Raw material with id " + productRawMaterial.id + " not found");
 
             ProductRawMaterial prodRawMaterial = new ProductRawMaterial();
 

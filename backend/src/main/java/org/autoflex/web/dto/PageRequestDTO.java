@@ -2,7 +2,13 @@ package org.autoflex.web.dto;
 
 import jakarta.ws.rs.DefaultValue;
 import jakarta.ws.rs.QueryParam;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+@Getter
+@Setter
+@NoArgsConstructor
 public class PageRequestDTO {
     @QueryParam("page")
     @DefaultValue("0")
