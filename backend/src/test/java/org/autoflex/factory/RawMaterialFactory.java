@@ -2,6 +2,7 @@ package org.autoflex.factory;
 
 import org.autoflex.domain.entities.RawMaterial;
 import org.autoflex.web.dto.RawMaterialRequestDTO;
+import org.autoflex.web.dto.RawMaterialResponseDTO;
 
 import java.math.BigDecimal;
 
@@ -15,20 +16,16 @@ public class RawMaterialFactory {
     }
 
     public static RawMaterial createCustomRawMaterial(Long id) {
-        RawMaterial entity = new RawMaterial("RAW001", "RawTest", new  BigDecimal("100.00"));
+        RawMaterial entity = new RawMaterial("RAW001", "RawTest", new BigDecimal("100.00"));
         entity.setId(id);
         return entity;
     }
 
-    public static RawMaterialRequestDTO createInvalidRawMaterialRequestDTO() {
-        RawMaterialRequestDTO dto = new RawMaterialRequestDTO();
-        dto.code = "";
-        dto.name = "";
-        dto.stockQuantity = new BigDecimal("-1.00");
-        return dto;
-    }
-
     public static RawMaterial createRawMaterialWithCode(String code) {
         return new RawMaterial(code, "Screwdriver", new BigDecimal("50.00"));
+    }
+
+    public static RawMaterialResponseDTO createRawMaterialResponseDTO() {
+        return new RawMaterialResponseDTO(1L, "RAW001", "Raw Material Test", new BigDecimal("150.00"));
     }
 }

@@ -5,6 +5,8 @@ import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 
 import java.math.BigDecimal;
 
@@ -19,4 +21,12 @@ public class RawMaterialRequestDTO {
     @NotNull(message = "Stock quantity is required")
     @DecimalMin(value = "0.0", message = "Stock quantity cannot be negative")
     public BigDecimal stockQuantity;
+
+    public RawMaterialRequestDTO() {}
+
+    public RawMaterialRequestDTO(String code, String name, BigDecimal stockQuantity) {
+        this.code = code;
+        this.name = name;
+        this.stockQuantity = stockQuantity;
+    }
 }
