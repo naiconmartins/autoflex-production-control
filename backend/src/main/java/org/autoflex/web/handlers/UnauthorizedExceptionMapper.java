@@ -6,7 +6,7 @@ import jakarta.ws.rs.core.UriInfo;
 import jakarta.ws.rs.ext.ExceptionMapper;
 import jakarta.ws.rs.ext.Provider;
 import org.autoflex.web.dto.WebErrorDTO;
-import io.quarkus.security.UnauthorizedException;
+import org.autoflex.web.exceptions.UnauthorizedException;
 
 import java.time.Instant;
 

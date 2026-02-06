@@ -7,4 +7,9 @@ public class LoginResponseDTO {
 
     public final String accessToken;
     public String tokenType = "Bearer";
+
+    public LoginResponseDTO(String accessToken, String tokenType) {
+        this.accessToken = accessToken;
+        this.tokenType = tokenType;
+    }
 }
