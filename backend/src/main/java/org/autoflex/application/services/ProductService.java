@@ -22,15 +22,29 @@ public class ProductService {
 
     @Transactional
     public ProductResponseDTO insert(ProductRequestDTO dto) {
-
-        if (Product.find("code", dto.code).firstResult() != null)
+        if (Product.find("code", dto.code).firstResultOptional().isPresent())
             throw new ConflictException("Product code already exists");
 
         Product product = new Product(dto.code, dto.name, dto.price);
 
         product.persist();
 
-        return getProductResponseDTO(dto, product);
+        for (ProductRawMaterialRequestDTO rawMaterialDto : dto.rawMaterials) {
+            Optional<RawMaterial> rawMaterialOpt = RawMaterial.findByIdOptional(rawMaterialDto.rawMaterialId);
+
+            if (rawMaterialOpt.isEmpty())
+                throw new ResourceNotFoundException("Raw material with id " + rawMaterialDto.rawMaterialId + " not found");
+
+            ProductRawMaterial prodRawMaterial = new ProductRawMaterial();
+            prodRawMaterial.setProduct(product);
+            prodRawMaterial.setRawMaterial(rawMaterialOpt.get());
+            prodRawMaterial.setRequiredQuantity(rawMaterialDto.requiredQuantity);
+
+            prodRawMaterial.persist();
+            product.addRawMaterial(prodRawMaterial);
+        }
+
+        return new ProductResponseDTO(product);
     }
 
     @Transactional

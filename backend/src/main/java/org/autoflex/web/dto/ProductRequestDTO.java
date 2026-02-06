@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -24,4 +25,11 @@ public class ProductRequestDTO {
 
     @NotEmpty(message = "The product must contain at least one raw material")
     public List<ProductRawMaterialRequestDTO> rawMaterials;
+
+    public ProductRequestDTO(String code, String name, BigDecimal price, List<ProductRawMaterialRequestDTO> rawMaterials) {
+        this.code = code;
+        this.name = name;
+        this.price = price;
+        this.rawMaterials = rawMaterials;
+    }
 }

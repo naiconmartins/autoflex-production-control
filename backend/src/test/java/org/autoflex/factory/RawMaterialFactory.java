@@ -6,7 +6,6 @@ import org.autoflex.web.dto.RawMaterialRequestDTO;
 import java.math.BigDecimal;
 
 public class RawMaterialFactory {
-
     public static RawMaterialRequestDTO createRawMaterialRequestDTO() {
         RawMaterialRequestDTO dto = new RawMaterialRequestDTO();
         dto.code = "RM001";

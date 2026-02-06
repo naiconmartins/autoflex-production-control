@@ -13,4 +13,9 @@ public class ProductRawMaterialRequestDTO {
     @NotNull(message = "Required quantity is required")
     @DecimalMin(value = "0.01", message = "Required quantity must be greater than zero")
     public BigDecimal requiredQuantity;
+
+    public ProductRawMaterialRequestDTO(Long rawMaterialId, BigDecimal requiredQuantity) {
+        this.rawMaterialId = rawMaterialId;
+        this.requiredQuantity = requiredQuantity;
+    }
 }
