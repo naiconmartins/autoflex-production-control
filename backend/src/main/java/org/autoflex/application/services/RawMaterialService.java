@@ -18,7 +18,7 @@ public class RawMaterialService {
     @Transactional
     public RawMaterialResponseDTO insert(RawMaterialRequestDTO dto) {
 
-        if (RawMaterial.find("code", dto.code).firstResult() != null)
+        if (RawMaterial.find("code", dto.code).firstResultOptional().isPresent())
             throw new ConflictException("Raw material code already exists");
 
         RawMaterial rawMaterial = new RawMaterial(dto.code, dto.name, dto.stockQuantity);

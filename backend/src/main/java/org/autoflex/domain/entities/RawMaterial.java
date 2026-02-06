@@ -5,8 +5,10 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
+import org.autoflex.web.dto.RawMaterialRequestDTO;
 import org.autoflex.web.exceptions.InvalidDataException;
 
 import java.math.BigDecimal;
@@ -14,6 +16,7 @@ import java.math.BigDecimal;
 @Entity
 @Getter
 @Setter
+@EqualsAndHashCode(callSuper = false)
 @Table(
         name = "raw_materials",
         uniqueConstraints = {
@@ -46,6 +49,12 @@ public class RawMaterial extends PanacheEntityBase {
         this.code = code;
         this.name = name;
         this.stockQuantity = stockQuantity;
+    }
+
+    public RawMaterial(RawMaterialRequestDTO dto) {
+        this.code = dto.code;
+        this.name = dto.name;
+        this.stockQuantity = dto.stockQuantity;
     }
 
     public boolean hasStock(BigDecimal requiredQuantity) {

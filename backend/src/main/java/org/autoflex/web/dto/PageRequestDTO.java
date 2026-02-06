@@ -19,4 +19,11 @@ public class PageRequestDTO {
     @QueryParam("dir")
     @DefaultValue("asc")
     public String direction;
+
+    public PageRequestDTO(int page, int size, String sortBy, String direction) {
+        this.page = page;
+        this.size = size;
+        this.sortBy = sortBy;
+        this.direction = direction;
+    }
 }
