@@ -103,7 +103,7 @@
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-test-security</artifactId>
             <version>3.31.2</version>
-            <scope>compile</scope>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
