@@ -20,12 +20,16 @@ public class ConstraintViolationExceptionMapper implements ExceptionMapper<Const
     @Override
     public Response toResponse(ConstraintViolationException e) {
         int status = 422;
-        ValidationErrorDTO err = new ValidationErrorDTO(Instant.now(), status, "Invalid data", "/" + uriInfo.getPath());
+        String path = uriInfo.getAbsolutePath().getPath();
+        ValidationErrorDTO err = new ValidationErrorDTO(Instant.now(), status, "Invalid data", path);
 
-        for (ConstraintViolation<?> v : e.getConstraintViolations()) {
-            String field = (v.getPropertyPath() != null) ? v.getPropertyPath().toString() : "field";
+        e.getConstraintViolations().stream().findFirst().ifPresent(v -> {
+            String fullPath = v.getPropertyPath().toString();
+            String[] nodes = fullPath.split("\\.");
+            String field = nodes[nodes.length - 1];
+
             err.addError(field, v.getMessage());
-        }
+        });
 
         return Response.status(status).entity(err).build();
     }

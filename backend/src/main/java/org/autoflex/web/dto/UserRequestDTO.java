@@ -2,23 +2,29 @@ package org.autoflex.web.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 public class UserRequestDTO {
 
-    @Email
-    @NotBlank
+    @Email(message = "Invalid email format")
+    @NotNull(message = "Email address must not be null")
+    @NotBlank(message = "Email is required")
     public String email;
 
-    @NotBlank
+    @NotNull(message = "Password must not be null")
+    @NotBlank(message = "Password is required")
     public String password;
 
-    @NotBlank
+    @NotNull(message = "First name must not be null")
+    @NotBlank(message = "First name is required")
     public String firstName;
 
-    @NotBlank
+    @NotNull(message = "Last name must not be null")
+    @NotBlank(message = "Last name is required")
     public String lastName;
 
-    @NotBlank
+    @NotNull(message = "Role must not be null")
+    @NotBlank(message = "Role name is required")
     public String role;
 
     public UserRequestDTO(String email, String password, String firstName, String lastName, String role) {

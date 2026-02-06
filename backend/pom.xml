@@ -99,6 +99,12 @@
             <artifactId>quarkus-panache-mock</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-test-security</artifactId>
+            <version>3.31.2</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
 
     <build>

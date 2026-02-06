@@ -2,6 +2,7 @@ package org.autoflex.web.dto;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import org.autoflex.domain.entities.User;
 
 import java.time.Instant;
@@ -9,6 +10,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Getter
+@Setter
 public class UserResponseDTO {
     public Long id;
     public String email;
@@ -29,5 +31,15 @@ public class UserResponseDTO {
                 .collect(Collectors.toSet());
         this.active = user.isActive();
         this.createdAt = user.getCreatedAt();
+    }
+
+    public UserResponseDTO(Long id, String email, String firstName, String lastName, Set<String> roles, Boolean active, Instant createdAt) {
+        this.id = id;
+        this.email = email;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.roles = roles;
+        this.active = active;
+        this.createdAt = createdAt;
     }
 }
