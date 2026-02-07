@@ -19,9 +19,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} antialiased`}>
-        <StoreProvider>{children}</StoreProvider>
+        <StoreProvider>
+          <main id="main" role="main" className="flex-1">
+            {children}
+          </main>
+        </StoreProvider>
       </body>
     </html>
   );

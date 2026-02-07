@@ -1,0 +1,87 @@
+"use server";
+
+import { RawMaterialRequest } from "@/interfaces/raw-material";
+import { mapApiErrorToClientMessage } from "@/services/api-error.mapper";
+import { ApiError } from "@/services/api.service";
+import { rawMaterialService } from "@/services/raw-material.service";
+import { getToken } from "./findCookie";
+
+type ActionSuccess<T> = {
+  success: true;
+  data: T;
+};
+
+type ActionError = {
+  success: false;
+  status: number;
+  error: string;
+  fieldErrors?: Record<string, string[]>;
+};
+
+type ActionResult<T> = ActionSuccess<T> | ActionError;
+
+async function executeAction<T>(
+  action: (token: string) => Promise<T>,
+): Promise<ActionResult<T>> {
+  try {
+    const token = await getToken();
+    if (!token) {
+      return {
+        success: false,
+        status: 401,
+        error: "Token não encontrado. Faça login novamente.",
+      };
+    }
+
+    const data = await action(token);
+    return { success: true, data };
+  } catch (err: any) {
+    if (err instanceof ApiError) {
+      return {
+        success: false,
+        status: err.status,
+        error: mapApiErrorToClientMessage(err),
+        fieldErrors: err.status === 422 ? err.data?.errors : undefined,
+      };
+    }
+
+    return {
+      success: false,
+      status: 500,
+      error: "Erro inesperado. Por favor, tente novamente.",
+    };
+  }
+}
+
+export async function fetchRawMaterialsAction(
+  page: number = 0,
+  size: number = 10,
+  sortBy: string = "name",
+  direction: string = "asc",
+) {
+  return executeAction((token) =>
+    rawMaterialService.findAll(token, page, size, sortBy, direction),
+  );
+}
+
+export async function createRawMaterialAction(data: RawMaterialRequest) {
+  return executeAction((token) => rawMaterialService.create(data, token));
+}
+
+export async function updateRawMaterialAction(
+  id: string,
+  data: RawMaterialRequest,
+) {
+  return executeAction((token) => rawMaterialService.update(id, data, token));
+}
+
+export async function deleteRawMaterialAction(id: string) {
+  return executeAction(async (token) => {
+    await rawMaterialService.delete(id, token);
+    return undefined as void;
+  });
+}
+
+export async function findRawMaterialByIdAction(id: string) {
+  return executeAction((token) => rawMaterialService.findById(id, token));
+}

@@ -6,6 +6,7 @@ import { mapApiErrorToClientMessage } from "@/services/api-error.mapper";
 import { ApiError } from "@/services/api.service";
 import { authService } from "@/services/auth.service";
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 
 type LoginActionSuccess = {
   success: true;
@@ -55,4 +56,10 @@ export async function loginAction(
       error: "An unexpected error occurred. Please try again later.",
     };
   }
+}
+
+export async function logoutAction() {
+  const cookieStore = await cookies();
+  cookieStore.delete("token");
+  redirect("/login");
 }
