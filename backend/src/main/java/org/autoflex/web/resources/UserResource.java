@@ -3,10 +3,7 @@ package org.autoflex.web.resources;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriBuilder;
@@ -31,5 +28,12 @@ public class UserResource {
                 .build(created.getId());
 
         return Response.created(location).entity(created).build();
+    }
+
+    @GET
+    @Path("/me")
+    @RolesAllowed({"USER", "ADMIN"})
+    public UserResponseDTO getCurrentUser() {
+        return userService.getCurrentUser();
     }
 }

@@ -1,5 +1,6 @@
 package org.autoflex.application.services;
 
+import io.quarkus.security.identity.SecurityIdentity;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -8,9 +9,7 @@ import org.autoflex.domain.enums.UserRole;
 import org.autoflex.web.dto.UserRequestDTO;
 import org.autoflex.domain.entities.User;
 import org.autoflex.web.dto.UserResponseDTO;
-import org.autoflex.web.exceptions.ConflictException;
-import org.autoflex.web.exceptions.DatabaseException;
-import org.autoflex.web.exceptions.InvalidDataException;
+import org.autoflex.web.exceptions.*;
 
 import java.util.Optional;
 
@@ -19,6 +18,9 @@ public class UserService {
 
     @Inject
     PasswordService passwordService;
+
+    @Inject
+    SecurityIdentity securityIdentity;
 
     @Transactional
     public UserResponseDTO insert(UserRequestDTO dto) {
@@ -49,6 +51,29 @@ public class UserService {
             User.flush();
         } catch (Exception ex) {
             throw new DatabaseException("Database constraint violation");
+        }
+
+        return new UserResponseDTO(user);
+    }
+
+    @Transactional
+    public UserResponseDTO getCurrentUser() {
+        if (securityIdentity.isAnonymous()) {
+            throw new UnauthorizedException("User is not authenticated");
+        }
+
+        String email = securityIdentity.getPrincipal().getName();
+
+        Optional<User> userOpt = User.findByEmail(email);
+
+        if (userOpt.isEmpty()) {
+            throw new ResourceNotFoundException("User not found");
+        }
+
+        User user = userOpt.get();
+
+        if (!user.isActive()) {
+            throw new UnauthorizedException("User is not active");
         }
 
         return new UserResponseDTO(user);

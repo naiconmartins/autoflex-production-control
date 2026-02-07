@@ -3,8 +3,6 @@ package org.autoflex.application.security;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
-import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.core.Response;
 import org.autoflex.web.dto.LoginRequestDTO;
 import org.autoflex.domain.entities.User;
 import org.autoflex.web.dto.LoginResponseDTO;
@@ -32,8 +30,8 @@ public class AuthService {
         if (!passwordService.matches(dto.password, user.getPasswordHash()))
             throw new UnauthorizedException();
 
-        String token = tokenService.issue(user);
+        TokenService.TokenData tokenData = tokenService.issue(user);
 
-        return new LoginResponseDTO(token);
+        return new LoginResponseDTO(tokenData.getToken(), tokenData.getExpiresIn());
     }
 }

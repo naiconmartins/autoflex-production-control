@@ -22,7 +22,7 @@ public class AuthResourceTest {
     @Test
     void login_shouldReturn200_whenCredentialsAreValid() {
         LoginRequestDTO request = new LoginRequestDTO("user@autoflex.org", "1234");
-        LoginResponseDTO response = new LoginResponseDTO("generated-jwt-token");
+        LoginResponseDTO response = new LoginResponseDTO("generated-jwt-token", 7200);
 
         when(authService.authenticate(any(LoginRequestDTO.class))).thenReturn(response);
 
@@ -33,7 +33,9 @@ public class AuthResourceTest {
                 .post("/auth/login")
                 .then()
                 .statusCode(200)
-                .body("accessToken", is("generated-jwt-token"));
+                .body("accessToken", is("generated-jwt-token"))
+                .body("expires", is(7200))
+                .body("tokenType", is("Bearer"));
     }
 
     @Test

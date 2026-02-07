@@ -31,12 +31,14 @@ public class AuthServiceTest {
 
     private User mockedUser;
     private LoginRequestDTO defaultDto;
+    private TokenService.TokenData mockedTokenData;
 
     @BeforeEach
     void setUp() {
         PanacheMock.mock(User.class);
         mockedUser = mock(User.class);
         defaultDto = new LoginRequestDTO("admin@autoflex.org", "123456");
+        mockedTokenData = new TokenService.TokenData("mocked-jwt-token", 7200);
 
         lenient().when(mockedUser.isActive()).thenReturn(true);
         lenient().when(mockedUser.getPasswordHash()).thenReturn("hashed_password");
@@ -46,11 +48,13 @@ public class AuthServiceTest {
     @Test
     void authenticate_shouldReturnToken_whenCredentialsAreCorrect() {
         prepareMockUser(defaultDto.email, mockedUser);
-        when(tokenService.issue(mockedUser)).thenReturn("mocked-jwt-token");
+        when(tokenService.issue(mockedUser)).thenReturn(mockedTokenData);
 
         LoginResponseDTO response = authService.authenticate(defaultDto);
 
         Assertions.assertEquals("mocked-jwt-token", response.accessToken);
+        Assertions.assertEquals(7200, response.expires);
+        Assertions.assertEquals("Bearer", response.tokenType);
         verify(tokenService).issue(mockedUser);
     }
 
@@ -83,6 +87,18 @@ public class AuthServiceTest {
     @Test
     void authenticate_shouldThrowException_whenDtoIsNull() {
         Assertions.assertThrows(NullPointerException.class, () -> authService.authenticate(null));
+    }
+
+    @Test
+    void authenticate_shouldReturnCorrectExpirationTime() {
+        prepareMockUser(defaultDto.email, mockedUser);
+        TokenService.TokenData customTokenData = new TokenService.TokenData("custom-token", 3600);
+        when(tokenService.issue(mockedUser)).thenReturn(customTokenData);
+
+        LoginResponseDTO response = authService.authenticate(defaultDto);
+
+        Assertions.assertEquals(3600, response.expires);
+        Assertions.assertEquals("custom-token", response.accessToken);
     }
 
     private void prepareMockUser(String email, User user) {

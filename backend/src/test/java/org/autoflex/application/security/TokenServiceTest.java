@@ -32,9 +32,14 @@ public class TokenServiceTest {
 
     @Test
     void issue_shouldGenerateValidJwtWithCorrectClaims() throws Exception {
-        String token = tokenService.issue(user);
+        TokenService.TokenData tokenData = tokenService.issue(user);
 
-        Assertions.assertNotNull(token);
+        Assertions.assertNotNull(tokenData);
+        Assertions.assertNotNull(tokenData.getToken());
+        Assertions.assertNotNull(tokenData.getExpiresIn());
+        Assertions.assertEquals(7200, tokenData.getExpiresIn());
+
+        String token = tokenData.getToken();
 
         JwtConsumer jwtConsumer = new JwtConsumerBuilder()
                 .setSkipSignatureVerification()
@@ -48,5 +53,35 @@ public class TokenServiceTest {
 
         Assertions.assertTrue(claims.getStringListClaimValue("groups").contains("USER"));
         Assertions.assertTrue(claims.getStringListClaimValue("groups").contains("ADMIN"));
+    }
+
+    @Test
+    void issue_shouldReturnCorrectExpirationTime() {
+        TokenService.TokenData tokenData = tokenService.issue(user);
+
+        Assertions.assertEquals(7200, tokenData.getExpiresIn());
+    }
+
+    @Test
+    void issue_shouldGenerateTokenForDifferentUsers() throws Exception {
+        User anotherUser = Mockito.mock(User.class);
+        Mockito.when(anotherUser.getEmail()).thenReturn("another@autoflex.org");
+        Mockito.when(anotherUser.getRoles()).thenReturn(Set.of(UserRole.USER));
+
+        TokenService.TokenData tokenData1 = tokenService.issue(user);
+        TokenService.TokenData tokenData2 = tokenService.issue(anotherUser);
+
+        Assertions.assertNotEquals(tokenData1.getToken(), tokenData2.getToken());
+
+        JwtConsumer jwtConsumer = new JwtConsumerBuilder()
+                .setSkipSignatureVerification()
+                .setRequireSubject()
+                .build();
+
+        JwtClaims claims1 = jwtConsumer.processToClaims(tokenData1.getToken());
+        JwtClaims claims2 = jwtConsumer.processToClaims(tokenData2.getToken());
+
+        Assertions.assertEquals(EMAIL, claims1.getSubject());
+        Assertions.assertEquals("another@autoflex.org", claims2.getSubject());
     }
 }
