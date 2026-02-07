@@ -20,6 +20,7 @@ public class RawMaterialResponseDTO {
     }
 
     public RawMaterialResponseDTO(RawMaterial entity) {
+        this.id = entity.getId();
         this.code = entity.getCode();
         this.name = entity.getName();
         this.stockQuantity = entity.getStockQuantity();
