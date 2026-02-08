@@ -3,7 +3,7 @@
 import { type Table } from "@tanstack/react-table";
 import { Settings2 } from "lucide-react";
 
-import { Button } from "../ui/button";
+import { Button } from "./ui/button";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -11,7 +11,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "../ui/dropdown-menu";
+} from "./ui/dropdown-menu";
 
 export function DataTableViewOptions<TData>({
   table,

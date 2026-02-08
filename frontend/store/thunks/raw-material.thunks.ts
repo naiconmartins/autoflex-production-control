@@ -26,7 +26,7 @@ export const fetchRawMaterials = (params?: {
       dispatch(setLoading(true));
       const page = params?.page ?? 0;
       const size = params?.size ?? 10;
-      const sortBy = params?.sortBy ?? "name";
+      const sortBy = params?.sortBy ?? "id";
       const direction = params?.direction ?? "asc";
 
       const result = await fetchRawMaterialsAction(

@@ -13,6 +13,14 @@ export function mapApiErrorToClientMessage(error: ApiError): string {
     return "You are not allowed to perform this action.";
   }
 
+  if (error.status === 404) {
+    return "The requested resource was not found.";
+  }
+
+  if (error.status === 409) {
+    return "This resource already exists.";
+  }
+
   if (error.status === 422) {
     return "Some fields are invalid. Please review your input.";
   }
@@ -22,4 +30,27 @@ export function mapApiErrorToClientMessage(error: ApiError): string {
   }
 
   return error.message || "An unexpected error occurred.";
+}
+
+export function extractFieldErrors(
+  error: ApiError,
+): Record<string, string[]> | undefined {
+  if (
+    error.status === 422 &&
+    error.data?.errors &&
+    Array.isArray(error.data.errors)
+  ) {
+    const fieldErrors: Record<string, string[]> = {};
+
+    error.data.errors.forEach((err: { field: string; message: string }) => {
+      if (!fieldErrors[err.field]) {
+        fieldErrors[err.field] = [];
+      }
+      fieldErrors[err.field].push(err.message);
+    });
+
+    return fieldErrors;
+  }
+
+  return undefined;
 }

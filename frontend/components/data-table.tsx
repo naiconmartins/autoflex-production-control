@@ -23,24 +23,32 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "../ui/table";
+} from "./ui/table";
 
-import { DataTablePagination } from "../ui/data-table-pagination";
+import Image from "next/image";
+import { DataTablePagination } from "./data-table-pagination";
 import { DataTableToolbar } from "./data-table-toolbar";
+import Loading from "./loading";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
+  loading: boolean;
   data: TData[];
   page: number;
   totalPages: number;
+  placeholder: string;
+  column: string;
   onPagination: (page: number) => void;
 }
 
 export function DataTable<TData, TValue>({
   columns,
+  loading,
   data,
   page,
   totalPages,
+  placeholder,
+  column,
   onPagination,
 }: DataTableProps<TData, TValue>) {
   const [rowSelection, setRowSelection] = React.useState({});
@@ -62,7 +70,7 @@ export function DataTable<TData, TValue>({
     },
     initialState: {
       pagination: {
-        pageSize: 25,
+        pageSize: 10,
       },
     },
     enableRowSelection: true,
@@ -80,7 +88,11 @@ export function DataTable<TData, TValue>({
 
   return (
     <div className="flex flex-col gap-4">
-      <DataTableToolbar table={table} />
+      <DataTableToolbar
+        table={table}
+        placeholder={placeholder}
+        column={column}
+      />
       <div className="overflow-hidden rounded-md border">
         <Table>
           <TableHeader>
@@ -102,31 +114,53 @@ export function DataTable<TData, TValue>({
             ))}
           </TableHeader>
           <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext(),
-                      )}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
-            ) : (
+            {loading ? (
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
-                  className="h-24 text-center"
+                  className="h-60 text-center pb-4"
                 >
-                  No results.
+                  <Loading />
                 </TableCell>
               </TableRow>
+            ) : (
+              <>
+                {table.getRowModel().rows?.length ? (
+                  table.getRowModel().rows.map((row) => (
+                    <TableRow
+                      key={row.id}
+                      data-state={row.getIsSelected() && "selected"}
+                    >
+                      {row.getVisibleCells().map((cell) => (
+                        <TableCell key={cell.id}>
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext(),
+                          )}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell
+                      colSpan={columns.length}
+                      className="h-24 text-center pb-4"
+                    >
+                      <div className="w-full flex flex-row justify-center">
+                        <Image
+                          alt="No results"
+                          src={"/empty-box.svg"}
+                          height={200}
+                          width={250}
+                          className="w-44"
+                        />
+                      </div>
+                      No results.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </>
             )}
           </TableBody>
         </Table>

@@ -1,7 +1,10 @@
 "use server";
 
 import { RawMaterialRequest } from "@/interfaces/raw-material";
-import { mapApiErrorToClientMessage } from "@/services/api-error.mapper";
+import {
+  extractFieldErrors,
+  mapApiErrorToClientMessage,
+} from "@/services/api-error.mapper";
 import { ApiError } from "@/services/api.service";
 import { rawMaterialService } from "@/services/raw-material.service";
 import { getToken } from "./findCookie";
@@ -29,7 +32,7 @@ async function executeAction<T>(
       return {
         success: false,
         status: 401,
-        error: "Token não encontrado. Faça login novamente.",
+        error: "Token not found. Please login again.",
       };
     }
 
@@ -37,18 +40,20 @@ async function executeAction<T>(
     return { success: true, data };
   } catch (err: any) {
     if (err instanceof ApiError) {
+      const fieldErrors = extractFieldErrors(err);
+
       return {
         success: false,
         status: err.status,
         error: mapApiErrorToClientMessage(err),
-        fieldErrors: err.status === 422 ? err.data?.errors : undefined,
+        fieldErrors,
       };
     }
 
     return {
       success: false,
       status: 500,
-      error: "Erro inesperado. Por favor, tente novamente.",
+      error: "Unexpected error. Please try again.",
     };
   }
 }

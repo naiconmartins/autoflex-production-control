@@ -5,7 +5,8 @@ import { type ColumnDef } from "@tanstack/react-table";
 import { Checkbox } from "../ui/checkbox";
 
 import { RawMaterial } from "@/interfaces/raw-material";
-import { DataTableColumnHeader } from "./data-table-column-header";
+import { DataTableColumnHeader } from "../data-table-column-header";
+import { Badge } from "../ui/badge";
 import { DataTableRowActions } from "./data-table-row-actions";
 
 export const columns: ColumnDef<RawMaterial>[] = [
@@ -50,12 +51,14 @@ export const columns: ColumnDef<RawMaterial>[] = [
     cell: ({ row }) => {
       return (
         <div className="flex gap-2">
-          <span className="max-w-125 truncate font-medium">
+          <span className="max-w-20 truncate font-medium">
             {row.getValue("code")}
           </span>
         </div>
       );
     },
+    enableSorting: false,
+    enableHiding: true,
   },
   {
     accessorKey: "name",
@@ -71,6 +74,35 @@ export const columns: ColumnDef<RawMaterial>[] = [
         </div>
       );
     },
+  },
+  {
+    accessorKey: "status",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="STATUS" />
+    ),
+    cell: ({ row }) => {
+      return (
+        <div className="flex gap-2">
+          {row.original.stockQuantity > 0 ? (
+            <Badge
+              variant="ghost"
+              className="bg-emerald-50 text-emerald-500 text-sm rounded-sm"
+            >
+              In stock
+            </Badge>
+          ) : (
+            <Badge
+              variant="ghost"
+              className="bg-rose-50 text-rose-500 text-sm rounded-sm"
+            >
+              Unavailable
+            </Badge>
+          )}
+        </div>
+      );
+    },
+    enableSorting: false,
+    enableHiding: true,
   },
   {
     accessorKey: "stockQuantity",
@@ -89,6 +121,8 @@ export const columns: ColumnDef<RawMaterial>[] = [
   },
   {
     id: "actions",
-    cell: ({ row }) => <DataTableRowActions row={row} />,
+    cell: ({ row }) => (
+      <DataTableRowActions title="Edit Raw Material" row={row} />
+    ),
   },
 ];
