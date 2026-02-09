@@ -10,14 +10,11 @@ import {
 } from "@/components/ui/dialog";
 import { RowDataProps } from "@/interfaces/row-data";
 import { useAppDispatch } from "@/store/hooks";
-import {
-  deleteRawMaterial,
-  fetchRawMaterials,
-} from "@/store/thunks/raw-material.thunks";
+import { deleteProduct, fetchProducts } from "@/store/thunks/product.thunks";
 import { Trash2 } from "lucide-react";
 import { useState } from "react";
 
-export default function DeleteRawMaterial<TData>({ row }: RowDataProps<TData>) {
+export default function DeleteProduct<TData>({ row }: RowDataProps<TData>) {
   const dispatch = useAppDispatch();
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -29,10 +26,10 @@ export default function DeleteRawMaterial<TData>({ row }: RowDataProps<TData>) {
 
     try {
       const id = row.getValue("id");
-      const result = await dispatch(deleteRawMaterial(id as string));
+      const result = await dispatch(deleteProduct(id as string));
 
       if (result.success) {
-        await dispatch(fetchRawMaterials());
+        await dispatch(fetchProducts());
         setOpen(false);
       } else {
         setError(true);
@@ -57,8 +54,7 @@ export default function DeleteRawMaterial<TData>({ row }: RowDataProps<TData>) {
           <DialogTitle>Are you absolutely sure?</DialogTitle>
         </DialogHeader>
         <DialogDescription className="px-6 text-base">
-          This action cannot be undone. It will permanently delete this raw
-          material.
+          This action cannot be undone. It will permanently delete this product.
         </DialogDescription>
 
         {error && (

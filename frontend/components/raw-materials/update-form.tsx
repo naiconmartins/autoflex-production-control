@@ -93,14 +93,7 @@ export default function UpdateRawMaterialForm<TData>({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button
-          variant="outline"
-          size="icon"
-          asChild
-          className="cursor-pointer border-none"
-        >
-          <PencilIcon className="w-4 h-4" />
-        </Button>
+        <PencilIcon className="w-4 h-4 cursor-pointer" />
       </DialogTrigger>
 
       <DialogContent className="sm:max-w-md p-0">

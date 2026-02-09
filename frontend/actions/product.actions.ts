@@ -1,12 +1,12 @@
 "use server";
 
-import { RawMaterialRequest } from "@/interfaces/raw-material";
+import { ProductRequest } from "@/interfaces/product";
 import {
   extractFieldErrors,
   mapApiErrorToClientMessage,
 } from "@/services/api-error.mapper";
 import { ApiError } from "@/services/api.service";
-import { rawMaterialService } from "@/services/raw-material.service";
+import { productService } from "@/services/product.service";
 import { ActionResult } from "@/types/actions.types";
 import { getToken } from "./findCookie";
 
@@ -45,35 +45,32 @@ async function executeAction<T>(
   }
 }
 
-export async function fetchRawMaterialsAction(
+export async function fetchProductsAction(
   page: number = 0,
   size: number = 10,
   sortBy: string = "name",
   direction: string = "asc",
 ) {
   return executeAction((token) =>
-    rawMaterialService.findAll(token, page, size, sortBy, direction),
+    productService.findAll(token, page, size, sortBy, direction),
   );
 }
 
-export async function createRawMaterialAction(data: RawMaterialRequest) {
-  return executeAction((token) => rawMaterialService.create(data, token));
+export async function createProductAction(data: ProductRequest) {
+  return executeAction((token) => productService.create(data, token));
 }
 
-export async function updateRawMaterialAction(
-  id: string,
-  data: RawMaterialRequest,
-) {
-  return executeAction((token) => rawMaterialService.update(id, data, token));
+export async function updateProductAction(id: string, data: ProductRequest) {
+  return executeAction((token) => productService.update(id, data, token));
 }
 
-export async function deleteRawMaterialAction(id: string) {
+export async function deleteProductAction(id: string) {
   return executeAction(async (token) => {
-    await rawMaterialService.delete(id, token);
+    await productService.delete(id, token);
     return undefined as void;
   });
 }
 
-export async function findRawMaterialByIdAction(id: string) {
-  return executeAction((token) => rawMaterialService.findById(id, token));
+export async function findProductByIdAction(id: string) {
+  return executeAction((token) => productService.findById(id, token));
 }
