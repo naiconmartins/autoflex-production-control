@@ -12,6 +12,8 @@ public class RawMaterialResponseDTO {
     public String name;
     public BigDecimal stockQuantity;
 
+    public RawMaterialResponseDTO() {}
+
     public RawMaterialResponseDTO(Long id, String code, String name, BigDecimal stockQuantity) {
         this.id = id;
         this.code = code;

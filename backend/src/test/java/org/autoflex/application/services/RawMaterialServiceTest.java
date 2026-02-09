@@ -6,6 +6,7 @@ import io.quarkus.panache.common.Sort;
 import io.quarkus.panache.mock.PanacheMock;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceException;
 import org.autoflex.domain.entities.RawMaterial;
 import org.autoflex.factory.RawMaterialFactory;
@@ -41,7 +42,11 @@ public class RawMaterialServiceTest {
         id = 1L;
         dto = RawMaterialFactory.createRawMaterialRequestDTO();
         existingRawMaterial = RawMaterialFactory.createRawMaterialWithCode(dto.code);
+
         PanacheMock.mock(RawMaterial.class);
+
+        EntityManager mockEm = mock(EntityManager.class);
+        when(RawMaterial.getEntityManager()).thenReturn(mockEm);
     }
 
     private void mockFindByCode(RawMaterial result) {

@@ -18,7 +18,7 @@ public class ForbiddenExceptionMapper implements ExceptionMapper<ForbiddenExcept
     @Override
     public Response toResponse(ForbiddenException e) {
         int status = Response.Status.FORBIDDEN.getStatusCode();
-        WebErrorDTO err = new WebErrorDTO(Instant.now(), status, e.getMessage(), "/" + uriInfo.getPath());
+        WebErrorDTO err = new WebErrorDTO(Instant.now(), status, e.getMessage(), uriInfo.getPath());
         return Response.status(status).entity(err).build();
     }
 }

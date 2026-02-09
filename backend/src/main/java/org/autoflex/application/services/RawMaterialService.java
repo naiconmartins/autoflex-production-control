@@ -56,6 +56,7 @@ public class RawMaterialService {
 
         try {
             RawMaterial.deleteById(id);
+            RawMaterial.getEntityManager().flush();
         } catch (PersistenceException e) {
             throw new DatabaseException("Cannot delete raw material because it is referenced by other records");
         }

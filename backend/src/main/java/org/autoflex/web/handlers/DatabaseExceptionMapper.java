@@ -18,7 +18,7 @@ public class DatabaseExceptionMapper implements ExceptionMapper<DatabaseExceptio
 
     @Override
     public Response toResponse(DatabaseException e) {
-        int status = 400; // Bad Request para erros de integridade/banco
+        int status = 400;
         WebErrorDTO err = new WebErrorDTO(Instant.now(), status, e.getMessage(), uriInfo.getPath());
         return Response.status(status).entity(err).build();
     }

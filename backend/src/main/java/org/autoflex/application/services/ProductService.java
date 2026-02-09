@@ -64,7 +64,11 @@ public class ProductService {
         entity.setPrice(dto.price);
         entity.setCode(dto.code);
 
+        ProductRawMaterial.delete("product", entity);
+
         entity.getRawMaterials().clear();
+
+        Product.getEntityManager().flush();
 
         return getProductResponseDTO(dto, entity);
     }

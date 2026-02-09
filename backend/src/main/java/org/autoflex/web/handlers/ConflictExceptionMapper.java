@@ -18,7 +18,7 @@ public class ConflictExceptionMapper implements ExceptionMapper<ConflictExceptio
     @Override
     public Response toResponse(ConflictException e) {
         int status = Response.Status.CONFLICT.getStatusCode();
-        WebErrorDTO err = new WebErrorDTO(Instant.now(), status, e.getMessage(), "/" + uriInfo.getPath());
+        WebErrorDTO err = new WebErrorDTO(Instant.now(), status, e.getMessage(), uriInfo.getPath());
         return Response.status(status).entity(err).build();
     }
 }

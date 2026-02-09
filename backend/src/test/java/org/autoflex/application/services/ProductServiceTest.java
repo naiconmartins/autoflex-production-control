@@ -63,13 +63,19 @@ public class ProductServiceTest {
         PanacheMock.mock(Product.class);
         PanacheMock.mock(RawMaterial.class);
         PanacheMock.mock(ProductRawMaterial.class);
+
+        when(Product.getEntityManager()).thenReturn(entityManager);
+        when(RawMaterial.getEntityManager()).thenReturn(entityManager);
+        when(ProductRawMaterial.getEntityManager()).thenReturn(entityManager);
     }
 
     private void mockFindByCode(Product result) {
-        PanacheQuery mockQuery = mock(PanacheQuery.class);
-        when(mockQuery.firstResult()).thenReturn(result);
-        when(mockQuery.firstResultOptional()).thenReturn(Optional.ofNullable(result));
-        when(Product.find("code", dto.code)).thenReturn(mockQuery);
+        PanacheQuery<Product> mockQuery = mock(PanacheQuery.class);
+
+        doReturn(result).when(mockQuery).firstResult();
+        doReturn(Optional.ofNullable(result)).when(mockQuery).firstResultOptional();
+
+        PanacheMock.doReturn(mockQuery).when(Product.class).find(anyString(), (Object[]) any());
     }
 
     private void mockFindById(Long id, Product result) {
@@ -154,7 +160,7 @@ public class ProductServiceTest {
     void update_shouldUpdateProduct_whenValidRequest() {
         existingProduct.setId(id);
         mockFindById(id, existingProduct);
-        mockFindByCode(null); // Nenhum outro produto com esse código
+        mockFindByCode(null);
         mockRawMaterialFindById(1L, rawMaterial1);
         mockRawMaterialFindById(2L, rawMaterial2);
 

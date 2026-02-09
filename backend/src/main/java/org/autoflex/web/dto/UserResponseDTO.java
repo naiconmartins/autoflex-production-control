@@ -20,6 +20,8 @@ public class UserResponseDTO {
     public Boolean active;
     public Instant createdAt;
 
+    public UserResponseDTO() {}
+
     public UserResponseDTO(User user) {
         this.id = user.getId();
         this.email = user.getEmail();

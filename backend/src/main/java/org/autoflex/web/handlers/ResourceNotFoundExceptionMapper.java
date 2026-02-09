@@ -19,7 +19,7 @@ public class ResourceNotFoundExceptionMapper implements ExceptionMapper<Resource
     @Override
     public Response toResponse(ResourceNotFoundException e) {
         int status = Response.Status.NOT_FOUND.getStatusCode();
-        WebErrorDTO err = new WebErrorDTO(Instant.now(), status, e.getMessage(), "/" + uriInfo.getPath());
+        WebErrorDTO err = new WebErrorDTO(Instant.now(), status, e.getMessage(), uriInfo.getPath());
         return Response.status(status).entity(err).build();
     }
 }

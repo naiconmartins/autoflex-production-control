@@ -24,10 +24,13 @@ public class UnauthorizedExceptionMapper implements ExceptionMapper<Unauthorized
                 ? "Unauthorized"
                 : e.getMessage();
 
-        String path = uriInfo.getPath();
-        if (!path.startsWith("/")) path = "/" + path;
+        WebErrorDTO err = new WebErrorDTO(
+                Instant.now(),
+                status,
+                message,
+                uriInfo.getPath()
+        );
 
-        WebErrorDTO err = new WebErrorDTO(Instant.now(), status, message, path);
         return Response.status(status).entity(err).build();
     }
 }

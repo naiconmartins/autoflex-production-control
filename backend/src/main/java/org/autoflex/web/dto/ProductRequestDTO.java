@@ -26,6 +26,8 @@ public class ProductRequestDTO {
     @NotEmpty(message = "The product must contain at least one raw material")
     public List<ProductRawMaterialRequestDTO> rawMaterials;
 
+    ProductRequestDTO() {}
+
     public ProductRequestDTO(String code, String name, BigDecimal price, List<ProductRawMaterialRequestDTO> rawMaterials) {
         this.code = code;
         this.name = name;

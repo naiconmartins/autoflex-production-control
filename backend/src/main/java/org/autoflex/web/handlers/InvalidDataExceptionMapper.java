@@ -18,7 +18,12 @@ public class InvalidDataExceptionMapper implements ExceptionMapper<InvalidDataEx
     @Override
     public Response toResponse(InvalidDataException e) {
         int status = 422;
-        WebErrorDTO err = new WebErrorDTO(Instant.now(), status, e.getMessage(), "/" + uriInfo.getPath());
+        WebErrorDTO err = new WebErrorDTO(
+                Instant.now(),
+                status,
+                e.getMessage(),
+                uriInfo.getPath()
+        );
         return Response.status(status).entity(err).build();
     }
 }

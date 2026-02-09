@@ -21,7 +21,7 @@ public class ProductFactory {
 
     public static ProductRequestDTO createProductRequestDTOWithRawMaterials() {
         return new ProductRequestDTO(
-                "PROD001",
+                "PROD-040",
                 "Product Test",
                 new BigDecimal("100.00"),
                 List.of(

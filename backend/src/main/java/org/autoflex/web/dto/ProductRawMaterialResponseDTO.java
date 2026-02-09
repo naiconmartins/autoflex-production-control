@@ -10,6 +10,8 @@ public class ProductRawMaterialResponseDTO {
     public String name;
     public BigDecimal requiredQuantity;
 
+    public ProductRawMaterialResponseDTO() {}
+
     public ProductRawMaterialResponseDTO(Long id, String code, String name, BigDecimal requiredQuantity) {
         this.id = id;
         this.code = code;
