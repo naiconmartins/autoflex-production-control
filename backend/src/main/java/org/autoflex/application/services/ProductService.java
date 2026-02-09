@@ -1,48 +1,31 @@
 package org.autoflex.application.services;
 
+import io.quarkus.hibernate.orm.panache.PanacheQuery;
+import io.quarkus.panache.common.Page;
 import io.quarkus.panache.common.Sort;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.PersistenceException;
 import jakarta.transaction.Transactional;
-import org.autoflex.domain.entities.ProductRawMaterial;
-import org.autoflex.domain.entities.RawMaterial;
-import org.autoflex.web.dto.*;
 import org.autoflex.domain.entities.Product;
+import org.autoflex.web.dto.PageRequestDTO;
+import org.autoflex.web.dto.PageResponseDTO;
+import org.autoflex.web.dto.ProductRequestDTO;
+import org.autoflex.web.dto.ProductResponseDTO;
 import org.autoflex.web.exceptions.ConflictException;
 import org.autoflex.web.exceptions.DatabaseException;
 import org.autoflex.web.exceptions.ResourceNotFoundException;
-import org.jspecify.annotations.NonNull;
-import io.quarkus.panache.common.Page;
-import io.quarkus.hibernate.orm.panache.PanacheQuery;
-
-import java.util.Optional;
 
 @ApplicationScoped
 public class ProductService {
 
     @Transactional
     public ProductResponseDTO insert(ProductRequestDTO dto) {
-        if (Product.find("code", dto.code).firstResultOptional().isPresent())
+        if (Product.find("code", dto.code).firstResultOptional().isPresent()) {
             throw new ConflictException("Product code already exists");
+        }
 
         Product product = new Product(dto.code, dto.name, dto.price);
-
         product.persist();
-
-        for (ProductRawMaterialRequestDTO rawMaterialDto : dto.rawMaterials) {
-            Optional<RawMaterial> rawMaterialOpt = RawMaterial.findByIdOptional(rawMaterialDto.id);
-
-            if (rawMaterialOpt.isEmpty())
-                throw new ResourceNotFoundException("Raw material with id " + rawMaterialDto.id + " not found");
-
-            ProductRawMaterial prodRawMaterial = new ProductRawMaterial();
-            prodRawMaterial.setProduct(product);
-            prodRawMaterial.setRawMaterial(rawMaterialOpt.get());
-            prodRawMaterial.setRequiredQuantity(rawMaterialDto.requiredQuantity);
-
-            prodRawMaterial.persist();
-            product.addRawMaterial(prodRawMaterial);
-        }
 
         return new ProductResponseDTO(product);
     }
@@ -50,7 +33,6 @@ public class ProductService {
     @Transactional
     public ProductResponseDTO update(Long id, ProductRequestDTO dto) {
         Product entity = Product.findById(id);
-
         if (entity == null) {
             throw new ResourceNotFoundException("Product with id " + id + " not found");
         }
@@ -60,17 +42,11 @@ public class ProductService {
             throw new ConflictException("Product code already exists");
         }
 
+        entity.setCode(dto.code);
         entity.setName(dto.name);
         entity.setPrice(dto.price);
-        entity.setCode(dto.code);
 
-        ProductRawMaterial.delete("product", entity);
-
-        entity.getRawMaterials().clear();
-
-        Product.getEntityManager().flush();
-
-        return getProductResponseDTO(dto, entity);
+        return new ProductResponseDTO(entity);
     }
 
     @Transactional
@@ -92,14 +68,11 @@ public class ProductService {
                 ? Sort.by(dto.sortBy).descending()
                 : Sort.by(dto.sortBy).ascending();
 
-        PanacheQuery<Product> query = Product.findAll(sort)
-                .page(Page.of(dto.page, dto.size));
+        PanacheQuery<Product> query = Product.findAll(sort).page(Page.of(dto.page, dto.size));
 
         return PageResponseDTO.of(
                 query,
-                query.list().stream()
-                        .map(ProductResponseDTO::new)
-                        .toList(),
+                query.list().stream().map(ProductResponseDTO::new).toList(),
                 dto.page,
                 dto.size
         );
@@ -107,29 +80,9 @@ public class ProductService {
 
     public ProductResponseDTO findById(Long id) {
         Product entity = Product.findById(id);
-
-        if (entity == null) throw new ResourceNotFoundException("Product with id " + id + " not found");
-
-        return new ProductResponseDTO(entity);
-    }
-
-    @NonNull
-    private ProductResponseDTO getProductResponseDTO(ProductRequestDTO dto, Product entity) {
-        for (ProductRawMaterialRequestDTO productRawMaterial : dto.rawMaterials) {
-            Optional<RawMaterial> rawMaterialOpt = RawMaterial.findByIdOptional(productRawMaterial.id);
-
-            if (rawMaterialOpt.isEmpty())
-                throw new ResourceNotFoundException("Raw material with id " + productRawMaterial.id + " not found");
-
-            ProductRawMaterial prodRawMaterial = new ProductRawMaterial();
-
-            prodRawMaterial.setProduct(entity);
-            prodRawMaterial.setRawMaterial(rawMaterialOpt.get());
-            prodRawMaterial.setRequiredQuantity(productRawMaterial.requiredQuantity);
-
-            entity.addRawMaterial(prodRawMaterial);
+        if (entity == null) {
+            throw new ResourceNotFoundException("Product with id " + id + " not found");
         }
-
         return new ProductResponseDTO(entity);
     }
 }

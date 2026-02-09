@@ -3,17 +3,25 @@ package org.autoflex.web.resources;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
-import jakarta.ws.rs.*;
+import jakarta.ws.rs.BeanParam;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.PUT;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriBuilder;
+import org.autoflex.application.services.ProductService;
 import org.autoflex.web.dto.PageRequestDTO;
 import org.autoflex.web.dto.PageResponseDTO;
 import org.autoflex.web.dto.ProductRequestDTO;
-import org.autoflex.application.services.ProductService;
 import org.autoflex.web.dto.ProductResponseDTO;
 
-@Path("/product")
+@Path("/products")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class ProductResource {
@@ -26,7 +34,7 @@ public class ProductResource {
     public Response insert(@Valid ProductRequestDTO dto) {
         ProductResponseDTO created = productService.insert(dto);
 
-        var location = UriBuilder.fromPath("/product/{id}")
+        var location = UriBuilder.fromPath("/products/{id}")
                 .build(created.getId());
 
         return Response.created(location).entity(created).build();
@@ -37,7 +45,7 @@ public class ProductResource {
     @RolesAllowed({"ADMIN", "USER"})
     public Response update(@PathParam("id") Long id, @Valid ProductRequestDTO dto) {
         ProductResponseDTO product = productService.update(id, dto);
-        return Response.ok().entity(product).build();
+        return Response.ok(product).build();
     }
 
     @DELETE
@@ -57,7 +65,7 @@ public class ProductResource {
     @GET
     @Path("/{id}")
     @RolesAllowed({"ADMIN", "USER"})
-    public ProductResponseDTO findAll(@PathParam("id") Long id) {
+    public ProductResponseDTO findById(@PathParam("id") Long id) {
         return productService.findById(id);
     }
 }

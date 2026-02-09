@@ -1,15 +1,16 @@
 package org.autoflex.factory;
 
 import org.autoflex.domain.entities.Product;
+import org.autoflex.web.dto.ProductRequestDTO;
 import org.autoflex.web.dto.ProductRawMaterialRequestDTO;
 import org.autoflex.web.dto.ProductRawMaterialResponseDTO;
-import org.autoflex.web.dto.ProductRequestDTO;
 import org.autoflex.web.dto.ProductResponseDTO;
 
 import java.math.BigDecimal;
 import java.util.List;
 
 public class ProductFactory {
+
     public static ProductRequestDTO createProductRequestDTO() {
         return new ProductRequestDTO(
                 "PROD001",
