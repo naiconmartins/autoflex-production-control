@@ -9,28 +9,27 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer";
 import { Form } from "@/components/ui/form";
+import { Product } from "@/interfaces/product";
 import { productSchema } from "@/schemas/product-schema";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { createProduct, fetchProducts } from "@/store/thunks/product.thunks";
+import { editProduct, fetchProducts } from "@/store/thunks/product.thunks";
 import { fetchRawMaterials } from "@/store/thunks/raw-material.thunks";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Plus } from "lucide-react";
+import { Row } from "@tanstack/react-table";
+import { Edit2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
-import ProductInfo from "./product-info";
-import { ProductRawMaterialsTable } from "./product-raw-materials-table";
-import { SelectedMaterialsTable } from "./selected-materials-table";
+import { ProductRawMaterialsTable } from "../product-raw-materials-table";
+import { SelectedMaterialsTable } from "../selected-materials-table";
+import ProductInfoUpdate from "./product-info";
 
 export type ProductFormValues = z.infer<typeof productSchema>;
 
-export default function CreateProductForm({
-  setLoading,
-}: {
-  setLoading: (value: boolean) => void;
-}) {
+export default function UpdateProductForm({ row }: { row: Row<Product> }) {
   const dispatch = useAppDispatch();
   const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedMaterials, setSelectedMaterials] = useState<Map<number, any>>(
     new Map(),
@@ -56,8 +55,19 @@ export default function CreateProductForm({
   });
 
   useEffect(() => {
-    if (open) dispatch(fetchRawMaterials());
+    if (open) dispatch(fetchRawMaterials({ size: 50 }));
   }, [open, dispatch]);
+
+  useEffect(() => {
+    if (!open) return;
+
+    form.reset({
+      code: row.original.code,
+      name: row.original.name,
+      price: Number(row.original.price),
+      rawMaterials: row.original.rawMaterials,
+    });
+  }, [open, row, form]);
 
   const watchedFields = form.watch("rawMaterials");
   const selectedIds = watchedFields.map((f: any) => f.id);
@@ -100,7 +110,7 @@ export default function CreateProductForm({
   const onSubmit = async (values: ProductFormValues) => {
     setIsSubmitting(true);
     try {
-      const result = await dispatch(createProduct(values));
+      const result = await dispatch(editProduct(row.getValue("id"), values));
       if (result.success) {
         setLoading(true);
         await dispatch(fetchProducts());
@@ -132,22 +142,19 @@ export default function CreateProductForm({
   return (
     <Drawer open={open} onOpenChange={setOpen} direction="bottom">
       <DrawerTrigger asChild>
-        <Button variant="default">
-          <Plus className="h-4 w-4" />
-          New Product
-        </Button>
+        <Edit2 className="h-4 w-4 cursor-pointer" />
       </DrawerTrigger>
 
       <DrawerContent className="data-[vaul-drawer-direction=bottom]:sm:h-screen data-[vaul-drawer-direction=bottom]:sm:max-h-none">
         <DrawerTitle />
-        <div className="mx-auto grid w-full grid-cols-1 gap-6 px-6 py-4 sm:grid-cols-2">
-          <div className="space-y-4">
+        <div className="h-full min-h-0 mx-auto grid w-full grid-cols-1 gap-6 px-6 py-4 sm:grid-cols-2">
+          <div className="min-h-0 space-y-4 overflow-y-auto">
             <Form {...form}>
               <form
                 onSubmit={form.handleSubmit(onSubmit)}
                 className="space-y-4"
               >
-                <ProductInfo form={form} isSubmitting={isSubmitting} />
+                <ProductInfoUpdate form={form} isSubmitting={isSubmitting} />
 
                 <SelectedMaterialsTable
                   control={form.control}
@@ -157,6 +164,12 @@ export default function CreateProductForm({
                   disabled={isSubmitting}
                   form={form}
                 />
+
+                {form.formState.errors.root && (
+                  <div className="mb-4 bg-rose-100 p-3 text-sm text-rose-700 rounded-sm">
+                    {form.formState.errors.root.message}
+                  </div>
+                )}
 
                 <DialogFooter>
                   <Button

@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import { RawMaterial } from "@/interfaces/raw-material";
 import { Trash2 } from "lucide-react";
 import { Control, UseFormReturn } from "react-hook-form";
-import { ProductFormValues } from "./create-form";
+import { ProductFormValues } from "./insert-product/insert-form";
 
 type Props = {
   form: UseFormReturn<ProductFormValues>;
@@ -34,7 +34,7 @@ export function SelectedMaterialsTable({
   return (
     <Card className="p-4 border-none shadow-none">
       {form.formState.errors.rawMaterials?.message && (
-        <p className="text-xs text-red-600 mb-3">
+        <p className="text-sm text-rose-600 mb-3 bg-rose-100 rounded-sm p-3">
           {form.formState.errors.rawMaterials.message}
         </p>
       )}
@@ -53,7 +53,7 @@ export function SelectedMaterialsTable({
             <div className="col-span-1 text-right"></div>
           </div>
 
-          <div className="max-h-[400px] overflow-y-auto">
+          <div>
             {fields.length === 0 ? (
               <div className="px-3 py-3 text-sm text-muted-foreground">
                 No materials selected yet

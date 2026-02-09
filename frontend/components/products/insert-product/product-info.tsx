@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { UseFormReturn } from "react-hook-form";
-import { ProductFormValues } from "./create-form";
+import { ProductFormValues } from "./insert-form";
 
 interface Props {
   form: UseFormReturn<ProductFormValues>;
@@ -21,12 +21,6 @@ export default function ProductInfo({ form, isSubmitting }: Props) {
   return (
     <Card className="p-4 shadow-none border-none">
       <h1 className="text-lg font-semibold mb-4">New Product</h1>
-
-      {form.formState.errors.root && (
-        <div className="mb-4 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">
-          {form.formState.errors.root.message}
-        </div>
-      )}
 
       <div className="space-y-3">
         <FormField
