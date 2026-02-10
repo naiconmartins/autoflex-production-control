@@ -76,7 +76,7 @@ public class ProductRawMaterialServiceTest {
         ProductRawMaterialResponseDTO result = service.add(productId, requestDto);
 
         assertNotNull(result);
-        assertEquals(rawMaterialId, result.rawMaterialId);
+        assertEquals(rawMaterialId, result.id);
         verify(entityManager, times(1)).persist(any(ProductRawMaterial.class));
     }
 

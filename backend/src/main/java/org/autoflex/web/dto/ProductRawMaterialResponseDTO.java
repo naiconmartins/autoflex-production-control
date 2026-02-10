@@ -10,25 +10,25 @@ import java.math.BigDecimal;
 @Setter
 public class ProductRawMaterialResponseDTO {
 
-    public Long rawMaterialId;
-    public String rawMaterialCode;
-    public String rawMaterialName;
+    public Long id;
+    public String code;
+    public String name;
     public BigDecimal requiredQuantity;
 
     public ProductRawMaterialResponseDTO() {
     }
 
     public ProductRawMaterialResponseDTO(Long rawMaterialId, String rawMaterialCode, String rawMaterialName, BigDecimal requiredQuantity) {
-        this.rawMaterialId = rawMaterialId;
-        this.rawMaterialCode = rawMaterialCode;
-        this.rawMaterialName = rawMaterialName;
+        this.id = rawMaterialId;
+        this.code = rawMaterialCode;
+        this.name = rawMaterialName;
         this.requiredQuantity = requiredQuantity;
     }
 
     public ProductRawMaterialResponseDTO(ProductRawMaterial entity) {
-        this.rawMaterialId = entity.getRawMaterial().getId();
-        this.rawMaterialCode = entity.getRawMaterial().getCode();
-        this.rawMaterialName = entity.getRawMaterial().getName();
+        this.id = entity.getRawMaterial().getId();
+        this.code = entity.getRawMaterial().getCode();
+        this.name = entity.getRawMaterial().getName();
         this.requiredQuantity = entity.getRequiredQuantity();
     }
 }

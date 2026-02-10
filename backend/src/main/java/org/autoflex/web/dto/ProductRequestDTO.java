@@ -23,7 +23,7 @@ public class ProductRequestDTO {
     @DecimalMin(value = "0.01", message = "Price must be greater than zero")
     public BigDecimal price;
 
-    @NotEmpty(message = "The product must contain at least one raw material")
+    @NotEmpty(message = "At least one raw material is required")
     public List<ProductRawMaterialRequestDTO> rawMaterials;
 
     ProductRequestDTO() {}

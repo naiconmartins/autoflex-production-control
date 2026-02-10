@@ -11,7 +11,7 @@ import org.autoflex.domain.entities.Product;
 import org.autoflex.domain.entities.ProductRawMaterial;
 import org.autoflex.domain.entities.RawMaterial;
 import org.autoflex.factory.ProductFactory;
-import org.autoflex.factory.ProductionPlanFactory;
+import org.autoflex.factory.ProductionCapacityFactory;
 import org.autoflex.factory.RawMaterialFactory;
 import org.autoflex.web.dto.ProductionPlanResponseDTO;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,10 +25,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @QuarkusTest
-public class ProductionPlanServiceTest {
+public class ProductionCapacityServiceTest {
 
     @Inject
-    ProductionPlanService service;
+    ProductionCapacityService service;
 
     @InjectMock
     EntityManager entityManager;
@@ -69,8 +69,8 @@ public class ProductionPlanServiceTest {
         when(RawMaterial.listAll()).thenReturn(List.of(wood));
         when(Product.listAll(any(Sort.class))).thenReturn(List.of(table, chair));
 
-        mockRecipe(table, List.of(ProductionPlanFactory.createLink(table, wood, "5.0")));
-        mockRecipe(chair, List.of(ProductionPlanFactory.createLink(chair, wood, "2.0")));
+        mockRecipe(table, List.of(ProductionCapacityFactory.createLink(table, wood, "5.0")));
+        mockRecipe(chair, List.of(ProductionCapacityFactory.createLink(chair, wood, "2.0")));
 
         ProductionPlanResponseDTO result = service.generate();
 
@@ -89,8 +89,8 @@ public class ProductionPlanServiceTest {
         when(Product.listAll(any(Sort.class))).thenReturn(List.of(table));
 
         mockRecipe(table, List.of(
-                ProductionPlanFactory.createLink(table, wood, "1.0"),
-                ProductionPlanFactory.createLink(table, iron, "5.0")
+                ProductionCapacityFactory.createLink(table, wood, "1.0"),
+                ProductionCapacityFactory.createLink(table, iron, "5.0")
         ));
 
         ProductionPlanResponseDTO result = service.generate();
@@ -105,7 +105,7 @@ public class ProductionPlanServiceTest {
         when(RawMaterial.listAll()).thenReturn(List.of(wood));
         when(Product.listAll(any(Sort.class))).thenReturn(List.of(table));
 
-        mockRecipe(table, List.of(ProductionPlanFactory.createLink(table, wood, "1.0")));
+        mockRecipe(table, List.of(ProductionCapacityFactory.createLink(table, wood, "1.0")));
 
         ProductionPlanResponseDTO result = service.generate();
 

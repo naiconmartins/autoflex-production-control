@@ -6,13 +6,13 @@ import java.util.List;
 
 public class ProductionPlanResponseDTO {
 
-    public List<ProductionPlanItemDTO> items = new ArrayList<>();
+    public List<ProductionCapacityDTO> items = new ArrayList<>();
     public BigDecimal grandTotalValue = BigDecimal.ZERO;
 
     public ProductionPlanResponseDTO() {
     }
 
-    public ProductionPlanResponseDTO(List<ProductionPlanItemDTO> items, BigDecimal grandTotalValue) {
+    public ProductionPlanResponseDTO(List<ProductionCapacityDTO> items, BigDecimal grandTotalValue) {
         this.items = items;
         this.grandTotalValue = grandTotalValue;
     }

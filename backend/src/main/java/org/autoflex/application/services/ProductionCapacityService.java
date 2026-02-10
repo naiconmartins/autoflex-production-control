@@ -5,7 +5,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import org.autoflex.domain.entities.Product;
 import org.autoflex.domain.entities.ProductRawMaterial;
 import org.autoflex.domain.entities.RawMaterial;
-import org.autoflex.web.dto.ProductionPlanItemDTO;
+import org.autoflex.web.dto.ProductionCapacityDTO;
 import org.autoflex.web.dto.ProductionPlanResponseDTO;
 
 import java.math.BigDecimal;
@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 @ApplicationScoped
-public class ProductionPlanService {
+public class ProductionCapacityService {
 
     public ProductionPlanResponseDTO generate() {
         Map<Long, BigDecimal> remainingStock = loadStock();
@@ -40,7 +40,7 @@ public class ProductionPlanService {
 
             BigDecimal totalValue = product.getPrice().multiply(maxUnits);
 
-            response.items.add(new ProductionPlanItemDTO(
+            response.items.add(new ProductionCapacityDTO(
                     product.getId(),
                     product.getCode(),
                     product.getName(),

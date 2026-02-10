@@ -7,6 +7,8 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.PersistenceException;
 import jakarta.transaction.Transactional;
 import org.autoflex.domain.entities.Product;
+import org.autoflex.domain.entities.ProductRawMaterial;
+import org.autoflex.domain.entities.RawMaterial;
 import org.autoflex.web.dto.PageRequestDTO;
 import org.autoflex.web.dto.PageResponseDTO;
 import org.autoflex.web.dto.ProductRequestDTO;
@@ -45,6 +47,21 @@ public class ProductService {
         entity.setCode(dto.code);
         entity.setName(dto.name);
         entity.setPrice(dto.price);
+
+        entity.getRawMaterials().clear();
+        Product.getEntityManager().flush();
+
+        if (dto.rawMaterials != null && !dto.rawMaterials.isEmpty()) {
+            for (var itemDto : dto.rawMaterials) {
+                RawMaterial rm = RawMaterial.findById(itemDto.id);
+                if (rm == null) {
+                    throw new ResourceNotFoundException("Raw Material not found with id: " + itemDto.id);
+                }
+
+                ProductRawMaterial association = new ProductRawMaterial(entity, rm, itemDto.requiredQuantity);
+                entity.addRawMaterial(association);
+            }
+        }
 
         return new ProductResponseDTO(entity);
     }
