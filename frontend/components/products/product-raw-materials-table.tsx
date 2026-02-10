@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import { useState } from "react";
 
 type RawMaterial = {
@@ -27,6 +27,8 @@ export function ProductRawMaterialsTable({
   disabled,
   pagination,
   onPageChange,
+  onSearch,
+  onResetSearch,
 }: {
   materials: RawMaterial[];
   selectedIds: number[];
@@ -34,10 +36,40 @@ export function ProductRawMaterialsTable({
   disabled?: boolean;
   pagination: Pagination;
   onPageChange: (page: number) => void;
+  onSearch?: (value: string) => void;
+  onResetSearch?: () => void;
 }) {
   const [search, setSearch] = useState("");
+  const isServerSearch = Boolean(onSearch);
+  const isFiltered = search.trim().length > 0;
+
+  const handleInputChange = (value: string) => {
+    setSearch(value);
+
+    if (!isServerSearch) return;
+
+    const trimmed = value.trim();
+
+    if (trimmed.length > 0) {
+      onSearch?.(trimmed);
+    }
+
+    if (trimmed.length === 0) {
+      onResetSearch?.();
+    }
+  };
+
+  const handleReset = () => {
+    setSearch("");
+
+    if (isServerSearch) {
+      onResetSearch?.();
+    }
+  };
 
   const filtered = materials.filter((rm) => {
+    if (isServerSearch) return true;
+
     const query = search.toLowerCase();
     return (
       rm.code.toLowerCase().includes(query) ||
@@ -61,10 +93,23 @@ export function ProductRawMaterialsTable({
 
         <Input
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={(e) => handleInputChange(e.target.value)}
           placeholder="Search by id, code or name..."
           disabled={disabled}
         />
+        {isFiltered && (
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={handleReset}
+            disabled={disabled}
+            className="w-fit"
+          >
+            Reset
+            <X className="h-4 w-4" />
+          </Button>
+        )}
 
         <div className="rounded-md border">
           <div className="grid grid-cols-12 gap-2 border-b bg-muted/40 px-3 py-2 text-xs font-medium text-muted-foreground">

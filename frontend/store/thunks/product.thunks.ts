@@ -2,11 +2,13 @@ import {
   createProductAction,
   deleteProductAction,
   fetchProductsAction,
+  searchProductsAction,
   updateProductAction,
 } from "@/actions/product.actions";
 import { ProductRequest } from "@/interfaces/product";
 import {
   addProduct,
+  clearProductItems,
   removeProduct,
   setError,
   setLoading,
@@ -30,6 +32,43 @@ export const fetchProducts = (params?: {
       const direction = params?.direction ?? "asc";
 
       const result = await fetchProductsAction(page, size, sortBy, direction);
+
+      if (result.success) {
+        dispatch(setProducts(result.data));
+      } else {
+        dispatch(setError(result.error));
+      }
+    } catch (error: any) {
+      dispatch(setError(error.message || "Erro ao buscar matérias-primas"));
+    }
+  };
+};
+
+export const searchProducts = (
+  name: string,
+  params?: {
+    page?: number;
+    size?: number;
+    sortBy?: string;
+    direction?: string;
+  },
+) => {
+  return async (dispatch: AppDispatch) => {
+    try {
+      dispatch(clearProductItems());
+      dispatch(setLoading(true));
+      const page = params?.page ?? 0;
+      const size = params?.size ?? 10;
+      const sortBy = params?.sortBy ?? "id";
+      const direction = params?.direction ?? "asc";
+
+      const result = await searchProductsAction(
+        name,
+        page,
+        size,
+        sortBy,
+        direction,
+      );
 
       if (result.success) {
         dispatch(setProducts(result.data));

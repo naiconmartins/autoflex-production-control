@@ -5,18 +5,28 @@ import { columnsProducts } from "@/components/products/columns";
 import InsertProductForm from "@/components/products/insert-product/insert-form";
 import SidebarComponent from "@/components/sidebar-component";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { fetchProducts } from "@/store/thunks/product.thunks";
+import { fetchProducts, searchProducts } from "@/store/thunks/product.thunks";
 import { useEffect, useState } from "react";
 
 export default function ProductPage() {
   const dispatch = useAppDispatch();
-  const [loading, setLoading] = useState(false);
+  const [formLoading, setFormLoading] = useState(false);
 
   const { user } = useAppSelector((state) => state.auth);
-  const { items, pagination } = useAppSelector((state) => state.product);
+  const { items, pagination, loading } = useAppSelector(
+    (state) => state.product,
+  );
 
   const handlePageChange = (page: number) => {
     dispatch(fetchProducts({ page: page }));
+  };
+
+  const handleSearch = (name: string) => {
+    dispatch(searchProducts(name));
+  };
+
+  const handleSearchReset = () => {
+    dispatch(fetchProducts());
   };
 
   useEffect(() => {
@@ -37,7 +47,7 @@ export default function ProductPage() {
         <section className="h-full p-6 bg-zinc-50">
           <div className="flex flex-row items-center justify-between pb-6">
             <h1 className="text-2xl font-semibold">Products</h1>
-            <InsertProductForm setLoading={setLoading} />
+            <InsertProductForm setLoading={setFormLoading} />
           </div>
 
           <div className="bg-white p-6 rounded-4xl">
@@ -47,9 +57,11 @@ export default function ProductPage() {
               page={pagination.page}
               totalPages={pagination.totalPages}
               onPagination={handlePageChange}
-              loading={loading}
+              loading={loading || formLoading}
               placeholder="Filter products..."
               column="name"
+              onSearch={handleSearch}
+              onResetSearch={handleSearchReset}
             />
           </div>
         </section>

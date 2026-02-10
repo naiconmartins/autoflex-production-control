@@ -57,6 +57,16 @@ const productSlice = createSlice({
     setLoading: (state, action: PayloadAction<boolean>) => {
       state.loading = action.payload;
     },
+    clearProductItems: (state) => {
+      state.items = [];
+      state.pagination = {
+        page: 0,
+        size: state.pagination.size,
+        totalElements: 0,
+        totalPages: 0,
+      };
+      state.error = null;
+    },
     setError: (state, action: PayloadAction<string | null>) => {
       state.error = action.payload;
       state.loading = false;
@@ -87,6 +97,7 @@ export const {
   removeProduct,
   setSelectedProduct,
   setLoading,
+  clearProductItems,
   setError,
   clearProducts,
   setHydrated,

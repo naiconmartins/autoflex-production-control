@@ -12,6 +12,12 @@ export const fetchProducts = () => {
   };
 };
 
+export const searchProducts = (_name: string) => {
+  return async (_dispatch: ThunkDispatch): Promise<ActionResult> => {
+    return { success: true, data: undefined };
+  };
+};
+
 export const createProduct = (_data: ProductRequest) => {
   return async (_dispatch: ThunkDispatch): Promise<ActionResult<Product>> => {
     return {

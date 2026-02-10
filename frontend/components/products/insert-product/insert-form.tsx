@@ -12,7 +12,10 @@ import { Form } from "@/components/ui/form";
 import { productSchema } from "@/schemas/product-schema";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { createProduct, fetchProducts } from "@/store/thunks/product.thunks";
-import { fetchRawMaterials } from "@/store/thunks/raw-material.thunks";
+import {
+  fetchRawMaterials,
+  searchRawMaterials,
+} from "@/store/thunks/raw-material.thunks";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Plus } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -64,6 +67,14 @@ export default function InsertProductForm({
 
   const handlePageChange = (page: number) => {
     dispatch(fetchRawMaterials({ page }));
+  };
+
+  const handleSearchRawMaterials = (name: string) => {
+    dispatch(searchRawMaterials(name));
+  };
+
+  const handleResetRawMaterialsSearch = () => {
+    dispatch(fetchRawMaterials());
   };
 
   const findMaterial = (id: number) => {
@@ -193,6 +204,8 @@ export default function InsertProductForm({
             disabled={isSubmitting}
             pagination={pagination}
             onPageChange={handlePageChange}
+            onSearch={handleSearchRawMaterials}
+            onResetSearch={handleResetRawMaterialsSearch}
           />
         </div>
       </DrawerContent>
