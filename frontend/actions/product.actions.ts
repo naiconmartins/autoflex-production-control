@@ -56,6 +56,18 @@ export async function fetchProductsAction(
   );
 }
 
+export async function searchProductsAction(
+  name: string,
+  page: number = 0,
+  size: number = 10,
+  sortBy: string = "name",
+  direction: string = "asc",
+) {
+  return executeAction((token) =>
+    productService.search(token, name, page, size, sortBy, direction),
+  );
+}
+
 export async function createProductAction(data: ProductRequest) {
   return executeAction((token) => productService.create(data, token));
 }

@@ -1,7 +1,7 @@
 "use client";
 
-import { useAppDispatch } from "@/store/hooks";
-import { clearSession, setSession } from "@/store/slices/auth.slice";
+import { useAppDispatch } from "@/lib/store/hooks";
+import { clearSession, setSession } from "@/lib/store/slices/auth.slice";
 import { useEffect } from "react";
 
 export function ClientAuthBootstrap() {

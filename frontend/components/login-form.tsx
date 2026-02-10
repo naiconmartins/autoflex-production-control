@@ -4,8 +4,8 @@ import { useRouter } from "next/navigation";
 import React from "react";
 
 import { loginAction } from "@/actions/auth.actions";
-import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { setAuthError, setSession } from "@/store/slices/auth.slice";
+import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
+import { setAuthError, setSession } from "@/lib/store/slices/auth.slice";
 
 import { Button } from "@/components/ui/button";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";

@@ -10,10 +10,10 @@ import {
 } from "@/components/ui/drawer";
 import { Form } from "@/components/ui/form";
 import { Product } from "@/interfaces/product";
+import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
+import { editProduct, fetchProducts } from "@/lib/store/thunks/product.thunks";
+import { fetchRawMaterials } from "@/lib/store/thunks/raw-material.thunks";
 import { productSchema } from "@/schemas/product-schema";
-import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { editProduct, fetchProducts } from "@/store/thunks/product.thunks";
-import { fetchRawMaterials } from "@/store/thunks/raw-material.thunks";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Row } from "@tanstack/react-table";
 import { Edit2 } from "lucide-react";
@@ -143,7 +143,7 @@ export default function UpdateProductForm({ row }: { row: Row<Product> }) {
   return (
     <Drawer open={open} onOpenChange={setOpen} direction="bottom">
       <DrawerTrigger asChild>
-        <Edit2 className="h-4 w-4 cursor-pointer" />
+        <Edit2 id="update-product" className="h-4 w-4 cursor-pointer" />
       </DrawerTrigger>
 
       <DrawerContent className="data-[vaul-drawer-direction=bottom]:sm:h-screen data-[vaul-drawer-direction=bottom]:sm:max-h-none">

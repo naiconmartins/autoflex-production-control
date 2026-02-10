@@ -76,6 +76,33 @@ class ProductService extends ApiService {
       },
     );
   }
+
+  async search(
+    token: string,
+    name: string,
+    page: number = 0,
+    size: number = 10,
+    sortBy: string = "name",
+    direction: string = "asc",
+  ): Promise<ProductPagination> {
+    const queryParams = new URLSearchParams({
+      name: name,
+      page: page.toString(),
+      size: size.toString(),
+      sort: sortBy,
+      dir: direction,
+    });
+
+    return this.request<ProductPagination>(
+      `/products/search?${queryParams.toString()}`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    );
+  }
 }
 
 export const productService = new ProductService();

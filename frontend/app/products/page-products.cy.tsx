@@ -1,7 +1,7 @@
 import { ComponentProviders } from "@/cypress/mocks/component-providers";
 import { createTestStore } from "@/cypress/mocks/test-store";
-import { setSession } from "@/store/slices/auth.slice";
-import { setProducts } from "@/store/slices/product.slice";
+import { setSession } from "@/lib/store/slices/auth.slice";
+import { setProducts } from "@/lib/store/slices/product.slice";
 import ProductPage from "./page";
 
 function mountProductPage(store = createTestStore()) {

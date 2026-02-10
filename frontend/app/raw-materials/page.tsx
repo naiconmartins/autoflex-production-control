@@ -4,11 +4,11 @@ import Loading from "@/components/loading";
 import { columns } from "@/components/raw-materials/columns";
 import CreateRawMaterilForm from "@/components/raw-materials/insert-form";
 import SidebarComponent from "@/components/sidebar-component";
-import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import {
   fetchRawMaterials,
   searchRawMaterials,
-} from "@/store/thunks/raw-material.thunks";
+} from "@/lib/store/thunks/raw-material.thunks";
 import { useEffect, useState } from "react";
 
 export default function RawMaterialsPage() {

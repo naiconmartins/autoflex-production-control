@@ -1,8 +1,8 @@
-import { configureStore } from "@reduxjs/toolkit";
-import { ComponentProviders } from "@/cypress/mocks/component-providers";
 import { LoginForm } from "@/components/login-form";
-import authReducer from "@/store/slices/auth.slice";
 import { createAppRouterMock } from "@/cypress/mocks/app-router";
+import { ComponentProviders } from "@/cypress/mocks/component-providers";
+import authReducer from "@/lib/store/slices/auth.slice";
+import { configureStore } from "@reduxjs/toolkit";
 
 describe("<LoginForm />", () => {
   const router = createAppRouterMock();
@@ -36,9 +36,9 @@ describe("<LoginForm />", () => {
   it("renders title and description", () => {
     mountLoginForm();
     cy.contains("h1", "Welcome back").should("exist");
-    cy.contains(
-      "Enter your email and password to access your account",
-    ).should("exist");
+    cy.contains("Enter your email and password to access your account").should(
+      "exist",
+    );
   });
 
   it("renders inputs and submit button", () => {
@@ -62,7 +62,9 @@ describe("<LoginForm />", () => {
   });
 
   it("renders mapper server error message from auth state", () => {
-    mountLoginForm("An unexpected server error occurred. Please try again later.");
+    mountLoginForm(
+      "An unexpected server error occurred. Please try again later.",
+    );
     cy.get('[data-cy="login-error"]')
       .should("exist")
       .and(

@@ -8,12 +8,12 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { RowDataProps } from "@/interfaces/row-data";
-import { rawMaterialSchema } from "@/schemas/raw-material-schema";
-import { useAppDispatch } from "@/store/hooks";
+import { useAppDispatch } from "@/lib/store/hooks";
 import {
   editRawMaterial,
   fetchRawMaterials,
-} from "@/store/thunks/raw-material.thunks";
+} from "@/lib/store/thunks/raw-material.thunks";
+import { rawMaterialSchema } from "@/schemas/raw-material-schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { PencilIcon } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -93,10 +93,10 @@ export default function UpdateRawMaterialForm<TData>({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <PencilIcon className="w-4 h-4 cursor-pointer" />
+        <PencilIcon id="edit-dialog" className="w-4 h-4 cursor-pointer" />
       </DialogTrigger>
 
-      <DialogContent className="sm:max-w-md p-0">
+      <DialogContent id="raw-material-edit-dialog" className="sm:max-w-md p-0">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
             <DialogHeader className="p-6">
@@ -114,9 +114,9 @@ export default function UpdateRawMaterialForm<TData>({
               name="code"
               render={({ field }) => (
                 <FormItem className="px-6 pb-4">
-                  <FormLabel>Code</FormLabel>
+                  <FormLabel htmlFor="code">Code</FormLabel>
                   <FormControl>
-                    <Input {...field} disabled={isSubmitting} />
+                    <Input id="code" {...field} disabled={isSubmitting} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -128,9 +128,9 @@ export default function UpdateRawMaterialForm<TData>({
               name="name"
               render={({ field }) => (
                 <FormItem className="px-6 pb-4">
-                  <FormLabel>Name</FormLabel>
+                  <FormLabel htmlFor="name">Name</FormLabel>
                   <FormControl>
-                    <Input {...field} disabled={isSubmitting} />
+                    <Input id="name" {...field} disabled={isSubmitting} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -142,9 +142,11 @@ export default function UpdateRawMaterialForm<TData>({
               name="stockQuantity"
               render={({ field }) => (
                 <FormItem className="px-6 pb-4">
-                  <FormLabel>Stock Quantity</FormLabel>
+                  <FormLabel htmlFor="stockQuantity">Stock Quantity</FormLabel>
                   <FormControl>
                     <Input
+                      id="stockQuantity"
+                      name="stockQuantity"
                       type="number"
                       value={field.value ?? 0}
                       onChange={(e) => field.onChange(Number(e.target.value))}

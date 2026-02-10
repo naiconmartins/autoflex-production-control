@@ -1,5 +1,5 @@
-import { store } from "@/store/store";
 import { ComponentProviders } from "@/cypress/mocks/component-providers";
+import { store } from "@/lib/store/store";
 import LoginPage from "./page";
 
 describe("<LoginPage />", () => {
@@ -22,7 +22,9 @@ describe("<LoginPage />", () => {
 
   it("renders the brand section", () => {
     mountLoginPage();
-    cy.get('[data-cy="login-logo"]').should("exist").and("contain.text", "Autoflex");
+    cy.get('[data-cy="login-logo"]')
+      .should("exist")
+      .and("contain.text", "Autoflex");
     cy.get('[data-cy="login-logo-icon"]').should("exist");
   });
 

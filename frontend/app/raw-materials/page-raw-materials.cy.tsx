@@ -1,7 +1,7 @@
 import { ComponentProviders } from "@/cypress/mocks/component-providers";
 import { createTestStore } from "@/cypress/mocks/test-store";
-import { setSession } from "@/store/slices/auth.slice";
-import { setRawMaterials } from "@/store/slices/raw-material.slice";
+import { setSession } from "@/lib/store/slices/auth.slice";
+import { setRawMaterials } from "@/lib/store/slices/raw-material.slice";
 import RawMaterialsPage from "./page";
 
 function mountRawMaterialsPage(store = createTestStore()) {

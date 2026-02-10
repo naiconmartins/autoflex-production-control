@@ -9,11 +9,11 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { RowDataProps } from "@/interfaces/row-data";
-import { useAppDispatch } from "@/store/hooks";
+import { useAppDispatch } from "@/lib/store/hooks";
 import {
   deleteRawMaterial,
   fetchRawMaterials,
-} from "@/store/thunks/raw-material.thunks";
+} from "@/lib/store/thunks/raw-material.thunks";
 import { Trash2 } from "lucide-react";
 import { useState } from "react";
 
@@ -49,7 +49,10 @@ export default function DeleteRawMaterial<TData>({ row }: RowDataProps<TData>) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Trash2 className="text-rose-500 w-4 h-4 cursor-pointer" />
+        <Trash2
+          id="delete-raw-material"
+          className="text-rose-500 w-4 h-4 cursor-pointer"
+        />
       </DialogTrigger>
 
       <DialogContent className="sm:max-w-md p-0">

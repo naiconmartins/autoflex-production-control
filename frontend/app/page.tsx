@@ -9,9 +9,9 @@ import SidebarComponent from "@/components/sidebar-component";
 import ValueBarChart, {
   type ProductItem as BarItem,
 } from "@/components/value-bar-chart";
+import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
+import { fetchProductionCapacity } from "@/lib/store/thunks/production-capacity.thunks";
 import { formatCurrency } from "@/lib/utils";
-import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { fetchProductionCapacity } from "@/store/thunks/production-capacity.thunks";
 import { DollarSign } from "lucide-react";
 import { useEffect, useMemo } from "react";
 

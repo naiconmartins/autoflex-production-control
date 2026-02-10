@@ -1,8 +1,8 @@
+import authReducer from "@/lib/store/slices/auth.slice";
+import productReducer from "@/lib/store/slices/product.slice";
+import productionCapacityReducer from "@/lib/store/slices/production-capacity.slice";
+import rawMaterialReducer from "@/lib/store/slices/raw-material.slice";
 import { configureStore } from "@reduxjs/toolkit";
-import authReducer from "@/store/slices/auth.slice";
-import productReducer from "@/store/slices/product.slice";
-import productionCapacityReducer from "@/store/slices/production-capacity.slice";
-import rawMaterialReducer from "@/store/slices/raw-material.slice";
 
 export function createTestStore() {
   return configureStore({

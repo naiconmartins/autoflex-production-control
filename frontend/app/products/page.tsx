@@ -4,8 +4,11 @@ import Loading from "@/components/loading";
 import { columnsProducts } from "@/components/products/columns";
 import InsertProductForm from "@/components/products/insert-product/insert-form";
 import SidebarComponent from "@/components/sidebar-component";
-import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { fetchProducts, searchProducts } from "@/store/thunks/product.thunks";
+import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
+import {
+  fetchProducts,
+  searchProducts,
+} from "@/lib/store/thunks/product.thunks";
 import { useEffect, useState } from "react";
 
 export default function ProductPage() {

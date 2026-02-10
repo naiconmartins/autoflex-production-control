@@ -1,6 +1,6 @@
 import { ComponentProviders } from "@/cypress/mocks/component-providers";
 import { createTestStore } from "@/cypress/mocks/test-store";
-import { setRawMaterials } from "@/store/slices/raw-material.slice";
+import { setRawMaterials } from "@/lib/store/slices/raw-material.slice";
 import InsertProductForm from "./insert-form";
 
 describe("<InsertProductForm />", () => {

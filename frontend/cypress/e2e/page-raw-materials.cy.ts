@@ -1,149 +1,152 @@
 describe("Raw Materials Page Integration", () => {
-  const filterInput = 'input[placeholder="Filter raw materials..."]';
-  const pineName = "Pine Wood Board 2.5x30x200cm";
-  const codeNumber = `${Date.now()}`;
-  const createdCode = `E2E-RM-FIXED-${codeNumber}`;
-  const createdName = `E2E Raw Material Fixed ${codeNumber}`;
-  const createdStock = "25";
-  const updatedStock = "30";
+  let updatedRawMaterialName = "Raw Test Update";
 
-  const loginAndOpenRawMaterials = () => {
-    cy.visit("/login");
-    cy.get('[data-cy="login-email"]').type("adm@autoflex.com");
-    cy.get('[data-cy="login-password"]').type("adm");
-    cy.get('[data-cy="login-submit"]').click();
+  const loginAsAdmin = () => {
+    cy.session("admin-user", () => {
+      cy.visit("/login");
 
-    cy.location("pathname", { timeout: 15000 }).should("eq", "/");
-    cy.visit("/raw-materials");
-    cy.location("pathname", { timeout: 15000 }).should("eq", "/raw-materials");
-  };
+      cy.get('[data-cy="login-email"]').type("adm@autoflex.com");
+      cy.get('[data-cy="login-password"]').type("adm");
+      cy.get('[data-cy="login-submit"]').click();
 
-  const searchByName = (value: string) => {
-    cy.get(filterInput).clear().type(value);
-  };
-
-  const setNumberInputValue = (selector: string, value: string) => {
-    cy.get(selector).then(($input) => {
-      const input = $input[0] as HTMLInputElement;
-      const nativeSetter = Object.getOwnPropertyDescriptor(
-        HTMLInputElement.prototype,
-        "value",
-      )?.set;
-
-      nativeSetter?.call(input, "");
-      input.dispatchEvent(new Event("input", { bubbles: true }));
-      nativeSetter?.call(input, value);
-      input.dispatchEvent(new Event("input", { bubbles: true }));
-      input.dispatchEvent(new Event("change", { bubbles: true }));
+      cy.location("pathname", { timeout: 15000 }).should("eq", "/");
     });
-
-    cy.get(selector).should("have.value", value);
-  };
-
-  const createRawMaterial = (code: string, name: string, stock: string) => {
-    cy.contains("button", "New Raw Material").click();
-    cy.contains("Create Raw Materials").should("exist");
-    cy.get("#code").clear().type(code);
-    cy.get("#name").clear().type(name);
-    setNumberInputValue("#stockQuantity", stock);
-    cy.contains("button", "Save").click();
-    cy.contains("Create Raw Materials").should("not.exist");
-  };
-
-  const openEditDialogByCode = (code: string) => {
-    cy.contains("tr", code, { timeout: 15000 }).within(() => {
-      cy.get("svg.cursor-pointer:not(.text-rose-500)").first().click({ force: true });
-    });
-
-    cy.contains("Edit Raw Material", { timeout: 15000 }).should("exist");
-  };
-
-  const deleteRawMaterialByCode = (code: string) => {
-    cy.contains("tr", code, { timeout: 15000 }).within(() => {
-      cy.get("svg.cursor-pointer.text-rose-500").first().click({ force: true });
-    });
-
-    cy.contains("Are you absolutely sure?").should("exist");
-    cy.contains("button", "Continue").click();
-    cy.contains("Are you absolutely sure?").should("not.exist");
   };
 
   beforeEach(() => {
-    cy.viewport(1280, 720);
-    loginAndOpenRawMaterials();
+    loginAsAdmin();
+    cy.visit("/raw-materials");
   });
 
-  it("loads the page and shows the table with Pine Wood Board", () => {
-    cy.contains("Raw Materials", { timeout: 15000 }).should("exist");
-    cy.get("table").should("exist");
-    cy.contains("CODE").should("exist");
-    cy.contains("NAME").should("exist");
-    cy.contains("STOCK").should("exist");
-    cy.contains("tr", pineName, { timeout: 15000 }).should("exist");
+  it("loads table and shows Pine Wood Board 2.5x30x200cm", () => {
+    cy.get("table tbody tr", { timeout: 15000 }).should(
+      "have.length.at.least",
+      1,
+    );
+
+    cy.contains("Pine Wood Board 2.5x30x200cm", { timeout: 15000 }).should(
+      "exist",
+    );
   });
 
-  it("tests the search input with Pine and zzzz", () => {
-    searchByName("Pine");
-    cy.contains("tr", pineName, { timeout: 15000 }).should("exist");
+  it("filters raw materials by search input", () => {
+    cy.get('input[placeholder="Filter raw materials..."]', {
+      timeout: 15000,
+    }).as("searchInput");
 
-    searchByName("zzzz");
+    cy.get("@searchInput").clear().type("Pine ");
+    cy.contains("Pine Wood Board 2.5x30x200cm", { timeout: 15000 }).should(
+      "exist",
+    );
+
+    cy.get("@searchInput").clear().type("NotFound-XYZ");
     cy.contains("No results.", { timeout: 15000 }).should("exist");
+
+    cy.contains("button", "Reset").click();
+    cy.contains("Pine Wood Board 2.5x30x200cm", { timeout: 15000 }).should(
+      "exist",
+    );
   });
 
-  it("creates a new raw material and verifies it appears in search", () => {
-    searchByName(createdName);
+  it("creates a new raw material", () => {
+    const rawMaterialCode = `TES-${Date.now()}`;
 
-    cy.get("body").then(($body) => {
-      if (!$body.text().includes(createdCode)) {
-        createRawMaterial(createdCode, createdName, createdStock);
-      }
-    });
+    cy.contains("button", "New Raw Material", { timeout: 15000 }).click();
 
-    searchByName(createdName);
-    cy.contains("tr", createdCode, { timeout: 15000 }).should("exist");
+    cy.get("input#code").clear().type(rawMaterialCode);
+    cy.get("input#name").clear().type("Raw Test");
+    cy.get("input#stockQuantity").clear().type("10");
+
+    cy.contains("button", "Save").click();
+
+    cy.get('input[placeholder="Filter raw materials..."]', {
+      timeout: 15000,
+    })
+      .clear()
+      .type("Test");
+
+    cy.contains("Raw Test", { timeout: 15000 }).should("exist");
   });
 
-  it("updates stock quantity of the created raw material and validates the value", () => {
-    searchByName(createdName);
+  it("shows validation errors when saving raw material with empty inputs", () => {
+    cy.contains("button", "New Raw Material", { timeout: 15000 }).click();
 
-    cy.get("body").then(($body) => {
-      if (!$body.text().includes(createdCode)) {
-        createRawMaterial(createdCode, createdName, createdStock);
-        searchByName(createdName);
-      }
-    });
+    cy.get("input#code").clear();
+    cy.get("input#name").clear();
+    cy.get("input#stockQuantity").clear();
 
-    openEditDialogByCode(createdCode);
+    cy.contains("button", "Save").click();
 
-    cy.get('[role="dialog"]').within(() => {
-      setNumberInputValue('input[type="number"]', updatedStock);
-
-      cy.contains("button", "Save").click();
-    });
-
-    cy.contains("Edit Raw Material").should("not.exist");
-
-    searchByName(createdName);
-
-    cy.contains("tr", createdCode, { timeout: 15000 })
-      .find("td")
-      .eq(5)
-      .should("contain.text", updatedStock);
+    cy.contains("Code is required", { timeout: 15000 }).should("exist");
+    cy.contains("Name is required", { timeout: 15000 }).should("exist");
+    cy.contains("Stock quantity must be at least 1", {
+      timeout: 15000,
+    }).should("exist");
   });
 
-  it("deletes the created raw material", () => {
-    searchByName(createdName);
+  it("shows conflict error when creating raw material with existing code MAD-001", () => {
+    cy.contains("button", "New Raw Material", { timeout: 15000 }).click();
 
-    cy.get("body").then(($body) => {
-      if (!$body.text().includes(createdCode)) {
-        createRawMaterial(createdCode, createdName, updatedStock);
-        searchByName(createdName);
-      }
+    cy.get("input#code").clear().type("MAD-001");
+    cy.get("input#name").clear().type(`Raw Material Duplicate ${Date.now()}`);
+    cy.get("input#stockQuantity").clear().type("10");
+
+    cy.contains("button", "Save").click();
+
+    cy.contains("This resource already exists", { timeout: 15000 }).should(
+      "exist",
+    );
+  });
+
+  it("updates raw material name from Raw Test to Raw Test Update", () => {
+    updatedRawMaterialName = `Raw Test Update ${Date.now()}`;
+
+    cy.get('input[placeholder="Filter raw materials..."]', {
+      timeout: 15000,
+    })
+      .clear()
+      .type("Raw Test");
+
+    cy.contains("tr", "Raw Test", { timeout: 15000 }).within(() => {
+      cy.get("#edit-dialog").click();
     });
 
-    deleteRawMaterialByCode(createdCode);
+    cy.get("#raw-material-edit-dialog", { timeout: 15000 }).should("exist");
+    cy.get("#raw-material-edit-dialog input#name")
+      .clear()
+      .type(updatedRawMaterialName);
+    cy.get("#raw-material-edit-dialog").contains("button", "Save").click();
 
-    searchByName(createdName);
+    cy.contains("button", "Reset").click();
+    cy.get('input[placeholder="Filter raw materials..."]', {
+      timeout: 15000,
+    })
+      .clear()
+      .type(updatedRawMaterialName);
+
+    cy.contains(updatedRawMaterialName, { timeout: 15000 }).should("exist");
+  });
+
+  it("delete raw material", () => {
+    cy.get('input[placeholder="Filter raw materials..."]', {
+      timeout: 15000,
+    })
+      .clear()
+      .type(updatedRawMaterialName);
+
+    cy.contains("tr", updatedRawMaterialName, { timeout: 15000 }).within(() => {
+      cy.get("#delete-raw-material").click();
+    });
+
+    cy.contains("button", "Continue", { timeout: 15000 }).click();
+
+    cy.contains("button", "Reset").click();
+    cy.get('input[placeholder="Filter raw materials..."]', {
+      timeout: 15000,
+    })
+      .clear()
+      .type(updatedRawMaterialName);
+
     cy.contains("No results.", { timeout: 15000 }).should("exist");
   });
 });

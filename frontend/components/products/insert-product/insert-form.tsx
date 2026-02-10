@@ -9,13 +9,16 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer";
 import { Form } from "@/components/ui/form";
-import { productSchema } from "@/schemas/product-schema";
-import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { createProduct, fetchProducts } from "@/store/thunks/product.thunks";
+import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
+import {
+  createProduct,
+  fetchProducts,
+} from "@/lib/store/thunks/product.thunks";
 import {
   fetchRawMaterials,
   searchRawMaterials,
-} from "@/store/thunks/raw-material.thunks";
+} from "@/lib/store/thunks/raw-material.thunks";
+import { productSchema } from "@/schemas/product-schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Plus } from "lucide-react";
 import { useEffect, useState } from "react";

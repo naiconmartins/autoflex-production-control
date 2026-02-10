@@ -9,8 +9,11 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { RowDataProps } from "@/interfaces/row-data";
-import { useAppDispatch } from "@/store/hooks";
-import { deleteProduct, fetchProducts } from "@/store/thunks/product.thunks";
+import { useAppDispatch } from "@/lib/store/hooks";
+import {
+  deleteProduct,
+  fetchProducts,
+} from "@/lib/store/thunks/product.thunks";
 import { Trash2 } from "lucide-react";
 import { useState } from "react";
 
@@ -46,7 +49,10 @@ export default function DeleteProduct<TData>({ row }: RowDataProps<TData>) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Trash2 className="text-rose-500 w-4 h-4 cursor-pointer" />
+        <Trash2
+          id="delete-product"
+          className="text-rose-500 w-4 h-4 cursor-pointer"
+        />
       </DialogTrigger>
 
       <DialogContent className="sm:max-w-md p-0">

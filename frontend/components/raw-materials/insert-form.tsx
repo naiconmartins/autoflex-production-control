@@ -8,12 +8,12 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { rawMaterialSchema } from "@/schemas/raw-material-schema";
-import { useAppDispatch } from "@/store/hooks";
+import { useAppDispatch } from "@/lib/store/hooks";
 import {
   createRawMaterial,
   fetchRawMaterials,
-} from "@/store/thunks/raw-material.thunks";
+} from "@/lib/store/thunks/raw-material.thunks";
+import { rawMaterialSchema } from "@/schemas/raw-material-schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Plus } from "lucide-react";
 import { useState } from "react";
