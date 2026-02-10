@@ -1,0 +1,611 @@
+{
+  "info": {
+    "name": "Autoflex Production Control API",
+    "description": "Collection gerada a partir dos resources: AuthResource, UserResource, ProductResource, RawMaterialResource, ProductionCapacityResource e ProductRawMaterialResource.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{adminEmail}}\",\n  \"password\": \"{{adminPassword}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Endpoint público para autenticação e obtenção do token JWT."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (responseCode.code >= 200 && responseCode.code < 300) {",
+                  "   var json = JSON.parse(responseBody);",
+                  "   postman.setEnvironmentVariable('token', json.accessToken);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "User",
+      "item": [
+        {
+          "name": "Create User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"new.user@autoflex.com\",\n  \"password\": \"pass123\",\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"role\": \"USER\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/user",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "user"
+              ]
+            },
+            "description": "Cria novo usuário (requer role ADMIN)."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Current User",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/user/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "user",
+                "me"
+              ]
+            },
+            "description": "Retorna o usuário autenticado (USER ou ADMIN)."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Products",
+      "item": [
+        {
+          "name": "Create Product",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"PROD-011\",\n  \"name\": \"Dining Bench Oak\",\n  \"price\": 490.00,\n  \"rawMaterials\": [\n    {\n      \"id\": 2,\n      \"requiredQuantity\": 3.0\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/products",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "products"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Product",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"PROD-011\",\n  \"name\": \"Dining Bench Oak Updated\",\n  \"price\": 520.00,\n  \"rawMaterials\": [\n    {\n      \"id\": 2,\n      \"requiredQuantity\": 3.5\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/products/{{productId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "products",
+                "{{productId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Product",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/products/{{productId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "products",
+                "{{productId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List Products",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/products?page={{page}}&size={{size}}&sort={{sort}}&dir={{dir}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "products"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "{{page}}"
+                },
+                {
+                  "key": "size",
+                  "value": "{{size}}"
+                },
+                {
+                  "key": "sort",
+                  "value": "{{sort}}"
+                },
+                {
+                  "key": "dir",
+                  "value": "{{dir}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Search Products By Name",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/products/search?name={{name}}&page={{page}}&size={{size}}&sort={{sort}}&dir={{dir}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "products",
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "name",
+                  "value": "{{name}}"
+                },
+                {
+                  "key": "page",
+                  "value": "{{page}}"
+                },
+                {
+                  "key": "size",
+                  "value": "{{size}}"
+                },
+                {
+                  "key": "sort",
+                  "value": "{{sort}}"
+                },
+                {
+                  "key": "dir",
+                  "value": "{{dir}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Product By Id",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/products/{{productId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "products",
+                "{{productId}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Raw Materials",
+      "item": [
+        {
+          "name": "Create Raw Material",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"MAD-010\",\n  \"name\": \"Beech Wood Board 2.5x30x200cm\",\n  \"stockQuantity\": 70.00\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/raw-materials",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "raw-materials"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Raw Material",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"MAD-010\",\n  \"name\": \"Beech Wood Board 2.5x30x200cm Updated\",\n  \"stockQuantity\": 95.00\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/raw-materials/{{rawMaterialId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "raw-materials",
+                "{{rawMaterialId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Raw Material",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/raw-materials/{{rawMaterialId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "raw-materials",
+                "{{rawMaterialId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List Raw Materials",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/raw-materials?page={{page}}&size={{size}}&sort={{sort}}&dir={{dir}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "raw-materials"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "{{page}}"
+                },
+                {
+                  "key": "size",
+                  "value": "{{size}}"
+                },
+                {
+                  "key": "sort",
+                  "value": "{{sort}}"
+                },
+                {
+                  "key": "dir",
+                  "value": "{{dir}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Search Raw Materials By Name",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/raw-materials/search?name={{name}}&page={{page}}&size={{size}}&sort={{sort}}&dir={{dir}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "raw-materials",
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "name",
+                  "value": "{{name}}"
+                },
+                {
+                  "key": "page",
+                  "value": "{{page}}"
+                },
+                {
+                  "key": "size",
+                  "value": "{{size}}"
+                },
+                {
+                  "key": "sort",
+                  "value": "{{sort}}"
+                },
+                {
+                  "key": "dir",
+                  "value": "{{dir}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Raw Material By Id",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/raw-materials/{{rawMaterialId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "raw-materials",
+                "{{rawMaterialId}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Production Capacity",
+      "item": [
+        {
+          "name": "Generate Production Capacity",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/production-capacity",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "production-capacity"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Product Raw Materials",
+      "item": [
+        {
+          "name": "Add Raw Material To Product",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": {{rawMaterialId}},\n  \"requiredQuantity\": 1.5\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/products/{{productId}}/raw-materials",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "products",
+                "{{productId}}",
+                "raw-materials"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List Product Raw Materials",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/products/{{productId}}/raw-materials",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "products",
+                "{{productId}}",
+                "raw-materials"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Required Quantity",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": {{rawMaterialId}},\n  \"requiredQuantity\": 2.0\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/products/{{productId}}/raw-materials/{{rawMaterialId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "products",
+                "{{productId}}",
+                "raw-materials",
+                "{{rawMaterialId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Remove Raw Material From Product",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/products/{{productId}}/raw-materials/{{rawMaterialId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "products",
+                "{{productId}}",
+                "raw-materials",
+                "{{rawMaterialId}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "page",
+      "value": "0"
+    },
+    {
+      "key": "size",
+      "value": "10"
+    },
+    {
+      "key": "sort",
+      "value": "name"
+    },
+    {
+      "key": "dir",
+      "value": "asc"
+    },
+    {
+      "key": "name",
+      "value": "Table"
+    },
+    {
+      "key": "productId",
+      "value": "10"
+    },
+    {
+      "key": "rawMaterialId",
+      "value": "19"
+    },
+    {
+      "key": "adminEmail",
+      "value": "adm@autoflex.com"
+    },
+    {
+      "key": "adminPassword",
+      "value": "adm"
+    }
+  ]
+}
