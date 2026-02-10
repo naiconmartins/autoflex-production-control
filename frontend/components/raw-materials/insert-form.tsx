@@ -75,6 +75,7 @@ export default function InsertRawMaterilForm({
         setLoading(true);
         await dispatch(fetchRawMaterials());
         form.reset();
+        setOpen(false);
       } else {
         if (result.fieldErrors) {
           Object.entries(result.fieldErrors).forEach(([field, messages]) => {

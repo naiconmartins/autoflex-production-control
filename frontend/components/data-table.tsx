@@ -39,6 +39,8 @@ interface DataTableProps<TData, TValue> {
   placeholder: string;
   column: string;
   onPagination: (page: number) => void;
+  onSearch?: (value: string) => void;
+  onResetSearch?: () => void;
 }
 
 export function DataTable<TData, TValue>({
@@ -50,6 +52,8 @@ export function DataTable<TData, TValue>({
   placeholder,
   column,
   onPagination,
+  onSearch,
+  onResetSearch,
 }: DataTableProps<TData, TValue>) {
   const [rowSelection, setRowSelection] = React.useState({});
   const [columnVisibility, setColumnVisibility] =
@@ -92,6 +96,8 @@ export function DataTable<TData, TValue>({
         table={table}
         placeholder={placeholder}
         column={column}
+        onSearch={onSearch}
+        onResetSearch={onResetSearch}
       />
       <div className="overflow-hidden rounded-md border">
         <Table>

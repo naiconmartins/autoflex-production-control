@@ -56,6 +56,10 @@ export async function fetchRawMaterialsAction(
   );
 }
 
+export async function searchRawMaterialsAction(name: string) {
+  return executeAction((token) => rawMaterialService.search(name, token));
+}
+
 export async function createRawMaterialAction(data: RawMaterialRequest) {
   return executeAction((token) => rawMaterialService.create(data, token));
 }

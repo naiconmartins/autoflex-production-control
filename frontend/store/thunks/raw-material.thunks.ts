@@ -2,11 +2,17 @@ import {
   createRawMaterialAction,
   deleteRawMaterialAction,
   fetchRawMaterialsAction,
+  searchRawMaterialsAction,
   updateRawMaterialAction,
 } from "@/actions/raw-material.actions";
-import { RawMaterialRequest } from "@/interfaces/raw-material";
+import {
+  RawMaterial,
+  RawMaterialPagination,
+  RawMaterialRequest,
+} from "@/interfaces/raw-material";
 import {
   addRawMaterial,
+  clearRawMaterialItems,
   removeRawMaterial,
   setError,
   setLoading,
@@ -14,6 +20,38 @@ import {
   updateRawMaterial,
 } from "../slices/raw-material.slice";
 import { AppDispatch } from "../store";
+
+function normalizeRawMaterialPagination(
+  data: RawMaterialPagination | RawMaterial[] | undefined,
+): RawMaterialPagination {
+  if (!data) {
+    return {
+      content: [],
+      page: 0,
+      size: 10,
+      totalElements: 0,
+      totalPages: 0,
+    };
+  }
+
+  if (Array.isArray(data)) {
+    return {
+      content: data,
+      page: 0,
+      size: data.length || 10,
+      totalElements: data.length,
+      totalPages: 1,
+    };
+  }
+
+  return {
+    content: Array.isArray(data.content) ? data.content : [],
+    page: data.page ?? 0,
+    size: data.size ?? 10,
+    totalElements: data.totalElements ?? data.content?.length ?? 0,
+    totalPages: data.totalPages ?? 1,
+  };
+}
 
 export const fetchRawMaterials = (params?: {
   page?: number;
@@ -37,7 +75,38 @@ export const fetchRawMaterials = (params?: {
       );
 
       if (result.success) {
-        dispatch(setRawMaterials(result.data));
+        dispatch(
+          setRawMaterials(
+            normalizeRawMaterialPagination(
+              result.data as RawMaterialPagination | RawMaterial[] | undefined,
+            ),
+          ),
+        );
+      } else {
+        dispatch(setError(result.error));
+      }
+    } catch (error: any) {
+      dispatch(setError(error.message || "Erro ao buscar matérias-primas"));
+    }
+  };
+};
+
+export const searchRawMaterials = (name: string) => {
+  return async (dispatch: AppDispatch) => {
+    try {
+      dispatch(clearRawMaterialItems());
+      dispatch(setLoading(true));
+
+      const result = await searchRawMaterialsAction(name);
+
+      if (result.success) {
+        dispatch(
+          setRawMaterials(
+            normalizeRawMaterialPagination(
+              result.data as RawMaterialPagination | RawMaterial[] | undefined,
+            ),
+          ),
+        );
       } else {
         dispatch(setError(result.error));
       }

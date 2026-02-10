@@ -29,7 +29,7 @@ export default function SidebarComponent({
   page: string;
 }>) {
   return (
-    <SidebarProvider>
+    <SidebarProvider id="main-sidebar">
       <AppSidebar user={user} />
       <SidebarInset>
         <header className="bg-white flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">

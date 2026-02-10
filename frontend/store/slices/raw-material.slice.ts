@@ -60,6 +60,16 @@ const rawMaterialSlice = createSlice({
     setLoading: (state, action: PayloadAction<boolean>) => {
       state.loading = action.payload;
     },
+    clearRawMaterialItems: (state) => {
+      state.items = [];
+      state.pagination = {
+        page: 0,
+        size: state.pagination.size,
+        totalElements: 0,
+        totalPages: 0,
+      };
+      state.error = null;
+    },
     setError: (state, action: PayloadAction<string | null>) => {
       state.error = action.payload;
       state.loading = false;
@@ -90,6 +100,7 @@ export const {
   removeRawMaterial,
   setSelectedRawMaterial,
   setLoading,
+  clearRawMaterialItems,
   setError,
   clearRawMaterials,
   setHydrated,

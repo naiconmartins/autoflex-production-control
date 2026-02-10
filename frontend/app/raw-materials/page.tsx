@@ -5,18 +5,31 @@ import { columns } from "@/components/raw-materials/columns";
 import CreateRawMaterilForm from "@/components/raw-materials/insert-form";
 import SidebarComponent from "@/components/sidebar-component";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { fetchRawMaterials } from "@/store/thunks/raw-material.thunks";
+import {
+  fetchRawMaterials,
+  searchRawMaterials,
+} from "@/store/thunks/raw-material.thunks";
 import { useEffect, useState } from "react";
 
 export default function RawMaterialsPage() {
   const dispatch = useAppDispatch();
-  const [loading, setLoading] = useState(false);
+  const [formLoading, setFormLoading] = useState(false);
 
   const { user } = useAppSelector((state) => state.auth);
-  const { items, pagination } = useAppSelector((state) => state.rawMaterial);
+  const { items, pagination, loading } = useAppSelector(
+    (state) => state.rawMaterial,
+  );
 
   const handlePageChange = (page: number) => {
     dispatch(fetchRawMaterials({ page: page }));
+  };
+
+  const handleSearch = (name: string) => {
+    dispatch(searchRawMaterials(name));
+  };
+
+  const handleSearchReset = () => {
+    dispatch(fetchRawMaterials());
   };
 
   useEffect(() => {
@@ -37,7 +50,7 @@ export default function RawMaterialsPage() {
         <section className="h-full p-6 bg-zinc-50">
           <div className="flex flex-row items-center justify-between pb-6">
             <h1 className="text-2xl font-semibold">Raw Materials</h1>
-            <CreateRawMaterilForm setLoading={setLoading} />
+            <CreateRawMaterilForm setLoading={setFormLoading} />
           </div>
 
           <div className="bg-white p-6 rounded-4xl">
@@ -47,9 +60,11 @@ export default function RawMaterialsPage() {
               page={pagination.page}
               totalPages={pagination.totalPages}
               onPagination={handlePageChange}
-              loading={loading}
+              loading={loading || formLoading}
               placeholder="Filter raw materials..."
               column="name"
+              onSearch={handleSearch}
+              onResetSearch={handleSearchReset}
             />
           </div>
         </section>

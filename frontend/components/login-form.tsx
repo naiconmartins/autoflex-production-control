@@ -53,6 +53,7 @@ export function LoginForm({
 
   return (
     <form
+      data-cy="login-form"
       onSubmit={handleSubmit}
       className={cn("flex flex-col gap-6", className)}
       {...props}
@@ -66,7 +67,10 @@ export function LoginForm({
         </div>
 
         {error && (
-          <p className="text-destructive text-sm font-medium text-center">
+          <p
+            data-cy="login-error"
+            className="text-destructive text-sm font-medium text-center"
+          >
             {error}
           </p>
         )}
@@ -74,6 +78,7 @@ export function LoginForm({
         <Field>
           <FieldLabel htmlFor="email">Email</FieldLabel>
           <Input
+            data-cy="login-email"
             id="email"
             name="email"
             type="email"
@@ -86,6 +91,7 @@ export function LoginForm({
         <Field>
           <FieldLabel htmlFor="password">Password</FieldLabel>
           <Input
+            data-cy="login-password"
             id="password"
             name="password"
             type="password"
@@ -95,7 +101,12 @@ export function LoginForm({
         </Field>
 
         <Field>
-          <Button type="submit" className="w-full" disabled={loading}>
+          <Button
+            data-cy="login-submit"
+            type="submit"
+            className="w-full"
+            disabled={loading}
+          >
             {loading ? "Signing in..." : "Sign in"}
           </Button>
         </Field>

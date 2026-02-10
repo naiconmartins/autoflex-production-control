@@ -11,7 +11,7 @@ class RawMaterialService extends ApiService {
   }
 
   async create(data: RawMaterialRequest, token: string): Promise<RawMaterial> {
-    return this.request<RawMaterial>("/raw-material", {
+    return this.request<RawMaterial>("/raw-materials", {
       method: "POST",
       body: JSON.stringify(data),
       headers: {
@@ -25,7 +25,7 @@ class RawMaterialService extends ApiService {
     data: RawMaterialRequest,
     token: string,
   ): Promise<RawMaterial> {
-    return this.request<RawMaterial>(`/raw-material/${id}`, {
+    return this.request<RawMaterial>(`/raw-materials/${id}`, {
       method: "PUT",
       body: JSON.stringify(data),
       headers: {
@@ -35,7 +35,7 @@ class RawMaterialService extends ApiService {
   }
 
   async delete(id: string, token: string): Promise<void> {
-    return this.request<void>(`/raw-material/${id}`, {
+    return this.request<void>(`/raw-materials/${id}`, {
       method: "DELETE",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -44,7 +44,7 @@ class RawMaterialService extends ApiService {
   }
 
   async findById(id: string, token: string): Promise<RawMaterial> {
-    return this.request<RawMaterial>(`/raw-material/${id}`, {
+    return this.request<RawMaterial>(`/raw-materials/${id}`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -67,7 +67,21 @@ class RawMaterialService extends ApiService {
     });
 
     return this.request<RawMaterialPagination>(
-      `/raw-material?${queryParams.toString()}`,
+      `/raw-materials?${queryParams.toString()}`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    );
+  }
+
+  async search(name: string, token: string): Promise<RawMaterialPagination> {
+    const query = encodeURIComponent(name);
+
+    return this.request<RawMaterialPagination>(
+      `/raw-materials/search?name=${query}`,
       {
         method: "GET",
         headers: {
