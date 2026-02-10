@@ -1,78 +1,149 @@
-# production-control
+# Autoflex Production Control - Backend API
 
-This project uses Quarkus, the Supersonic Subatomic Java Framework.
+API backend para controle de produção usando **Java 21 + Quarkus + PostgreSQL**.
 
-If you want to learn more about Quarkus, please visit its website: <https://quarkus.io/>.
+## Escopo do projeto
 
-## Running the application in dev mode
+Este serviço gerencia:
+- Produtos
+- Matérias-primas
+- Associação produto x matéria-prima (BOM)
+- Sugestão de capacidade de produção com base no estoque atual, priorizando produtos de maior valor
 
-You can run your application in dev mode that enables live coding using:
+## Stack tecnológica
 
-```shell script
+- Java 21
+- Quarkus 3.x
+- Hibernate ORM com Panache
+- PostgreSQL
+- Autenticação JWT (SmallRye JWT)
+- Maven
+- Testes unitários e de integração com JUnit + RestAssured
+
+## Requisitos funcionais (Backend)
+
+- `RF001` CRUD de produtos: implementado em `ProductResource`
+- `RF002` CRUD de matérias-primas: implementado em `RawMaterialResource`
+- `RF003` CRUD de associação produto/matéria-prima: implementado em `ProductRawMaterialResource`
+- `RF004` Consulta de produtos produzíveis com estoque disponível: implementado em `ProductionCapacityResource`
+
+## Requisitos não funcionais (Backend)
+
+- `RNF002` Arquitetura API: backend exposto como REST API
+- `RNF004` Persistência em banco relacional: PostgreSQL via JDBC
+- `RNF005` Framework backend: Quarkus
+- `RNF007` Código, tabelas e colunas em inglês
+
+Observação: requisitos de frontend (`RNF001`, `RNF003`, `RNF006`, `RF005`-`RF008`) são atendidos na aplicação frontend.
+
+## Regra de negócio da capacidade de produção
+
+Endpoint `GET /production-capacity`:
+- Ordena os produtos pelo **maior preço**
+- Calcula quantas unidades podem ser produzidas com o estoque disponível
+- Consome estoque de forma simulada conforme a alocação dos produtos
+- Retorna quantidade produzível por produto e valor total geral
+
+## Endpoints da API
+
+### Auth
+- `POST /auth/login`
+
+### Usuários
+- `POST /user` (ADMIN)
+- `GET /user/me` (USER, ADMIN)
+
+### Produtos
+- `POST /products`
+- `PUT /products/{id}`
+- `DELETE /products/{id}`
+- `GET /products`
+- `GET /products/search?name=...`
+- `GET /products/{id}`
+
+### Matérias-primas
+- `POST /raw-materials`
+- `PUT /raw-materials/{id}`
+- `DELETE /raw-materials/{id}`
+- `GET /raw-materials`
+- `GET /raw-materials/search?name=...`
+- `GET /raw-materials/{id}`
+
+### Associação Produto x Matéria-prima
+- `POST /products/{productId}/raw-materials`
+- `GET /products/{productId}/raw-materials`
+- `PUT /products/{productId}/raw-materials/{rawMaterialId}`
+- `DELETE /products/{productId}/raw-materials/{rawMaterialId}`
+
+### Plano de produção
+- `GET /production-capacity`
+
+## Segurança
+
+- JWT obrigatório nas rotas protegidas
+- Rota pública: `POST /auth/login`
+- Autorização por perfil com `@RolesAllowed`
+
+## Como executar localmente
+
+### 1. Subir em modo desenvolvimento
+
+```bash
 ./mvnw quarkus:dev
 ```
 
-> **_NOTE:_**  Quarkus now ships with a Dev UI, which is available in dev mode only at <http://localhost:8080/q/dev/>.
+URL padrão da API: `http://localhost:8080`
 
-## Packaging and running the application
+### 2. Carga inicial de dados
 
-The application can be packaged using:
+Os dados de seed são carregados por:
+- `src/main/resources/import.sql`
 
-```shell script
+## Postman Collection
+
+Link da collection no repositório:
+- [autoflex.postman_collection.json](./autoflex.postman_collection.json)
+
+Ela inclui:
+- Todas as rotas do backend
+- Variáveis de ambiente (`baseUrl`, ids, credenciais)
+- Script automático no `Auth > Login` para salvar o JWT no ambiente:
+
+```javascript
+if (responseCode.code >= 200 && responseCode.code < 300) {
+   var json = JSON.parse(responseBody);
+   postman.setEnvironmentVariable('token', json.accessToken);
+}
+```
+
+Credenciais padrão na collection:
+- `adminEmail = adm@autoflex.com`
+- `adminPassword = adm`
+
+## Testes
+
+Rodar testes unitários:
+
+```bash
+./mvnw test
+```
+
+Rodar testes de integração:
+
+```bash
+./mvnw verify -DskipITs=false
+```
+
+## Build
+
+Gerar pacote da aplicação:
+
+```bash
 ./mvnw package
 ```
 
-It produces the `quarkus-run.jar` file in the `target/quarkus-app/` directory.
-Be aware that it’s not an _über-jar_ as the dependencies are copied into the `target/quarkus-app/lib/` directory.
+Executar aplicação empacotada:
 
-The application is now runnable using `java -jar target/quarkus-app/quarkus-run.jar`.
-
-If you want to build an _über-jar_, execute the following command:
-
-```shell script
-./mvnw package -Dquarkus.package.jar.type=uber-jar
+```bash
+java -jar target/quarkus-app/quarkus-run.jar
 ```
-
-The application, packaged as an _über-jar_, is now runnable using `java -jar target/*-runner.jar`.
-
-## Creating a native executable
-
-You can create a native executable using:
-
-```shell script
-./mvnw package -Dnative
-```
-
-Or, if you don't have GraalVM installed, you can run the native executable build in a container using:
-
-```shell script
-./mvnw package -Dnative -Dquarkus.native.container-build=true
-```
-
-You can then execute your native executable with: `./target/production-control-1.0.0-SNAPSHOT-runner`
-
-If you want to learn more about building native executables, please consult <https://quarkus.io/guides/maven-tooling>.
-
-## Related Guides
-
-- REST ([guide](https://quarkus.io/guides/rest)): A Jakarta REST implementation utilizing build time processing and Vert.x. This extension is not compatible with the quarkus-resteasy extension, or any of the extensions that depend on it.
-- REST Jackson ([guide](https://quarkus.io/guides/rest#json-serialisation)): Jackson serialization support for Quarkus REST. This extension is not compatible with the quarkus-resteasy extension, or any of the extensions that depend on it
-- Hibernate ORM with Panache ([guide](https://quarkus.io/guides/hibernate-orm-panache)): Simplify your persistence code for Hibernate ORM via the active record or the repository pattern
-- JDBC Driver - PostgreSQL ([guide](https://quarkus.io/guides/datasource)): Connect to the PostgreSQL database via JDBC
-
-## Provided Code
-
-### Hibernate ORM
-
-Create your first JPA entity
-
-[Related guide section...](https://quarkus.io/guides/hibernate-orm)
-
-[Related Hibernate with Panache section...](https://quarkus.io/guides/hibernate-orm-panache)
-
-
-### REST
-
-Easily start your REST Web Services
-
-[Related guide section...](https://quarkus.io/guides/getting-started-reactive#reactive-jax-rs-resources)
