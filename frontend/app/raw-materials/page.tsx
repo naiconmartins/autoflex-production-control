@@ -2,7 +2,7 @@
 import { DataTable } from "@/components/data-table";
 import Loading from "@/components/loading";
 import { columns } from "@/components/raw-materials/columns";
-import CreateRawMaterilForm from "@/components/raw-materials/create-form";
+import CreateRawMaterilForm from "@/components/raw-materials/insert-form";
 import SidebarComponent from "@/components/sidebar-component";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { fetchRawMaterials } from "@/store/thunks/raw-material.thunks";

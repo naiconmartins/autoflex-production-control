@@ -11,7 +11,7 @@ class ProductService extends ApiService {
   }
 
   async create(data: ProductRequest, token: string): Promise<Product> {
-    return this.request<Product>("/product", {
+    return this.request<Product>("/products", {
       method: "POST",
       body: JSON.stringify(data),
       headers: {
@@ -25,7 +25,7 @@ class ProductService extends ApiService {
     data: ProductRequest,
     token: string,
   ): Promise<Product> {
-    return this.request<Product>(`/product/${id}`, {
+    return this.request<Product>(`/products/${id}`, {
       method: "PUT",
       body: JSON.stringify(data),
       headers: {
@@ -35,7 +35,7 @@ class ProductService extends ApiService {
   }
 
   async delete(id: string, token: string): Promise<void> {
-    return this.request<void>(`/product/${id}`, {
+    return this.request<void>(`/products/${id}`, {
       method: "DELETE",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -44,7 +44,7 @@ class ProductService extends ApiService {
   }
 
   async findById(id: string, token: string): Promise<Product> {
-    return this.request<Product>(`/product/${id}`, {
+    return this.request<Product>(`/products/${id}`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -67,7 +67,7 @@ class ProductService extends ApiService {
     });
 
     return this.request<ProductPagination>(
-      `/product?${queryParams.toString()}`,
+      `/products?${queryParams.toString()}`,
       {
         method: "GET",
         headers: {

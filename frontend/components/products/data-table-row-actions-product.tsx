@@ -4,7 +4,7 @@ import { Product } from "@/interfaces/product";
 import { type Row } from "@tanstack/react-table";
 import DeleteProduct from "./dialog-delete";
 import ProductDetails from "./product-details";
-import UpdateProductForm from "./update-form/update-form";
+import UpdateProductForm from "./update-product/update-form";
 
 interface DataTableRowActionsProps {
   title: string;

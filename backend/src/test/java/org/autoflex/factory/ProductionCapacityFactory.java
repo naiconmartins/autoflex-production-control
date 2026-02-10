@@ -18,8 +18,8 @@ public class ProductionPlanFactory {
         return response;
     }
 
-    public static ProductionPlanItemDTO createItemDTO(Product product, long quantity) {
-        BigDecimal totalValue = product.getPrice().multiply(BigDecimal.valueOf(quantity));
+    public static ProductionPlanItemDTO createItemDTO(Product product, BigDecimal quantity) {
+        BigDecimal totalValue = product.getPrice().multiply(quantity);
         return new ProductionPlanItemDTO(
                 product.getId(),
                 product.getCode(),

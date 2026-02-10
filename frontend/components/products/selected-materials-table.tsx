@@ -10,9 +10,12 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { RawMaterial } from "@/interfaces/raw-material";
+import { productSchema } from "@/schemas/product-schema";
 import { Trash2 } from "lucide-react";
 import { Control, UseFormReturn } from "react-hook-form";
-import { ProductFormValues } from "./insert-product/insert-form";
+import z from "zod";
+
+type ProductFormValues = z.infer<typeof productSchema>;
 
 type Props = {
   form: UseFormReturn<ProductFormValues>;
@@ -54,12 +57,12 @@ export function SelectedMaterialsTable({
           </div>
 
           <div>
-            {fields.length === 0 ? (
+            {fields && fields.length === 0 ? (
               <div className="px-3 py-3 text-sm text-muted-foreground">
-                No materials selected yet
+                Select raw materials to associate with this product
               </div>
             ) : (
-              fields.map((field: any, index) => {
+              fields?.map((field: any, index) => {
                 const material = findMaterial(field.id);
 
                 return (

@@ -1,6 +1,7 @@
 import { configureStore } from "@reduxjs/toolkit";
 import authReducer from "./slices/auth.slice";
 import productReducer from "./slices/product.slice";
+import productionCapacityReducer from "./slices/production-capacity.slice";
 import rawMaterialReducer from "./slices/raw-material.slice";
 
 export const store = configureStore({
@@ -8,6 +9,7 @@ export const store = configureStore({
     auth: authReducer,
     rawMaterial: rawMaterialReducer,
     product: productReducer,
+    productionCapacity: productionCapacityReducer,
   },
 });
 

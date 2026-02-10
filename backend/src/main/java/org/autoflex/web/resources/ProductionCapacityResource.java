@@ -9,7 +9,7 @@ import jakarta.ws.rs.core.MediaType;
 import org.autoflex.application.services.ProductionPlanService;
 import org.autoflex.web.dto.ProductionPlanResponseDTO;
 
-@Path("/production-plan")
+@Path("/production-capacity")
 @Produces(MediaType.APPLICATION_JSON)
 public class ProductionPlanResource {
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { Box, GalleryVerticalEnd, User2 } from "lucide-react";
+import { Box, Factory, GalleryVerticalEnd } from "lucide-react";
 import * as React from "react";
 
 import {
@@ -34,8 +34,20 @@ export function AppSidebar({
     ],
     navMain: [
       {
-        title: "Inventory",
+        title: "Production",
         url: "/",
+        icon: Factory,
+        isActive: true,
+        items: [
+          {
+            title: "Production Capacity",
+            url: "/",
+          },
+        ],
+      },
+      {
+        title: "Inventory",
+        url: "#",
         icon: Box,
         isActive: true,
         items: [
@@ -46,17 +58,6 @@ export function AppSidebar({
           {
             title: "Products",
             url: "/products",
-          },
-        ],
-      },
-      {
-        title: "Users",
-        url: "/user",
-        icon: User2,
-        items: [
-          {
-            title: "Explorer",
-            url: "#",
           },
         ],
       },

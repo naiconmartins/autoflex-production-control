@@ -14,6 +14,7 @@ import {
 import { Product } from "@/interfaces/product";
 import { Row } from "@tanstack/react-table";
 import { ArrowRightToLine, Eye } from "lucide-react";
+import Image from "next/image";
 import { Card } from "../ui/card";
 import { Separator } from "../ui/separator";
 
@@ -80,27 +81,48 @@ export default function ProductDetails({ row }: Props) {
                   </tr>
                 </thead>
 
-                <tbody>
-                  {row.original.rawMaterials.map((rawMaterial) => (
-                    <tr
-                      key={rawMaterial.id}
-                      className="border-b last:border-b-0 hover:bg-muted/50"
-                    >
-                      <td className="py-2 text-sm text-muted-foreground">
-                        {rawMaterial.id}
-                      </td>
-                      <td className="py-2 text-sm font-medium">
-                        {rawMaterial.code}
-                      </td>
-                      <td className="py-2 text-sm truncate">
-                        {rawMaterial.name}
-                      </td>
-                      <td className="py-2 text-sm text-right font-medium">
-                        {rawMaterial.requiredQuantity}
+                {row.original.rawMaterials.length > 0 ? (
+                  <tbody>
+                    {row.original.rawMaterials.map((rawMaterial) => (
+                      <tr
+                        key={rawMaterial.id}
+                        className="border-b last:border-b-0 hover:bg-muted/50"
+                      >
+                        <td className="py-2 text-sm text-muted-foreground">
+                          {rawMaterial.id}
+                        </td>
+                        <td className="py-2 text-sm font-medium">
+                          {rawMaterial.code}
+                        </td>
+                        <td className="py-2 text-sm truncate">
+                          {rawMaterial.name}
+                        </td>
+                        <td className="py-2 text-sm text-right font-medium">
+                          {rawMaterial.requiredQuantity}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                ) : (
+                  <tbody>
+                    <tr>
+                      <td colSpan={4} className="py-10">
+                        <div className="flex flex-col items-center justify-center">
+                          <Image
+                            alt="No results"
+                            src="/empty-box.svg"
+                            height={200}
+                            width={250}
+                            className="w-30"
+                          />
+                          <p className="mt-2 text-sm text-muted-foreground">
+                            No raw materials associated with this product
+                          </p>
+                        </div>
                       </td>
                     </tr>
-                  ))}
-                </tbody>
+                  </tbody>
+                )}
               </table>
             </Card>
           </div>

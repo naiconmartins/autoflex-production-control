@@ -47,7 +47,7 @@ const inputs = [
   },
 ];
 
-export default function CreateRawMaterilForm({
+export default function InsertRawMaterilForm({
   setLoading,
 }: {
   setLoading: (value: boolean) => void;

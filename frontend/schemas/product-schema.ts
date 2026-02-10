@@ -14,5 +14,5 @@ export const productSchema = z.object({
 
   rawMaterials: z
     .array(productRawMaterialSchema)
-    .min(1, "The product must contain at least one raw material"),
+    .min(1, "Select at least one raw material"),
 });

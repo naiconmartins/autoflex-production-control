@@ -25,18 +25,21 @@ public class ProductionPlanService {
 
         for (Product product : products) {
             List<ProductRawMaterial> recipe = ProductRawMaterial.find("product", product).list();
+
             if (recipe == null || recipe.isEmpty()) {
                 continue;
             }
 
-            long maxUnits = computeMaxUnits(recipe, remainingStock);
-            if (maxUnits <= 0) {
+            BigDecimal maxUnits = computeMaxUnits(recipe, remainingStock);
+
+            if (maxUnits.compareTo(BigDecimal.ZERO) <= 0) {
                 continue;
             }
 
             consumeStock(recipe, remainingStock, maxUnits);
 
-            BigDecimal totalValue = product.getPrice().multiply(BigDecimal.valueOf(maxUnits));
+            BigDecimal totalValue = product.getPrice().multiply(maxUnits);
+
             response.items.add(new ProductionPlanItemDTO(
                     product.getId(),
                     product.getCode(),
@@ -45,6 +48,7 @@ public class ProductionPlanService {
                     maxUnits,
                     totalValue
             ));
+
             response.grandTotalValue = response.grandTotalValue.add(totalValue);
         }
 
@@ -61,8 +65,8 @@ public class ProductionPlanService {
         return stock;
     }
 
-    private long computeMaxUnits(List<ProductRawMaterial> recipe, Map<Long, BigDecimal> remainingStock) {
-        long maxUnits = Long.MAX_VALUE;
+    private BigDecimal computeMaxUnits(List<ProductRawMaterial> recipe, Map<Long, BigDecimal> remainingStock) {
+        BigDecimal maxUnits = null;
 
         for (ProductRawMaterial link : recipe) {
             Long rawMaterialId = link.getRawMaterial().getId();
@@ -70,44 +74,35 @@ public class ProductionPlanService {
             BigDecimal required = link.getRequiredQuantity();
 
             if (required == null || required.compareTo(BigDecimal.ZERO) <= 0) {
-                return 0L;
+                return BigDecimal.ZERO;
             }
 
-            long units = floorDivide(stock, required);
-            if (units < maxUnits) {
-                maxUnits = units;
+            BigDecimal possibleUnits = stock.divide(required, 0, RoundingMode.DOWN);
+
+            if (maxUnits == null || possibleUnits.compareTo(maxUnits) < 0) {
+                maxUnits = possibleUnits;
             }
 
-            if (maxUnits == 0L) {
-                return 0L;
+            if (maxUnits.compareTo(BigDecimal.ZERO) == 0) {
+                return BigDecimal.ZERO;
             }
         }
 
-        return maxUnits == Long.MAX_VALUE ? 0L : maxUnits;
+        return maxUnits == null ? BigDecimal.ZERO : maxUnits;
     }
 
-    private void consumeStock(List<ProductRawMaterial> recipe, Map<Long, BigDecimal> remainingStock, long units) {
-        BigDecimal unitsBd = BigDecimal.valueOf(units);
-
+    private void consumeStock(List<ProductRawMaterial> recipe, Map<Long, BigDecimal> remainingStock, BigDecimal units) {
         for (ProductRawMaterial link : recipe) {
             Long rawMaterialId = link.getRawMaterial().getId();
             BigDecimal stock = remainingStock.getOrDefault(rawMaterialId, BigDecimal.ZERO);
-            BigDecimal required = link.getRequiredQuantity().multiply(unitsBd);
-            BigDecimal newStock = stock.subtract(required);
+            BigDecimal totalRequired = link.getRequiredQuantity().multiply(units);
+            BigDecimal newStock = stock.subtract(totalRequired);
+
             if (newStock.compareTo(BigDecimal.ZERO) < 0) {
                 newStock = BigDecimal.ZERO;
             }
+
             remainingStock.put(rawMaterialId, newStock);
         }
-    }
-
-    private long floorDivide(BigDecimal dividend, BigDecimal divisor) {
-        if (dividend == null || divisor == null || divisor.compareTo(BigDecimal.ZERO) <= 0) {
-            return 0L;
-        }
-        if (dividend.compareTo(BigDecimal.ZERO) <= 0) {
-            return 0L;
-        }
-        return dividend.divide(divisor, 0, RoundingMode.DOWN).longValue();
     }
 }

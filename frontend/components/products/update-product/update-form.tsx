@@ -69,8 +69,8 @@ export default function UpdateProductForm({ row }: { row: Row<Product> }) {
     });
   }, [open, row, form]);
 
-  const watchedFields = form.watch("rawMaterials");
-  const selectedIds = watchedFields.map((f: any) => f.id);
+  const watchedFields = form.watch("rawMaterials") ?? [];
+  const selectedIds = watchedFields.map((f) => f.id);
 
   const handlePageChange = (page: number) => {
     dispatch(fetchRawMaterials({ page }));
@@ -110,6 +110,7 @@ export default function UpdateProductForm({ row }: { row: Row<Product> }) {
   const onSubmit = async (values: ProductFormValues) => {
     setIsSubmitting(true);
     try {
+      console.log(values);
       const result = await dispatch(editProduct(row.getValue("id"), values));
       if (result.success) {
         setLoading(true);
