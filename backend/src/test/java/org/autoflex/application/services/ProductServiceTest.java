@@ -10,6 +10,8 @@ import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceException;
 import org.autoflex.domain.entities.Product;
+import org.autoflex.domain.entities.ProductRawMaterial;
+import org.autoflex.domain.entities.RawMaterial;
 import org.autoflex.factory.ProductFactory;
 import org.autoflex.web.dto.PageRequestDTO;
 import org.autoflex.web.dto.PageResponseDTO;
@@ -49,7 +51,9 @@ public class ProductServiceTest {
         existingProduct.setId(id);
 
         PanacheMock.mock(Product.class);
+        PanacheMock.mock(RawMaterial.class);
         when(Product.getEntityManager()).thenReturn(entityManager);
+        when(RawMaterial.getEntityManager()).thenReturn(entityManager);
     }
 
     private void mockFindByCode(Product result) {
@@ -64,6 +68,10 @@ public class ProductServiceTest {
         when(Product.findById(id)).thenReturn(result);
     }
 
+    private void mockRawMaterialFindById(Long id, RawMaterial result) {
+        when(RawMaterial.findById(id)).thenReturn(result);
+    }
+
     private PanacheQuery<Product> mockPanacheQuery(List<Product> items, long count, int pageCount) {
         PanacheQuery<Product> mockQuery = mock(PanacheQuery.class);
         doReturn(mockQuery).when(mockQuery).page(any(Page.class));
@@ -76,6 +84,15 @@ public class ProductServiceTest {
     private void mockFindAll(List<Product> products, long count, int pageCount) {
         PanacheQuery<Product> mockQuery = mockPanacheQuery(products, count, pageCount);
         PanacheMock.doReturn(mockQuery).when(Product.class).findAll(any(Sort.class));
+    }
+
+    private void mockFindByName(List<Product> products, long count, int pageCount) {
+        PanacheQuery<Product> mockQuery = mockPanacheQuery(products, count, pageCount);
+        PanacheMock.doReturn(mockQuery).when(Product.class).find(
+                eq("lower(name) like concat('%', lower(?1), '%')"),
+                any(Sort.class),
+                any(Object[].class)
+        );
     }
 
     private void assertProductEquals(ProductResponseDTO result, ProductRequestDTO expected) {
@@ -94,6 +111,41 @@ public class ProductServiceTest {
 
         assertProductEquals(result, dto);
         verify(entityManager, times(1)).persist(any(Product.class));
+    }
+
+    @Test
+    void insert_shouldCreateProductWithRawMaterials_whenValidRequestHasRawMaterials() {
+        ProductRequestDTO request = ProductFactory.createProductRequestDTOWithRawMaterials();
+        mockFindByCode(null);
+
+        RawMaterial rm1 = new RawMaterial("RM001", "Raw Material 1", dto.price);
+        rm1.setId(1L);
+        RawMaterial rm2 = new RawMaterial("RM002", "Raw Material 2", dto.price);
+        rm2.setId(2L);
+
+        mockRawMaterialFindById(1L, rm1);
+        mockRawMaterialFindById(2L, rm2);
+        doNothing().when(entityManager).persist(any(Product.class));
+
+        ProductResponseDTO result = productService.insert(request);
+
+        assertNotNull(result);
+        assertEquals(2, result.rawMaterials.size());
+        assertEquals(1L, result.rawMaterials.get(0).id);
+        assertEquals(request.rawMaterials.get(0).requiredQuantity, result.rawMaterials.get(0).requiredQuantity);
+        assertEquals(2L, result.rawMaterials.get(1).id);
+        assertEquals(request.rawMaterials.get(1).requiredQuantity, result.rawMaterials.get(1).requiredQuantity);
+        verify(entityManager, times(1)).persist(any(Product.class));
+    }
+
+    @Test
+    void insert_shouldThrowResourceNotFoundException_whenRawMaterialDoesNotExist() {
+        ProductRequestDTO request = ProductFactory.createProductRequestDTOWithRawMaterials();
+        mockFindByCode(null);
+        mockRawMaterialFindById(1L, null);
+
+        assertThrows(ResourceNotFoundException.class, () -> productService.insert(request));
+        verify(entityManager, never()).persist(any());
     }
 
     @Test
@@ -118,6 +170,63 @@ public class ProductServiceTest {
         assertEquals(dto.code, existingProduct.getCode());
         assertEquals(dto.name, existingProduct.getName());
         assertEquals(dto.price, existingProduct.getPrice());
+    }
+
+    @Test
+    void update_shouldReplaceRawMaterials_whenRawMaterialsProvided() {
+        ProductRequestDTO request = ProductFactory.createProductRequestDTOWithRawMaterials();
+
+        RawMaterial oldRm = new RawMaterial("RM-OLD", "Old RM", dto.price);
+        oldRm.setId(99L);
+        existingProduct.addRawMaterial(new ProductRawMaterial(existingProduct, oldRm, dto.price));
+
+        RawMaterial rm1 = new RawMaterial("RM001", "Raw Material 1", dto.price);
+        rm1.setId(1L);
+        RawMaterial rm2 = new RawMaterial("RM002", "Raw Material 2", dto.price);
+        rm2.setId(2L);
+
+        mockFindById(id, existingProduct);
+        mockFindByCode(null);
+        mockRawMaterialFindById(1L, rm1);
+        mockRawMaterialFindById(2L, rm2);
+
+        ProductResponseDTO result = productService.update(id, request);
+
+        assertNotNull(result);
+        assertEquals(2, result.rawMaterials.size());
+        assertEquals(2, existingProduct.getRawMaterials().size());
+        assertEquals(1L, result.rawMaterials.get(0).id);
+        assertEquals(request.rawMaterials.get(0).requiredQuantity, result.rawMaterials.get(0).requiredQuantity);
+        assertEquals(2L, result.rawMaterials.get(1).id);
+        assertEquals(request.rawMaterials.get(1).requiredQuantity, result.rawMaterials.get(1).requiredQuantity);
+        verify(entityManager, times(1)).flush();
+    }
+
+    @Test
+    void update_shouldThrowResourceNotFoundException_whenRawMaterialDoesNotExist() {
+        ProductRequestDTO request = ProductFactory.createProductRequestDTOWithRawMaterials();
+
+        mockFindById(id, existingProduct);
+        mockFindByCode(null);
+        mockRawMaterialFindById(1L, null);
+
+        assertThrows(ResourceNotFoundException.class, () -> productService.update(id, request));
+        verify(entityManager, times(1)).flush();
+    }
+
+    @Test
+    void update_shouldClearRawMaterials_whenRawMaterialsIsNull() {
+        existingProduct.addRawMaterial(new ProductRawMaterial(existingProduct, new RawMaterial(), dto.price));
+
+        mockFindById(id, existingProduct);
+        mockFindByCode(null);
+        dto.rawMaterials = null;
+
+        ProductResponseDTO result = productService.update(id, dto);
+
+        assertNotNull(result);
+        assertTrue(existingProduct.getRawMaterials().isEmpty());
+        verify(entityManager, times(1)).flush();
     }
 
     @Test
@@ -258,5 +367,39 @@ public class ProductServiceTest {
         assertEquals(2, result.size);
         assertEquals(5L, result.totalElements);
         assertEquals(3, result.totalPages);
+    }
+
+    @Test
+    void findByName_shouldReturnPagedResults_whenNameProvided() {
+        PageRequestDTO pageRequest = new PageRequestDTO(1, 2, "name", "asc");
+
+        List<Product> products = List.of(
+                new Product("P-1", "Steel Table", dto.price),
+                new Product("P-2", "Steel Chair", dto.price)
+        );
+        mockFindByName(products, 4L, 2);
+
+        PageResponseDTO<ProductResponseDTO> result = productService.findByName("steel", pageRequest);
+
+        assertNotNull(result);
+        assertEquals(2, result.content.size());
+        assertEquals(4L, result.totalElements);
+        assertEquals(2, result.totalPages);
+        assertEquals(1, result.page);
+        assertEquals(2, result.size);
+    }
+
+    @Test
+    void findByName_shouldReturnEmptyPage_whenNameIsBlank() {
+        PageRequestDTO pageRequest = new PageRequestDTO(1, 2, "name", "asc");
+
+        PageResponseDTO<ProductResponseDTO> result = productService.findByName("   ", pageRequest);
+
+        assertNotNull(result);
+        assertTrue(result.content.isEmpty());
+        assertEquals(0L, result.totalElements);
+        assertEquals(0, result.totalPages);
+        assertEquals(1, result.page);
+        assertEquals(2, result.size);
     }
 }

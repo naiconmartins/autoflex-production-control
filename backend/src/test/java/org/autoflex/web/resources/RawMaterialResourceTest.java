@@ -17,8 +17,10 @@ import java.util.List;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.CoreMatchers.is;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @QuarkusTest
@@ -33,7 +35,7 @@ public class RawMaterialResourceTest {
                 .contentType(ContentType.JSON)
                 .body(RawMaterialFactory.createRawMaterialRequestDTO())
                 .when()
-                .post("/raw-material")
+                .post("/raw-materials")
                 .then()
                 .statusCode(401);
     }
@@ -50,10 +52,10 @@ public class RawMaterialResourceTest {
                 .contentType(ContentType.JSON)
                 .body(request)
                 .when()
-                .post("/raw-material")
+                .post("/raw-materials")
                 .then()
                 .statusCode(201)
-                .header("Location", org.hamcrest.Matchers.containsString("/raw-material/1"))
+                .header("Location", org.hamcrest.Matchers.containsString("/raw-materials/1"))
                 .body("code", is("RAW001"));
     }
 
@@ -66,7 +68,7 @@ public class RawMaterialResourceTest {
                 .contentType(ContentType.JSON)
                 .body(invalidRequest)
                 .when()
-                .post("/raw-material")
+                .post("/raw-materials")
                 .then()
                 .statusCode(422);
     }
@@ -80,9 +82,20 @@ public class RawMaterialResourceTest {
                 .contentType(ContentType.JSON)
                 .body(RawMaterialFactory.createRawMaterialRequestDTO())
                 .when()
-                .post("/raw-material")
+                .post("/raw-materials")
                 .then()
                 .statusCode(409);
+    }
+
+    @Test
+    void update_shouldReturn401_whenUserIsNotAuthenticated() {
+        given()
+                .contentType(ContentType.JSON)
+                .body(RawMaterialFactory.createRawMaterialRequestDTO())
+                .when()
+                .put("/raw-materials/{id}", 1L)
+                .then()
+                .statusCode(401);
     }
 
     @Test
@@ -94,9 +107,23 @@ public class RawMaterialResourceTest {
                 .contentType(ContentType.JSON)
                 .body(RawMaterialFactory.createRawMaterialRequestDTO())
                 .when()
-                .put("/raw-material/99")
+                .put("/raw-materials/99")
                 .then()
                 .statusCode(404);
+    }
+
+    @Test
+    @TestSecurity(user = "user", roles = "USER")
+    void update_shouldReturn422_whenDataIsInvalid() {
+        RawMaterialRequestDTO invalidRequest = new RawMaterialRequestDTO("", "", null);
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(invalidRequest)
+                .when()
+                .put("/raw-materials/{id}", 1L)
+                .then()
+                .statusCode(422);
     }
 
     @Test
@@ -112,11 +139,13 @@ public class RawMaterialResourceTest {
                 .contentType(ContentType.JSON)
                 .body(request)
                 .when()
-                .put("/raw-material/{id}", id)
+                .put("/raw-materials/{id}", id)
                 .then()
                 .statusCode(200)
                 .body("id", is(1))
                 .body("name", is(response.getName()));
+
+        verify(rawMaterialService).update(eq(id), any(RawMaterialRequestDTO.class));
     }
 
     @Test
@@ -132,9 +161,18 @@ public class RawMaterialResourceTest {
                 .contentType(ContentType.JSON)
                 .body(request)
                 .when()
-                .put("/raw-material/{id}", id)
+                .put("/raw-materials/{id}", id)
                 .then()
                 .statusCode(409);
+    }
+
+    @Test
+    void delete_shouldReturn401_whenUserIsNotAuthenticated() {
+        given()
+                .when()
+                .delete("/raw-materials/{id}", 1L)
+                .then()
+                .statusCode(401);
     }
 
     @Test
@@ -142,7 +180,7 @@ public class RawMaterialResourceTest {
     void delete_shouldReturn403_whenUserIsNotAdmin() {
         given()
                 .when()
-                .delete("/raw-material/1")
+                .delete("/raw-materials/1")
                 .then()
                 .statusCode(403);
     }
@@ -152,9 +190,11 @@ public class RawMaterialResourceTest {
     void delete_shouldReturn204_whenIdExists() {
         given()
                 .when()
-                .delete("/raw-material/1")
+                .delete("/raw-materials/1")
                 .then()
                 .statusCode(204);
+
+        verify(rawMaterialService).delete(1L);
     }
 
     @Test
@@ -165,7 +205,7 @@ public class RawMaterialResourceTest {
 
         given()
                 .when()
-                .delete("/raw-material/1")
+                .delete("/raw-materials/1")
                 .then()
                 .statusCode(400);
     }
@@ -180,9 +220,18 @@ public class RawMaterialResourceTest {
 
         given()
                 .when()
-                .delete("/raw-material/{id}", invalidId)
+                .delete("/raw-materials/{id}", invalidId)
                 .then()
                 .statusCode(404);
+    }
+
+    @Test
+    void findById_shouldReturn401_whenUserIsNotAuthenticated() {
+        given()
+                .when()
+                .get("/raw-materials/{id}", 1L)
+                .then()
+                .statusCode(401);
     }
 
     @Test
@@ -193,10 +242,12 @@ public class RawMaterialResourceTest {
 
         given()
                 .when()
-                .get("/raw-material/1")
+                .get("/raw-materials/1")
                 .then()
                 .statusCode(200)
                 .body("code", is("RAW001"));
+
+        verify(rawMaterialService).findById(1L);
     }
 
     @Test
@@ -209,9 +260,18 @@ public class RawMaterialResourceTest {
 
         given()
                 .when()
-                .get("/raw-material/{id}", invalidId)
+                .get("/raw-materials/{id}", invalidId)
                 .then()
                 .statusCode(404);
+    }
+
+    @Test
+    void findAll_shouldReturn401_whenUserIsNotAuthenticated() {
+        given()
+                .when()
+                .get("/raw-materials")
+                .then()
+                .statusCode(401);
     }
 
     @Test
@@ -228,11 +288,95 @@ public class RawMaterialResourceTest {
                 .queryParam("page", 0)
                 .queryParam("size", 10)
                 .when()
-                .get("/raw-material")
+                .get("/raw-materials")
                 .then()
                 .statusCode(200)
                 .body("totalElements", is(1))
                 .body("content[0].code", is("RAW001"));
+    }
+
+    @Test
+    @TestSecurity(user = "user", roles = "USER")
+    void findAll_shouldBindQueryParams_whenProvided() {
+        RawMaterialResponseDTO r1 = RawMaterialFactory.createRawMaterialResponseDTO();
+        PageResponseDTO<RawMaterialResponseDTO> pageResponse = new PageResponseDTO<>(
+                List.of(r1), 1L, 1, 1, 5
+        );
+
+        when(rawMaterialService.findAll(any(PageRequestDTO.class))).thenReturn(pageResponse);
+
+        given()
+                .queryParam("page", 1)
+                .queryParam("size", 5)
+                .queryParam("sort", "code")
+                .queryParam("dir", "desc")
+                .when()
+                .get("/raw-materials")
+                .then()
+                .statusCode(200)
+                .body("page", is(1))
+                .body("size", is(5));
+
+        verify(rawMaterialService).findAll(argThat(dto ->
+                dto.page == 1 && dto.size == 5 && "code".equals(dto.sortBy) && "desc".equals(dto.direction)
+        ));
+    }
+
+    @Test
+    void findByName_shouldReturn401_whenUserIsNotAuthenticated() {
+        given()
+                .queryParam("name", "steel")
+                .when()
+                .get("/raw-materials/search")
+                .then()
+                .statusCode(401);
+    }
+
+    @Test
+    @TestSecurity(user = "user", roles = "USER")
+    void findByName_shouldReturn200AndResults_whenNameProvided() {
+        RawMaterialResponseDTO r1 = RawMaterialFactory.createRawMaterialResponseDTO();
+        PageResponseDTO<RawMaterialResponseDTO> pageResponse = new PageResponseDTO<>(
+                List.of(r1), 1L, 1, 1, 5
+        );
+        when(rawMaterialService.findByName(eq("steel"), any(PageRequestDTO.class))).thenReturn(pageResponse);
+
+        given()
+                .queryParam("name", "steel")
+                .queryParam("page", 1)
+                .queryParam("size", 5)
+                .queryParam("sort", "code")
+                .queryParam("dir", "desc")
+                .when()
+                .get("/raw-materials/search")
+                .then()
+                .statusCode(200)
+                .body("totalElements", is(1))
+                .body("content[0].code", is("RAW001"));
+
+        verify(rawMaterialService).findByName(eq("steel"), argThat(dto ->
+                dto.page == 1 && dto.size == 5 && "code".equals(dto.sortBy) && "desc".equals(dto.direction)
+        ));
+    }
+
+    @Test
+    @TestSecurity(user = "user", roles = "USER")
+    void findByName_shouldReturn200AndEmptyList_whenNameIsBlank() {
+        PageResponseDTO<RawMaterialResponseDTO> emptyPage = new PageResponseDTO<>(
+                List.of(), 0L, 0, 0, 10
+        );
+        when(rawMaterialService.findByName(eq("   "), any(PageRequestDTO.class))).thenReturn(emptyPage);
+
+        given()
+                .queryParam("name", "   ")
+                .when()
+                .get("/raw-materials/search")
+                .then()
+                .statusCode(200)
+                .body("content.size()", is(0))
+                .body("totalElements", is(0));
+
+        verify(rawMaterialService).findByName(eq("   "), any(PageRequestDTO.class));
     }
 
 }

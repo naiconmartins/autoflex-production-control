@@ -10,7 +10,7 @@ import jakarta.ws.rs.core.UriBuilder;
 import org.autoflex.application.services.RawMaterialService;
 import org.autoflex.web.dto.*;
 
-@Path("/raw-material")
+@Path("/raw-materials")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class RawMaterialResource {
@@ -22,7 +22,7 @@ public class RawMaterialResource {
     public Response insert(@Valid RawMaterialRequestDTO dto) {
         RawMaterialResponseDTO created = rawMaterialService.insert(dto);
 
-        var location = UriBuilder.fromPath("/raw-material/{id}")
+        var location = UriBuilder.fromPath("/raw-materials/{id}")
                 .build(created.getId());
 
         return Response.created(location).entity(created).build();
@@ -48,6 +48,13 @@ public class RawMaterialResource {
     @RolesAllowed({"ADMIN", "USER"})
     public PageResponseDTO<RawMaterialResponseDTO> findAll(@BeanParam PageRequestDTO dto) {
         return rawMaterialService.findAll(dto);
+    }
+
+    @GET
+    @Path("/search")
+    @RolesAllowed({"ADMIN", "USER"})
+    public PageResponseDTO<RawMaterialResponseDTO> findByName(@QueryParam("name") String name, @BeanParam PageRequestDTO dto) {
+        return rawMaterialService.findByName(name, dto);
     }
 
     @GET

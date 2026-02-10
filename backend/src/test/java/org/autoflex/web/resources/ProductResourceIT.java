@@ -38,7 +38,7 @@ public class ProductResourceIT {
                 .contentType(ContentType.JSON)
                 .body(request)
                 .when()
-                .post("/product")
+                .post("/products")
                 .then()
                 .statusCode(201)
                 .body("id", notNullValue())
@@ -54,7 +54,7 @@ public class ProductResourceIT {
         given()
                 .pathParam("id", 5)
                 .when()
-                .get("/product/{id}")
+                .get("/products/{id}")
                 .then()
                 .statusCode(200)
                 .body("code", is(ANOTHER_EXISTING_CODE));
@@ -73,7 +73,7 @@ public class ProductResourceIT {
                 .body(request)
                 .pathParam("id", 1)
                 .when()
-                .put("/product/{id}")
+                .put("/products/{id}")
                 .then()
                 .statusCode(200)
                 .body("name", is("Updated Name"))
@@ -91,7 +91,7 @@ public class ProductResourceIT {
                 .contentType(ContentType.JSON)
                 .body(request)
                 .when()
-                .post("/product")
+                .post("/products")
                 .then()
                 .statusCode(409);
     }
@@ -108,7 +108,7 @@ public class ProductResourceIT {
                 .body(request)
                 .pathParam("id", 1)
                 .when()
-                .put("/product/{id}")
+                .put("/products/{id}")
                 .then()
                 .statusCode(409);
     }
@@ -120,14 +120,14 @@ public class ProductResourceIT {
         given()
                 .pathParam("id", databaseProductId)
                 .when()
-                .delete("/product/{id}")
+                .delete("/products/{id}")
                 .then()
                 .statusCode(204);
 
         given()
                 .pathParam("id", databaseProductId)
                 .when()
-                .get("/product/{id}")
+                .get("/products/{id}")
                 .then()
                 .statusCode(404);
     }
@@ -141,7 +141,7 @@ public class ProductResourceIT {
                 .contentType(ContentType.JSON)
                 .body(invalidRequest)
                 .when()
-                .post("/product")
+                .post("/products")
                 .then()
                 .statusCode(422);
     }
@@ -156,7 +156,7 @@ public class ProductResourceIT {
                 .body(request)
                 .pathParam("id", 9999L)
                 .when()
-                .put("/product/{id}")
+                .put("/products/{id}")
                 .then()
                 .statusCode(404);
     }
@@ -171,7 +171,7 @@ public class ProductResourceIT {
                 .contentType(ContentType.JSON)
                 .body(request)
                 .when()
-                .post("/product")
+                .post("/products")
                 .then()
                 .statusCode(404);
     }
@@ -182,7 +182,7 @@ public class ProductResourceIT {
         given()
                 .pathParam("id", 1L)
                 .when()
-                .delete("/product/{id}")
+                .delete("/products/{id}")
                 .then()
                 .statusCode(403);
     }
@@ -194,7 +194,7 @@ public class ProductResourceIT {
                 .queryParam("page", 0)
                 .queryParam("size", 5)
                 .when()
-                .get("/product")
+                .get("/products")
                 .then()
                 .statusCode(200)
                 .body("content", notNullValue());

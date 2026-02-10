@@ -4,6 +4,7 @@ import io.quarkus.hibernate.orm.panache.PanacheQuery;
 import io.quarkus.panache.common.Page;
 import io.quarkus.panache.common.Sort;
 import io.quarkus.panache.mock.PanacheMock;
+import io.quarkus.test.InjectMock;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
@@ -19,12 +20,13 @@ import org.autoflex.web.exceptions.DatabaseException;
 import org.autoflex.web.exceptions.ResourceNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @QuarkusTest
@@ -32,6 +34,9 @@ public class RawMaterialServiceTest {
 
     @Inject
     RawMaterialService rawMaterialService;
+
+    @InjectMock
+    EntityManager entityManager;
 
     private RawMaterialRequestDTO dto;
     private RawMaterial existingRawMaterial;
@@ -44,16 +49,14 @@ public class RawMaterialServiceTest {
         existingRawMaterial = RawMaterialFactory.createRawMaterialWithCode(dto.code);
 
         PanacheMock.mock(RawMaterial.class);
-
-        EntityManager mockEm = mock(EntityManager.class);
-        when(RawMaterial.getEntityManager()).thenReturn(mockEm);
+        when(RawMaterial.getEntityManager()).thenReturn(entityManager);
     }
 
     private void mockFindByCode(RawMaterial result) {
-        PanacheQuery mockQuery = mock(PanacheQuery.class);
-        when(mockQuery.firstResultOptional()).thenReturn(Optional.ofNullable(result));
-        when(mockQuery.firstResult()).thenReturn(result);
-        when(RawMaterial.find("code", dto.code)).thenReturn(mockQuery);
+        PanacheQuery<RawMaterial> mockQuery = mock(PanacheQuery.class);
+        doReturn(Optional.ofNullable(result)).when(mockQuery).firstResultOptional();
+        doReturn(result).when(mockQuery).firstResult();
+        PanacheMock.doReturn(mockQuery).when(RawMaterial.class).find(eq("code"), any(Object[].class));
     }
 
     private void mockFindById(Long id, RawMaterial result) {
@@ -86,11 +89,12 @@ public class RawMaterialServiceTest {
     @Test
     void insert_shouldCreateRawMaterial_whenValidRequest() {
         mockFindByCode(null);
-        doNothing().when(PanacheMock.getMock(RawMaterial.class)).persist();
+        doNothing().when(entityManager).persist(any(RawMaterial.class));
 
         RawMaterialResponseDTO result = rawMaterialService.insert(dto);
 
         assertRawMaterialEquals(result, dto);
+        verify(entityManager, times(1)).persist(any(RawMaterial.class));
     }
 
     @Test
@@ -98,6 +102,7 @@ public class RawMaterialServiceTest {
         mockFindByCode(existingRawMaterial);
 
         assertThrows(ConflictException.class, () -> rawMaterialService.insert(dto));
+        verify(entityManager, never()).persist(any());
     }
 
     @Test
@@ -154,8 +159,10 @@ public class RawMaterialServiceTest {
     void delete_shouldDeleteRawMaterial_whenValidId() {
         existingRawMaterial.setId(id);
         mockFindById(id, existingRawMaterial);
+        when(PanacheMock.getMock(RawMaterial.class).deleteById(id)).thenReturn(true);
 
         assertDoesNotThrow(() -> rawMaterialService.delete(id));
+        verify(entityManager, times(1)).flush();
     }
 
     @Test
@@ -167,12 +174,11 @@ public class RawMaterialServiceTest {
     }
 
     @Test
-    @SuppressWarnings("static-access")
     void delete_shouldThrowDatabaseException_whenEntityIsReferenced() {
         existingRawMaterial.setId(id);
         mockFindById(id, existingRawMaterial);
 
-        Mockito.doThrow(new PersistenceException("Constraint violation"))
+        doThrow(new PersistenceException("Constraint violation"))
                 .when(PanacheMock.getMock(RawMaterial.class))
                 .deleteById(id);
 
@@ -181,6 +187,7 @@ public class RawMaterialServiceTest {
 
         assertEquals("Cannot delete raw material because it is referenced by other records",
                 exception.getMessage());
+        verify(entityManager, never()).flush();
     }
 
     @Test
@@ -279,5 +286,60 @@ public class RawMaterialServiceTest {
         assertEquals(3, result.totalPages);
         assertEquals(1, result.page);
         assertEquals(2, result.size);
+    }
+
+    private void mockFindByName(List<RawMaterial> results, long count, int pageCount) {
+        PanacheQuery<RawMaterial> mockQuery = mockPanacheQuery(results, count, pageCount);
+        PanacheMock.doReturn(mockQuery).when(RawMaterial.class).find(
+                eq("lower(name) like concat('%', lower(?1), '%')"),
+                any(Sort.class),
+                any(Object[].class)
+        );
+    }
+
+    @Test
+    void findByName_shouldReturnMatches_whenNameFragmentProvided() {
+        PageRequestDTO pageRequest = new PageRequestDTO(0, 10, "name", "asc");
+
+        RawMaterial m1 = new RawMaterial("RM-1", "Steel Sheet", dto.stockQuantity);
+        RawMaterial m2 = new RawMaterial("RM-2", "Stainless Steel", dto.stockQuantity);
+        RawMaterial m3 = new RawMaterial("RM-3", "Aluminum", dto.stockQuantity);
+
+        mockFindByName(List.of(m1, m2), 2L, 1);
+
+        PageResponseDTO<RawMaterialResponseDTO> result = rawMaterialService.findByName("steel", pageRequest);
+
+        assertNotNull(result);
+        assertEquals(2, result.content.size());
+        assertEquals(2L, result.totalElements);
+        assertEquals(1, result.totalPages);
+        assertEquals("RM-1", result.content.get(0).code);
+        assertEquals("RM-2", result.content.get(1).code);
+    }
+
+    @Test
+    void findByName_shouldBeCaseInsensitive() {
+        PageRequestDTO pageRequest = new PageRequestDTO(0, 10, "name", "asc");
+
+        RawMaterial m1 = new RawMaterial("RM-1", "Steel Sheet", dto.stockQuantity);
+        mockFindByName(List.of(m1), 1L, 1);
+
+        PageResponseDTO<RawMaterialResponseDTO> result = rawMaterialService.findByName("StEeL", pageRequest);
+
+        assertEquals(1, result.content.size());
+        assertEquals("RM-1", result.content.getFirst().code);
+    }
+
+    @Test
+    void findByName_shouldReturnEmptyList_whenNameIsBlank() {
+        PageRequestDTO pageRequest = new PageRequestDTO(1, 5, "name", "asc");
+        PageResponseDTO<RawMaterialResponseDTO> result = rawMaterialService.findByName("   ", pageRequest);
+
+        assertNotNull(result);
+        assertTrue(result.content.isEmpty());
+        assertEquals(0L, result.totalElements);
+        assertEquals(0, result.totalPages);
+        assertEquals(1, result.page);
+        assertEquals(5, result.size);
     }
 }

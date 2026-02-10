@@ -19,8 +19,10 @@ import java.util.List;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.CoreMatchers.is;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @QuarkusTest
@@ -37,7 +39,7 @@ public class ProductResourceTest {
                 .contentType(ContentType.JSON)
                 .body(request)
                 .when()
-                .post("/product")
+                .post("/products")
                 .then()
                 .statusCode(401);
     }
@@ -54,10 +56,10 @@ public class ProductResourceTest {
                 .contentType(ContentType.JSON)
                 .body(request)
                 .when()
-                .post("/product")
+                .post("/products")
                 .then()
                 .statusCode(201)
-                .header("Location", org.hamcrest.Matchers.containsString("/product/1"))
+                .header("Location", org.hamcrest.Matchers.containsString("/products/1"))
                 .body("code", is("PROD001"));
     }
 
@@ -70,7 +72,7 @@ public class ProductResourceTest {
                 .contentType(ContentType.JSON)
                 .body(request)
                 .when()
-                .post("/product")
+                .post("/products")
                 .then()
                 .statusCode(422);
     }
@@ -86,7 +88,7 @@ public class ProductResourceTest {
                 .contentType(ContentType.JSON)
                 .body(request)
                 .when()
-                .post("/product")
+                .post("/products")
                 .then()
                 .statusCode(422);
     }
@@ -103,7 +105,7 @@ public class ProductResourceTest {
                 .contentType(ContentType.JSON)
                 .body(request)
                 .when()
-                .post("/product")
+                .post("/products")
                 .then()
                 .statusCode(409);
     }
@@ -120,7 +122,7 @@ public class ProductResourceTest {
                 .contentType(ContentType.JSON)
                 .body(request)
                 .when()
-                .post("/product")
+                .post("/products")
                 .then()
                 .statusCode(404);
     }
@@ -138,7 +140,7 @@ public class ProductResourceTest {
                 .contentType(ContentType.JSON)
                 .body(request)
                 .when()
-                .put("/product/{id}", id)
+                .put("/products/{id}", id)
                 .then()
                 .statusCode(200)
                 .body("id", is(1))
@@ -158,7 +160,7 @@ public class ProductResourceTest {
                 .contentType(ContentType.JSON)
                 .body(request)
                 .when()
-                .put("/product/{id}", id)
+                .put("/products/{id}", id)
                 .then()
                 .statusCode(409);
     }
@@ -176,7 +178,7 @@ public class ProductResourceTest {
                 .contentType(ContentType.JSON)
                 .body(request)
                 .when()
-                .put("/product/{id}", id)
+                .put("/products/{id}", id)
                 .then()
                 .statusCode(404);
     }
@@ -194,7 +196,7 @@ public class ProductResourceTest {
                 .contentType(ContentType.JSON)
                 .body(request)
                 .when()
-                .put("/product/{id}", invalidId)
+                .put("/products/{id}", invalidId)
                 .then()
                 .statusCode(404);
     }
@@ -206,7 +208,7 @@ public class ProductResourceTest {
 
         given()
                 .when()
-                .delete("/product/{id}", id)
+                .delete("/products/{id}", id)
                 .then()
                 .statusCode(204);
     }
@@ -216,7 +218,7 @@ public class ProductResourceTest {
     void delete_shouldReturn403_whenUserIsNotAdmin() {
         given()
                 .when()
-                .delete("/product/1")
+                .delete("/products/1")
                 .then()
                 .statusCode(403);
     }
@@ -231,7 +233,7 @@ public class ProductResourceTest {
 
         given()
                 .when()
-                .delete("/product/{id}", id)
+                .delete("/products/{id}", id)
                 .then()
                 .statusCode(400);
     }
@@ -246,7 +248,7 @@ public class ProductResourceTest {
 
         given()
                 .when()
-                .get("/product/{id}", id)
+                .get("/products/{id}", id)
                 .then()
                 .statusCode(200)
                 .body("id", is(1))
@@ -263,7 +265,7 @@ public class ProductResourceTest {
 
         given()
                 .when()
-                .get("/product/{id}", invalidId)
+                .get("/products/{id}", invalidId)
                 .then()
                 .statusCode(404);
     }
@@ -282,13 +284,93 @@ public class ProductResourceTest {
         given()
                 .queryParam("page", 0)
                 .queryParam("size", 10)
-                .queryParam("sortBy", "name")
-                .queryParam("direction", "asc")
+                .queryParam("sort", "name")
+                .queryParam("dir", "asc")
                 .when()
-                .get("/product")
+                .get("/products")
                 .then()
                 .statusCode(200)
                 .body("totalElements", is(1))
                 .body("content[0].code", is("PROD001"));
+    }
+
+    @Test
+    void update_shouldReturn401_whenUserIsNotAuthenticated() {
+        ProductRequestDTO request = ProductFactory.createProductRequestDTOWithRawMaterials();
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(request)
+                .when()
+                .put("/products/{id}", 1L)
+                .then()
+                .statusCode(401);
+    }
+
+    @Test
+    void delete_shouldReturn401_whenUserIsNotAuthenticated() {
+        given()
+                .when()
+                .delete("/products/{id}", 1L)
+                .then()
+                .statusCode(401);
+    }
+
+    @Test
+    void findById_shouldReturn401_whenUserIsNotAuthenticated() {
+        given()
+                .when()
+                .get("/products/{id}", 1L)
+                .then()
+                .statusCode(401);
+    }
+
+    @Test
+    void findAll_shouldReturn401_whenUserIsNotAuthenticated() {
+        given()
+                .when()
+                .get("/products")
+                .then()
+                .statusCode(401);
+    }
+
+    @Test
+    void findByName_shouldReturn401_whenUserIsNotAuthenticated() {
+        given()
+                .queryParam("name", "steel")
+                .when()
+                .get("/products/search")
+                .then()
+                .statusCode(401);
+    }
+
+    @Test
+    @TestSecurity(user = "user", roles = "USER")
+    void findByName_shouldReturnPagedResponse_whenCalled() {
+        ProductResponseDTO p1 = ProductFactory.createProductResponseDTOWithRawMaterials();
+        PageResponseDTO<ProductResponseDTO> pageResponse = new PageResponseDTO<>(
+                List.of(p1), 1L, 1, 1, 5
+        );
+
+        when(productService.findByName(eq("steel"), any(PageRequestDTO.class))).thenReturn(pageResponse);
+
+        given()
+                .queryParam("name", "steel")
+                .queryParam("page", 1)
+                .queryParam("size", 5)
+                .queryParam("sort", "name")
+                .queryParam("dir", "asc")
+                .when()
+                .get("/products/search")
+                .then()
+                .statusCode(200)
+                .body("totalElements", is(1))
+                .body("content[0].code", is("PROD001"))
+                .body("page", is(1))
+                .body("size", is(5));
+
+        verify(productService).findByName(eq("steel"), argThat(dto ->
+                dto.page == 1 && dto.size == 5 && "name".equals(dto.sortBy) && "asc".equals(dto.direction)
+        ));
     }
 }

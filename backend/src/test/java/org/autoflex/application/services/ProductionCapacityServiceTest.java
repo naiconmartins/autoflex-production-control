@@ -76,7 +76,7 @@ public class ProductionCapacityServiceTest {
 
         assertNotNull(result);
         assertEquals(1, result.items.size());
-        assertEquals(20, result.items.getFirst().producibleQuantity);
+        assertEquals(new BigDecimal("20"), result.items.getFirst().producibleQuantity);
     }
 
     @Test
@@ -96,7 +96,7 @@ public class ProductionCapacityServiceTest {
         ProductionPlanResponseDTO result = service.generate();
 
         assertEquals(1, result.items.size());
-        assertEquals(2, result.items.getFirst().producibleQuantity);
+        assertEquals(new BigDecimal("2"), result.items.getFirst().producibleQuantity);
     }
 
     @Test

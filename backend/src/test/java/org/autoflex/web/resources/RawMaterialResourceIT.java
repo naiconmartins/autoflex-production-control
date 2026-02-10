@@ -32,7 +32,7 @@ public class RawMaterialResourceIT {
                 .contentType(ContentType.JSON)
                 .body(request)
                 .when()
-                .post("/raw-material")
+                .post("/raw-materials")
                 .then()
                 .statusCode(201)
                 .body("id", notNullValue())
@@ -52,7 +52,7 @@ public class RawMaterialResourceIT {
                 .contentType(ContentType.JSON)
                 .body(request)
                 .when()
-                .post("/raw-material")
+                .post("/raw-materials")
                 .then()
                 .statusCode(409);
     }
@@ -68,7 +68,7 @@ public class RawMaterialResourceIT {
                 .body(updateRequest)
                 .pathParam("id", savedRawMaterialId)
                 .when()
-                .put("/raw-material/{id}")
+                .put("/raw-materials/{id}")
                 .then()
                 .statusCode(200)
                 .body("name", is("Updated Material"))
@@ -82,7 +82,7 @@ public class RawMaterialResourceIT {
         given()
                 .pathParam("id", savedRawMaterialId)
                 .when()
-                .get("/raw-material/{id}")
+                .get("/raw-materials/{id}")
                 .then()
                 .statusCode(200)
                 .body("id", is(savedRawMaterialId.intValue()))
@@ -99,7 +99,7 @@ public class RawMaterialResourceIT {
                 .contentType(ContentType.JSON)
                 .body(invalidRequest)
                 .when()
-                .post("/raw-material")
+                .post("/raw-materials")
                 .then()
                 .statusCode(422);
     }
@@ -111,7 +111,7 @@ public class RawMaterialResourceIT {
         given()
                 .pathParam("id", savedRawMaterialId)
                 .when()
-                .delete("/raw-material/{id}")
+                .delete("/raw-materials/{id}")
                 .then()
                 .statusCode(403);
     }
@@ -123,7 +123,7 @@ public class RawMaterialResourceIT {
         given()
                 .pathParam("id", 9999)
                 .when()
-                .get("/raw-material/{id}")
+                .get("/raw-materials/{id}")
                 .then()
                 .statusCode(404);
     }
@@ -135,7 +135,7 @@ public class RawMaterialResourceIT {
         Number idGen = given()
                 .contentType(ContentType.JSON)
                 .body(new RawMaterialRequestDTO("DELETE-OK", "Unlinked Material", BigDecimal.ONE))
-                .post("/raw-material")
+                .post("/raw-materials")
                 .then().statusCode(201).extract().path("id");
 
         Long rmId = idGen.longValue();
@@ -143,14 +143,14 @@ public class RawMaterialResourceIT {
         given()
                 .pathParam("id", rmId)
                 .when()
-                .delete("/raw-material/{id}")
+                .delete("/raw-materials/{id}")
                 .then()
                 .statusCode(204);
 
         given()
                 .pathParam("id", rmId)
                 .when()
-                .get("/raw-material/{id}")
+                .get("/raw-materials/{id}")
                 .then()
                 .statusCode(404);
     }
@@ -162,7 +162,7 @@ public class RawMaterialResourceIT {
         Number idGen = given()
                 .contentType(ContentType.JSON)
                 .body(new RawMaterialRequestDTO("FK-CONSTRAINT", "Linked Material", BigDecimal.TEN))
-                .post("/raw-material")
+                .post("/raw-materials")
                 .then().statusCode(201).extract().path("id");
 
         Long rmId = idGen.longValue();
@@ -174,13 +174,13 @@ public class RawMaterialResourceIT {
         given()
                 .contentType(ContentType.JSON)
                 .body(productRequest)
-                .post("/product")
+                .post("/products")
                 .then().statusCode(201);
 
         given()
                 .pathParam("id", rmId)
                 .when()
-                .delete("/raw-material/{id}")
+                .delete("/raw-materials/{id}")
                 .then()
                 .statusCode(400)
                 .body("error", containsString("Cannot delete raw material because it is referenced by other records"));
@@ -192,11 +192,11 @@ public class RawMaterialResourceIT {
     void update_shouldReturn409_whenCodeConflicts() {
         given().contentType(ContentType.JSON)
                 .body(new RawMaterialRequestDTO("CODE-A", "Material A", BigDecimal.ONE))
-                .post("/raw-material");
+                .post("/raw-materials");
 
         Integer idBInt = given().contentType(ContentType.JSON)
                 .body(new RawMaterialRequestDTO("CODE-B", "Material B", BigDecimal.ONE))
-                .post("/raw-material")
+                .post("/raw-materials")
                 .then()
                 .extract().path("id");
 
@@ -209,7 +209,7 @@ public class RawMaterialResourceIT {
                 .body(conflictRequest)
                 .pathParam("id", idB)
                 .when()
-                .put("/raw-material/{id}")
+                .put("/raw-materials/{id}")
                 .then()
                 .statusCode(409);
     }
@@ -225,7 +225,7 @@ public class RawMaterialResourceIT {
                 .body(request)
                 .pathParam("id", 99999)
                 .when()
-                .put("/raw-material/{id}")
+                .put("/raw-materials/{id}")
                 .then()
                 .statusCode(404);
     }
@@ -237,10 +237,10 @@ public class RawMaterialResourceIT {
         given()
                 .queryParam("page", 0)
                 .queryParam("size", 1)
-                .queryParam("sortBy", "name")
-                .queryParam("direction", "asc")
+                .queryParam("sort", "name")
+                .queryParam("dir", "asc")
                 .when()
-                .get("/raw-material")
+                .get("/raw-materials")
                 .then()
                 .statusCode(200)
                 .body("content", notNullValue())

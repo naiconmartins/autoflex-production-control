@@ -12,6 +12,7 @@ import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriBuilder;
@@ -60,6 +61,13 @@ public class ProductResource {
     @RolesAllowed({"ADMIN", "USER"})
     public PageResponseDTO<ProductResponseDTO> findAll(@BeanParam PageRequestDTO dto) {
         return productService.findAll(dto);
+    }
+
+    @GET
+    @Path("/search")
+    @RolesAllowed({"ADMIN", "USER"})
+    public PageResponseDTO<ProductResponseDTO> findByName(@QueryParam("name") String name, @BeanParam PageRequestDTO dto) {
+        return productService.findByName(name, dto);
     }
 
     @GET

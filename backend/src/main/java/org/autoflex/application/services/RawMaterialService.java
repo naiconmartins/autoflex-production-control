@@ -12,6 +12,8 @@ import org.autoflex.web.exceptions.ConflictException;
 import org.autoflex.web.exceptions.DatabaseException;
 import org.autoflex.web.exceptions.ResourceNotFoundException;
 
+import java.util.List;
+
 @ApplicationScoped
 public class RawMaterialService {
 
@@ -86,5 +88,34 @@ public class RawMaterialService {
         if (entity == null) throw new ResourceNotFoundException("Raw material with id " + id + " not found");
 
         return new RawMaterialResponseDTO(entity);
+    }
+
+    public PageResponseDTO<RawMaterialResponseDTO> findByName(String name, PageRequestDTO dto) {
+        String sortBy = (dto.sortBy == null || dto.sortBy.isBlank()) ? "name" : dto.sortBy;
+        String direction = (dto.direction == null || dto.direction.isBlank()) ? "asc" : dto.direction;
+        int page = Math.max(0, dto.page);
+        int size = dto.size <= 0 ? 10 : dto.size;
+
+        if (name == null || name.isBlank()) {
+            return new PageResponseDTO<>(List.of(), 0L, 0, page, size);
+        }
+
+        Sort sort = "desc".equalsIgnoreCase(direction)
+                ? Sort.by(sortBy).descending()
+                : Sort.by(sortBy).ascending();
+
+        PanacheQuery<RawMaterial> query = RawMaterial.find(
+                        "lower(name) like concat('%', lower(?1), '%')",
+                        sort,
+                        name
+                )
+                .page(Page.of(page, size));
+
+        return PageResponseDTO.of(
+                query,
+                query.list().stream().map(RawMaterialResponseDTO::new).toList(),
+                page,
+                size
+        );
     }
 }

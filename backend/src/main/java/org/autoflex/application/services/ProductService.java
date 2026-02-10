@@ -17,6 +17,8 @@ import org.autoflex.web.exceptions.ConflictException;
 import org.autoflex.web.exceptions.DatabaseException;
 import org.autoflex.web.exceptions.ResourceNotFoundException;
 
+import java.util.List;
+
 @ApplicationScoped
 public class ProductService {
 
@@ -27,6 +29,17 @@ public class ProductService {
         }
 
         Product product = new Product(dto.code, dto.name, dto.price);
+        if (dto.rawMaterials != null && !dto.rawMaterials.isEmpty()) {
+            for (var itemDto : dto.rawMaterials) {
+                RawMaterial rm = RawMaterial.findById(itemDto.id);
+                if (rm == null) {
+                    throw new ResourceNotFoundException("Raw Material not found with id: " + itemDto.id);
+                }
+
+                ProductRawMaterial association = new ProductRawMaterial(product, rm, itemDto.requiredQuantity);
+                product.addRawMaterial(association);
+            }
+        }
         product.persist();
 
         return new ProductResponseDTO(product);
@@ -101,5 +114,34 @@ public class ProductService {
             throw new ResourceNotFoundException("Product with id " + id + " not found");
         }
         return new ProductResponseDTO(entity);
+    }
+
+    public PageResponseDTO<ProductResponseDTO> findByName(String name, PageRequestDTO dto) {
+        String sortBy = (dto.sortBy == null || dto.sortBy.isBlank()) ? "name" : dto.sortBy;
+        String direction = (dto.direction == null || dto.direction.isBlank()) ? "asc" : dto.direction;
+        int page = Math.max(0, dto.page);
+        int size = dto.size <= 0 ? 10 : dto.size;
+
+        if (name == null || name.isBlank()) {
+            return new PageResponseDTO<>(List.of(), 0L, 0, page, size);
+        }
+
+        Sort sort = "desc".equalsIgnoreCase(direction)
+                ? Sort.by(sortBy).descending()
+                : Sort.by(sortBy).ascending();
+
+        PanacheQuery<Product> query = Product.find(
+                        "lower(name) like concat('%', lower(?1), '%')",
+                        sort,
+                        name
+                )
+                .page(Page.of(page, size));
+
+        return PageResponseDTO.of(
+                query,
+                query.list().stream().map(ProductResponseDTO::new).toList(),
+                page,
+                size
+        );
     }
 }
