@@ -28,11 +28,5 @@ EXPOSE 8080
 USER 1001
 
 ENV JAVA_OPTS="-Dquarkus.http.host=0.0.0.0 -Djava.util.logging.manager=org.jboss.logmanager.LogManager"
-ENV QUARKUS_PROFILE=dev
-ENV QUARKUS_HIBERNATE_ORM_SCHEMA_MANAGEMENT_STRATEGY=drop-and-create
-ENV QUARKUS_HIBERNATE_ORM_SQL_LOAD_SCRIPT=import.sql
-ENV QUARKUS_DATASOURCE_JDBC_URL=jdbc:postgresql://postgres:5432/autoflex
-ENV QUARKUS_DATASOURCE_USERNAME=autoflex
-ENV QUARKUS_DATASOURCE_PASSWORD=autoflex
 
 ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar /app/quarkus-run.jar"]
