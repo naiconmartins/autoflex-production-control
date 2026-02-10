@@ -33,25 +33,27 @@ export default function ProductPage() {
 
   return (
     <SidebarComponent user={user} link="Inventory" page="Products">
-      <section className="h-full p-6 bg-zinc-50">
-        <div className="flex flex-row items-center justify-between pb-6">
-          <h1 className="text-2xl font-semibold">Products</h1>
-          <InsertProductForm setLoading={setLoading} />
-        </div>
+      <main className="bg-zinc-50 flex-1 pb-10">
+        <section className="h-full p-6 bg-zinc-50">
+          <div className="flex flex-row items-center justify-between pb-6">
+            <h1 className="text-2xl font-semibold">Products</h1>
+            <InsertProductForm setLoading={setLoading} />
+          </div>
 
-        <div className="bg-white p-6 rounded-4xl">
-          <DataTable
-            data={items}
-            columns={columnsProducts}
-            page={pagination.page}
-            totalPages={pagination.totalPages}
-            onPagination={handlePageChange}
-            loading={loading}
-            placeholder="Filter products..."
-            column="name"
-          />
-        </div>
-      </section>
+          <div className="bg-white p-6 rounded-4xl">
+            <DataTable
+              data={items}
+              columns={columnsProducts}
+              page={pagination.page}
+              totalPages={pagination.totalPages}
+              onPagination={handlePageChange}
+              loading={loading}
+              placeholder="Filter products..."
+              column="name"
+            />
+          </div>
+        </section>
+      </main>
     </SidebarComponent>
   );
 }

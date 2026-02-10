@@ -21,12 +21,7 @@ export default function KPICard({
   variant = "default",
   delay = 0,
 }: KPICardProps) {
-  const cardVariant =
-    variant === "primary"
-      ? "bg-primary text-white"
-      : variant === "accent"
-        ? "border-accent/30 bg-card shadow-[0_0_0_1px_oklch(var(--accent)/0.2)]"
-        : "border-border bg-card";
+  const cardVariant = variant === "primary" ? "bg-primary text-white" : null;
 
   const textVariant = variant === "primary" ? "text-white" : null;
 

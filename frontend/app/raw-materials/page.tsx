@@ -33,25 +33,27 @@ export default function RawMaterialsPage() {
 
   return (
     <SidebarComponent user={user} link="Inventory" page="Raw Materials">
-      <section className="h-full p-6 bg-zinc-50">
-        <div className="flex flex-row items-center justify-between pb-6">
-          <h1 className="text-2xl font-semibold">Raw Materials</h1>
-          <CreateRawMaterilForm setLoading={setLoading} />
-        </div>
+      <main className="bg-zinc-50 flex-1 pb-10">
+        <section className="h-full p-6 bg-zinc-50">
+          <div className="flex flex-row items-center justify-between pb-6">
+            <h1 className="text-2xl font-semibold">Raw Materials</h1>
+            <CreateRawMaterilForm setLoading={setLoading} />
+          </div>
 
-        <div className="bg-white p-6 rounded-4xl">
-          <DataTable
-            data={items}
-            columns={columns}
-            page={pagination.page}
-            totalPages={pagination.totalPages}
-            onPagination={handlePageChange}
-            loading={loading}
-            placeholder="Filter raw materials..."
-            column="name"
-          />
-        </div>
-      </section>
+          <div className="bg-white p-6 rounded-4xl">
+            <DataTable
+              data={items}
+              columns={columns}
+              page={pagination.page}
+              totalPages={pagination.totalPages}
+              onPagination={handlePageChange}
+              loading={loading}
+              placeholder="Filter raw materials..."
+              column="name"
+            />
+          </div>
+        </section>
+      </main>
     </SidebarComponent>
   );
 }
