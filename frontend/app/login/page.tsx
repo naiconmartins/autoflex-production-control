@@ -22,8 +22,15 @@ export default function LoginPage() {
         </div>
 
         <div className="flex flex-1 items-center justify-center">
-          <div data-cy="login-form-container" className="w-full max-w-xs">
+          <div data-cy="login-form-container" className="w-full max-w-xs space-y-2">
             <LoginForm />
+            <p
+              data-cy="login-credentials-hint"
+              className="text-xs leading-4 text-muted-foreground"
+            >
+              Demo access: <strong>adm@autoflex.com</strong> /{" "}
+              <strong>adm</strong>
+            </p>
           </div>
         </div>
       </div>
