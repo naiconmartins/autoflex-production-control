@@ -2,20 +2,26 @@ package org.autoflex.application.services;
 
 import io.quarkus.test.InjectMock;
 import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.security.identity.SecurityIdentity;
 import jakarta.inject.Inject;
 import org.autoflex.application.security.PasswordService;
 import org.autoflex.domain.entities.User;
+import org.autoflex.domain.enums.UserRole;
 import org.autoflex.factory.UserFactory;
 import org.autoflex.web.dto.UserRequestDTO;
 import org.autoflex.web.dto.UserResponseDTO;
 import org.autoflex.web.exceptions.ConflictException;
 import org.autoflex.web.exceptions.InvalidDataException;
+import org.autoflex.web.exceptions.ResourceNotFoundException;
+import org.autoflex.web.exceptions.UnauthorizedException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
+import java.security.Principal;
+import java.time.Instant;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -29,6 +35,8 @@ public class UserServiceTest {
     UserService userService;
     @InjectMock
     PasswordService passwordService;
+    @InjectMock
+    SecurityIdentity securityIdentity;
 
     private UserRequestDTO requestDto;
     private MockedStatic<User> userMockedStatic;
@@ -99,5 +107,70 @@ public class UserServiceTest {
         assertThrows(InvalidDataException.class, () -> {
             userService.insert(dto);
         });
+    }
+
+    @Test
+    void getCurrentUser_shouldThrowUnauthorizedException_whenAnonymous() {
+        when(securityIdentity.isAnonymous()).thenReturn(true);
+
+        UnauthorizedException ex = assertThrows(UnauthorizedException.class, () -> userService.getCurrentUser());
+        assertEquals("User is not authenticated", ex.getMessage());
+    }
+
+    @Test
+    void getCurrentUser_shouldThrowResourceNotFoundException_whenUserDoesNotExist() {
+        String email = "missing@autoflex.org";
+        when(securityIdentity.isAnonymous()).thenReturn(false);
+        when(securityIdentity.getPrincipal()).thenReturn((Principal) () -> email);
+        userMockedStatic.when(() -> User.findByEmail(email)).thenReturn(Optional.empty());
+
+        ResourceNotFoundException ex = assertThrows(ResourceNotFoundException.class, () -> userService.getCurrentUser());
+        assertEquals("User not found", ex.getMessage());
+    }
+
+    @Test
+    void getCurrentUser_shouldThrowUnauthorizedException_whenUserIsInactive() {
+        String email = "inactive@autoflex.org";
+        when(securityIdentity.isAnonymous()).thenReturn(false);
+        when(securityIdentity.getPrincipal()).thenReturn((Principal) () -> email);
+
+        User user = new User();
+        user.setId(1L);
+        user.setEmail(email);
+        user.setFirstName("Inactive");
+        user.setLastName("User");
+        user.addRole(UserRole.USER);
+        user.setActive(false);
+        user.setCreatedAt(Instant.now());
+
+        userMockedStatic.when(() -> User.findByEmail(email)).thenReturn(Optional.of(user));
+
+        UnauthorizedException ex = assertThrows(UnauthorizedException.class, () -> userService.getCurrentUser());
+        assertEquals("User is not active", ex.getMessage());
+    }
+
+    @Test
+    void getCurrentUser_shouldReturnUserResponse_whenAuthenticatedAndActive() {
+        String email = "current@autoflex.org";
+        when(securityIdentity.isAnonymous()).thenReturn(false);
+        when(securityIdentity.getPrincipal()).thenReturn((Principal) () -> email);
+
+        User user = new User();
+        user.setId(10L);
+        user.setEmail(email);
+        user.setFirstName("Current");
+        user.setLastName("User");
+        user.addRole(UserRole.USER);
+        user.setActive(true);
+        user.setCreatedAt(Instant.now());
+
+        userMockedStatic.when(() -> User.findByEmail(email)).thenReturn(Optional.of(user));
+
+        UserResponseDTO result = userService.getCurrentUser();
+
+        assertNotNull(result);
+        assertEquals(email, result.email);
+        assertTrue(result.active);
+        assertTrue(result.roles.contains("USER"));
     }
 }

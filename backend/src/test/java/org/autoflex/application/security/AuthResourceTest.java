@@ -11,6 +11,8 @@ import org.junit.jupiter.api.Test;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.CoreMatchers.is;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @QuarkusTest
@@ -65,6 +67,8 @@ public class AuthResourceTest {
                 .post("/auth/login")
                 .then()
                 .statusCode(422);
+
+        verify(authService, never()).authenticate(any(LoginRequestDTO.class));
     }
 
     @Test
@@ -79,6 +83,8 @@ public class AuthResourceTest {
                 .then()
                 .statusCode(422)
                 .body("errors[0].message", is("Password is required"));
+
+        verify(authService, never()).authenticate(any(LoginRequestDTO.class));
     }
 
     @Test
@@ -96,5 +102,35 @@ public class AuthResourceTest {
                 .then()
                 .statusCode(401)
                 .body("error", is("User is inactive"));
+    }
+
+    @Test
+    void login_shouldReturn422_whenEmailIsNull() {
+        LoginRequestDTO invalidRequest = new LoginRequestDTO(null, "1234");
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(invalidRequest)
+                .when()
+                .post("/auth/login")
+                .then()
+                .statusCode(422);
+
+        verify(authService, never()).authenticate(any(LoginRequestDTO.class));
+    }
+
+    @Test
+    void login_shouldReturn422_whenPasswordIsNull() {
+        LoginRequestDTO invalidRequest = new LoginRequestDTO("admin@autoflex.org", null);
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(invalidRequest)
+                .when()
+                .post("/auth/login")
+                .then()
+                .statusCode(422);
+
+        verify(authService, never()).authenticate(any(LoginRequestDTO.class));
     }
 }

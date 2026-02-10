@@ -84,4 +84,31 @@ public class TokenServiceTest {
         Assertions.assertEquals(EMAIL, claims1.getSubject());
         Assertions.assertEquals("another@autoflex.org", claims2.getSubject());
     }
+
+    @Test
+    void issue_shouldIncludeEmptyGroups_whenUserHasNoRoles() throws Exception {
+        Mockito.when(user.getRoles()).thenReturn(Set.of());
+
+        TokenService.TokenData tokenData = tokenService.issue(user);
+
+        JwtConsumer jwtConsumer = new JwtConsumerBuilder()
+                .setSkipSignatureVerification()
+                .setRequireSubject()
+                .build();
+
+        JwtClaims claims = jwtConsumer.processToClaims(tokenData.getToken());
+        Assertions.assertTrue(claims.getStringListClaimValue("groups").isEmpty());
+    }
+
+    @Test
+    void issue_shouldThrowNullPointerException_whenUserIsNull() {
+        Assertions.assertThrows(NullPointerException.class, () -> tokenService.issue(null));
+    }
+
+    @Test
+    void issue_shouldThrowNullPointerException_whenRolesAreNull() {
+        Mockito.when(user.getRoles()).thenReturn(null);
+
+        Assertions.assertThrows(NullPointerException.class, () -> tokenService.issue(user));
+    }
 }

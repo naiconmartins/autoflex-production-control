@@ -3,6 +3,8 @@ package org.autoflex.web.resources;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.security.TestSecurity;
 import io.restassured.http.ContentType;
+import org.autoflex.factory.RawMaterialFactory;
+import org.autoflex.factory.TestData;
 import org.autoflex.web.dto.ProductRawMaterialRequestDTO;
 import org.autoflex.web.dto.ProductRequestDTO;
 import org.autoflex.web.dto.RawMaterialRequestDTO;
@@ -43,6 +45,22 @@ public class RawMaterialResourceIT {
     }
 
     @Test
+    @TestSecurity(user = "user", roles = "USER")
+    void insert_shouldReturn201_whenUserRoleIsUser() {
+        RawMaterialRequestDTO request = RawMaterialFactory.createUniqueRawMaterialRequestDTO();
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(request)
+                .when()
+                .post("/raw-materials")
+                .then()
+                .statusCode(201)
+                .body("id", notNullValue())
+                .body("code", is(request.code));
+    }
+
+    @Test
     @Order(2)
     @TestSecurity(user = "admin", roles = "ADMIN")
     void insert_shouldReturn409_whenCodeAlreadyExists() {
@@ -73,6 +91,30 @@ public class RawMaterialResourceIT {
                 .statusCode(200)
                 .body("name", is("Updated Material"))
                 .body("stockQuantity", is(150.0f));
+    }
+
+    @Test
+    @TestSecurity(user = "admin", roles = "ADMIN")
+    void update_shouldReturn200_whenDataIsValidForAdminRole() {
+        Number idGen = given()
+                .contentType(ContentType.JSON)
+                .body(RawMaterialFactory.createUniqueRawMaterialRequestDTO())
+                .post("/raw-materials")
+                .then().statusCode(201).extract().path("id");
+
+        Long rmId = idGen.longValue();
+        RawMaterialRequestDTO updateRequest = new RawMaterialRequestDTO(TestData.unique("RM-UPD-ADM"), "Updated By Admin", new BigDecimal("200.0"));
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(updateRequest)
+                .pathParam("id", rmId)
+                .when()
+                .put("/raw-materials/{id}")
+                .then()
+                .statusCode(200)
+                .body("name", is("Updated By Admin"))
+                .body("code", is(updateRequest.code));
     }
 
     @Test
@@ -159,16 +201,17 @@ public class RawMaterialResourceIT {
     @Order(9)
     @TestSecurity(user = "admin", roles = "ADMIN")
     void delete_shouldReturn400_whenConstraintViolationOccurs() {
+        String code = TestData.unique("FK-CONSTRAINT");
         Number idGen = given()
                 .contentType(ContentType.JSON)
-                .body(new RawMaterialRequestDTO("FK-CONSTRAINT", "Linked Material", BigDecimal.TEN))
+                .body(new RawMaterialRequestDTO(code, "Linked Material", BigDecimal.TEN))
                 .post("/raw-materials")
                 .then().statusCode(201).extract().path("id");
 
         Long rmId = idGen.longValue();
 
         ProductRequestDTO productRequest = new ProductRequestDTO(
-                "PROD-LOCK", "Blocking Product", new BigDecimal("100"),
+                TestData.unique("PROD-LOCK"), "Blocking Product", new BigDecimal("100"),
                 List.of(new ProductRawMaterialRequestDTO(rmId, BigDecimal.ONE)));
 
         given()
@@ -190,19 +233,21 @@ public class RawMaterialResourceIT {
     @Order(10)
     @TestSecurity(user = "admin", roles = "ADMIN")
     void update_shouldReturn409_whenCodeConflicts() {
+        String codeA = TestData.unique("CODE-A");
+        String codeB = TestData.unique("CODE-B");
         given().contentType(ContentType.JSON)
-                .body(new RawMaterialRequestDTO("CODE-A", "Material A", BigDecimal.ONE))
+                .body(new RawMaterialRequestDTO(codeA, "Material A", BigDecimal.ONE))
                 .post("/raw-materials");
 
         Integer idBInt = given().contentType(ContentType.JSON)
-                .body(new RawMaterialRequestDTO("CODE-B", "Material B", BigDecimal.ONE))
+                .body(new RawMaterialRequestDTO(codeB, "Material B", BigDecimal.ONE))
                 .post("/raw-materials")
                 .then()
                 .extract().path("id");
 
         Long idB = idBInt.longValue();
 
-        RawMaterialRequestDTO conflictRequest = new RawMaterialRequestDTO("CODE-A", "New Name", BigDecimal.ONE);
+        RawMaterialRequestDTO conflictRequest = new RawMaterialRequestDTO(codeA, "New Name", BigDecimal.ONE);
 
         given()
                 .contentType(ContentType.JSON)
@@ -246,5 +291,72 @@ public class RawMaterialResourceIT {
                 .body("content", notNullValue())
                 .body("content.size()", is(1))
                 .body("size", is(1));
+    }
+
+    @Test
+    @TestSecurity(user = "admin", roles = "ADMIN")
+    void delete_shouldReturn404_whenIdDoesNotExist() {
+        given()
+                .pathParam("id", 999999L)
+                .when()
+                .delete("/raw-materials/{id}")
+                .then()
+                .statusCode(404)
+                .body("error", containsString("not found"));
+    }
+
+    @Test
+    @TestSecurity(user = "admin", roles = "ADMIN")
+    void update_shouldReturn422_whenStockIsNegative() {
+        Number idGen = given()
+                .contentType(ContentType.JSON)
+                .body(new RawMaterialRequestDTO(TestData.unique("RM-NEG"), "Negative Stock", BigDecimal.TEN))
+                .post("/raw-materials")
+                .then()
+                .statusCode(201)
+                .extract().path("id");
+
+        Long rmId = idGen.longValue();
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(new RawMaterialRequestDTO(TestData.unique("RM-NEG-UPD"), "Updated", new BigDecimal("-1.0")))
+                .pathParam("id", rmId)
+                .when()
+                .put("/raw-materials/{id}")
+                .then()
+                .statusCode(422)
+                .body("error", is("Invalid data"))
+                .body("errors[0].field", anyOf(is("stockQuantity"), is("update.dto.stockQuantity")));
+    }
+
+    @Test
+    @TestSecurity(user = "user", roles = "USER")
+    void search_shouldReturnEmptyPage_whenNameIsBlank() {
+        given()
+                .queryParam("name", " ")
+                .queryParam("page", -1)
+                .queryParam("size", 0)
+                .when()
+                .get("/raw-materials/search")
+                .then()
+                .statusCode(200)
+                .body("content.size()", is(0))
+                .body("page", is(0))
+                .body("size", is(10));
+    }
+
+    @Test
+    @TestSecurity(user = "user", roles = "USER")
+    void search_shouldReturnMatches_whenNameIsProvided() {
+        given()
+                .queryParam("name", "Wood")
+                .queryParam("page", 0)
+                .queryParam("size", 5)
+                .when()
+                .get("/raw-materials/search")
+                .then()
+                .statusCode(200)
+                .body("content", notNullValue());
     }
 }

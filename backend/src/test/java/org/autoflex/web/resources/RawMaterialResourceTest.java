@@ -20,6 +20,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -56,6 +57,24 @@ public class RawMaterialResourceTest {
                 .then()
                 .statusCode(201)
                 .header("Location", org.hamcrest.Matchers.containsString("/raw-materials/1"))
+                .body("code", is("RAW001"));
+    }
+
+    @Test
+    @TestSecurity(user = "user", roles = "USER")
+    void insert_shouldReturn201_whenAuthenticatedUserHasUserRole() {
+        RawMaterialRequestDTO request = RawMaterialFactory.createRawMaterialRequestDTO();
+        RawMaterialResponseDTO response = RawMaterialFactory.createRawMaterialResponseDTO();
+
+        when(rawMaterialService.insert(any(RawMaterialRequestDTO.class))).thenReturn(response);
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(request)
+                .when()
+                .post("/raw-materials")
+                .then()
+                .statusCode(201)
                 .body("code", is("RAW001"));
     }
 
@@ -146,6 +165,22 @@ public class RawMaterialResourceTest {
                 .body("name", is(response.getName()));
 
         verify(rawMaterialService).update(eq(id), any(RawMaterialRequestDTO.class));
+    }
+
+    @Test
+    @TestSecurity(user = "admin", roles = "ADMIN")
+    void update_shouldReturn422_whenDataIsInvalidForAdminRole() {
+        RawMaterialRequestDTO invalidRequest = new RawMaterialRequestDTO("", "", null);
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(invalidRequest)
+                .when()
+                .put("/raw-materials/{id}", 1L)
+                .then()
+                .statusCode(422);
+
+        verify(rawMaterialService, never()).update(eq(1L), any(RawMaterialRequestDTO.class));
     }
 
     @Test

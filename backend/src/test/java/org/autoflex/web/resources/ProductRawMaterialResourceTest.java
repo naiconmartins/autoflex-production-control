@@ -20,6 +20,8 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -62,6 +64,25 @@ public class ProductRawMaterialResourceTest {
                 .body("requiredQuantity", notNullValue());
 
         verify(service).add(eq(productId), any(ProductRawMaterialRequestDTO.class));
+    }
+
+    @Test
+    @TestSecurity(user = "admin", roles = "ADMIN")
+    void add_shouldReturn201_whenAdminRole() {
+        Long productId = 1L;
+        ProductRawMaterialRequestDTO request = ProductRawMaterialFactory.createRequest(2L, new BigDecimal("10.0"));
+        ProductRawMaterialResponseDTO response = new ProductRawMaterialResponseDTO(2L, "RM-2", "Raw Material 2", request.requiredQuantity);
+
+        when(service.add(eq(productId), any(ProductRawMaterialRequestDTO.class))).thenReturn(response);
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(request)
+                .when()
+                .post("/products/{productId}/raw-materials", productId)
+                .then()
+                .statusCode(201)
+                .body("id", is(2));
     }
 
     @Test
@@ -120,6 +141,74 @@ public class ProductRawMaterialResourceTest {
     }
 
     @Test
+    @TestSecurity(user = "admin", roles = "ADMIN")
+    void list_shouldReturn200_whenAdminRole() {
+        when(service.listByProduct(1L)).thenReturn(List.of());
+
+        given()
+                .when()
+                .get("/products/{productId}/raw-materials", 1L)
+                .then()
+                .statusCode(200);
+    }
+
+    @Test
+    @TestSecurity(user = "user", roles = "USER")
+    void list_shouldReturn404_whenProductNotFound() {
+        when(service.listByProduct(1L)).thenThrow(new ResourceNotFoundException("Product with id 1 not found"));
+
+        given()
+                .when()
+                .get("/products/{productId}/raw-materials", 1L)
+                .then()
+                .statusCode(404);
+    }
+
+    @Test
+    void updateRequiredQuantity_shouldReturn401_whenAnonymous() {
+        given()
+                .contentType(ContentType.JSON)
+                .body(new ProductRawMaterialRequestDTO(2L, BigDecimal.ONE))
+                .when()
+                .put("/products/{productId}/raw-materials/{rawMaterialId}", 1L, 2L)
+                .then()
+                .statusCode(401);
+    }
+
+    @Test
+    @TestSecurity(user = "user", roles = "USER")
+    void updateRequiredQuantity_shouldReturn200_whenValidRequest() {
+        ProductRawMaterialRequestDTO request = new ProductRawMaterialRequestDTO(2L, new BigDecimal("2.00"));
+        ProductRawMaterialResponseDTO response = new ProductRawMaterialResponseDTO(2L, "RM-2", "Raw Material 2", request.requiredQuantity);
+        when(service.updateRequiredQuantity(eq(1L), eq(2L), any(ProductRawMaterialRequestDTO.class))).thenReturn(response);
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(request)
+                .when()
+                .put("/products/{productId}/raw-materials/{rawMaterialId}", 1L, 2L)
+                .then()
+                .statusCode(200)
+                .body("requiredQuantity", is(2.0f));
+    }
+
+    @Test
+    @TestSecurity(user = "admin", roles = "ADMIN")
+    void updateRequiredQuantity_shouldReturn422_whenInvalidPayload() {
+        ProductRawMaterialRequestDTO invalid = new ProductRawMaterialRequestDTO(2L, BigDecimal.ZERO);
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(invalid)
+                .when()
+                .put("/products/{productId}/raw-materials/{rawMaterialId}", 1L, 2L)
+                .then()
+                .statusCode(422);
+
+        verify(service, never()).updateRequiredQuantity(eq(1L), eq(2L), any(ProductRawMaterialRequestDTO.class));
+    }
+
+    @Test
     @TestSecurity(user = "user", roles = "USER")
     void updateRequiredQuantity_shouldReturn404_whenLinkNotFound() {
         ProductRawMaterialRequestDTO request = new ProductRawMaterialRequestDTO(2L, BigDecimal.ONE);
@@ -136,6 +225,15 @@ public class ProductRawMaterialResourceTest {
     }
 
     @Test
+    void remove_shouldReturn401_whenAnonymous() {
+        given()
+                .when()
+                .delete("/products/{productId}/raw-materials/{rawMaterialId}", 1L, 2L)
+                .then()
+                .statusCode(401);
+    }
+
+    @Test
     @TestSecurity(user = "user", roles = "USER")
     void remove_shouldReturn204_whenValidRequest() {
         given()
@@ -146,5 +244,17 @@ public class ProductRawMaterialResourceTest {
 
         verify(service).remove(1L, 2L);
     }
-}
 
+    @Test
+    @TestSecurity(user = "admin", roles = "ADMIN")
+    void remove_shouldReturn404_whenLinkNotFound() {
+        doThrow(new ResourceNotFoundException("Raw material link not found for product 1"))
+                .when(service).remove(1L, 2L);
+
+        given()
+                .when()
+                .delete("/products/{productId}/raw-materials/{rawMaterialId}", 1L, 2L)
+                .then()
+                .statusCode(404);
+    }
+}

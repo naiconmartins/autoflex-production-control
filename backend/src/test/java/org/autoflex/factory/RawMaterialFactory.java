@@ -15,6 +15,13 @@ public class RawMaterialFactory {
         return dto;
     }
 
+    public static RawMaterialRequestDTO createUniqueRawMaterialRequestDTO() {
+        RawMaterialRequestDTO dto = createRawMaterialRequestDTO();
+        dto.code = TestData.unique("RM-IT");
+        dto.name = "Raw Material IT";
+        return dto;
+    }
+
     public static RawMaterial createCustomRawMaterial(Long id) {
         RawMaterial entity = new RawMaterial("RAW001", "RawTest", new BigDecimal("100.00"));
         entity.setId(id);

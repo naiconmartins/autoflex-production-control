@@ -67,7 +67,9 @@ public class AuthResourceIT {
                 .when()
                 .post("/auth/login")
                 .then()
-                .statusCode(401);
+                .statusCode(401)
+                .body("status", is(401))
+                .body("error", is("Unauthorized"));
     }
 
     @Test
@@ -80,7 +82,9 @@ public class AuthResourceIT {
                 .when()
                 .post("/auth/login")
                 .then()
-                .statusCode(401);
+                .statusCode(401)
+                .body("status", is(401))
+                .body("error", is("Unauthorized"));
     }
 
     @Test
@@ -93,7 +97,9 @@ public class AuthResourceIT {
                 .when()
                 .post("/auth/login")
                 .then()
-                .statusCode(401);
+                .statusCode(401)
+                .body("status", is(401))
+                .body("error", is("Unauthorized"));
     }
 
     @Test
@@ -106,6 +112,78 @@ public class AuthResourceIT {
                 .when()
                 .post("/auth/login")
                 .then()
-                .statusCode(422);
+                .statusCode(422)
+                .body("error", is("Invalid data"))
+                .body("errors[0].field", is("email"));
+    }
+
+    @Test
+    void login_shouldReturn422_whenEmailFormatIsInvalid() {
+        LoginRequestDTO loginDto = new LoginRequestDTO("invalid-email", PASSWORD);
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(loginDto)
+                .when()
+                .post("/auth/login")
+                .then()
+                .statusCode(422)
+                .body("error", is("Invalid data"))
+                .body("errors[0].field", is("email"));
+    }
+
+    @Test
+    void login_shouldReturn422_whenPasswordIsBlank() {
+        LoginRequestDTO loginDto = new LoginRequestDTO(EMAIL, "");
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(loginDto)
+                .when()
+                .post("/auth/login")
+                .then()
+                .statusCode(422)
+                .body("error", is("Invalid data"))
+                .body("errors[0].field", is("password"));
+    }
+
+    @Test
+    void login_shouldReturn422_whenEmailIsNull() {
+        LoginRequestDTO loginDto = new LoginRequestDTO(null, PASSWORD);
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(loginDto)
+                .when()
+                .post("/auth/login")
+                .then()
+                .statusCode(422)
+                .body("error", is("Invalid data"));
+    }
+
+    @Test
+    void login_shouldReturn422_whenPasswordIsNull() {
+        LoginRequestDTO loginDto = new LoginRequestDTO(EMAIL, null);
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(loginDto)
+                .when()
+                .post("/auth/login")
+                .then()
+                .statusCode(422)
+                .body("error", is("Invalid data"));
+    }
+
+    @Test
+    void login_shouldReturn422_whenBodyIsEmptyJson() {
+        given()
+                .contentType(ContentType.JSON)
+                .body("{}")
+                .when()
+                .post("/auth/login")
+                .then()
+                .statusCode(422)
+                .body("error", is("Invalid data"));
     }
 }

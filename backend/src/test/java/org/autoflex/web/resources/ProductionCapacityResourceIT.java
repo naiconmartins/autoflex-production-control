@@ -30,5 +30,16 @@ public class ProductionCapacityResourceIT {
                 .body("items", notNullValue())
                 .body("grandTotalValue", notNullValue());
     }
-}
 
+    @Test
+    @TestSecurity(user = "admin", roles = "ADMIN")
+    void generate_shouldReturn200AndPlan_whenAdminAuthenticated() {
+        given()
+                .when()
+                .get("/production-capacity")
+                .then()
+                .statusCode(200)
+                .body("items", notNullValue())
+                .body("grandTotalValue", notNullValue());
+    }
+}

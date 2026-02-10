@@ -230,6 +230,21 @@ public class ProductServiceTest {
     }
 
     @Test
+    void update_shouldClearRawMaterials_whenRawMaterialsIsEmpty() {
+        existingProduct.addRawMaterial(new ProductRawMaterial(existingProduct, new RawMaterial(), dto.price));
+        ProductRequestDTO request = ProductFactory.createProductRequestDTO();
+
+        mockFindById(id, existingProduct);
+        mockFindByCode(null);
+
+        ProductResponseDTO result = productService.update(id, request);
+
+        assertNotNull(result);
+        assertTrue(existingProduct.getRawMaterials().isEmpty());
+        verify(entityManager, times(1)).flush();
+    }
+
+    @Test
     void update_shouldThrowResourceNotFoundException_whenIdNotFound() {
         mockFindById(id, null);
 
@@ -390,6 +405,44 @@ public class ProductServiceTest {
     }
 
     @Test
+    void findByName_shouldReturnPagedResults_whenNameProvidedWithDescendingOrder() {
+        PageRequestDTO pageRequest = new PageRequestDTO(0, 5, "code", "desc");
+
+        List<Product> products = List.of(ProductFactory.createProductWithCode("PROD999"));
+        mockFindByName(products, 1L, 1);
+
+        PageResponseDTO<ProductResponseDTO> result = productService.findByName("prod", pageRequest);
+
+        assertNotNull(result);
+        assertEquals(1, result.content.size());
+        assertEquals("PROD999", result.content.get(0).code);
+        assertEquals(1L, result.totalElements);
+        assertEquals(1, result.totalPages);
+        assertEquals(0, result.page);
+        assertEquals(5, result.size);
+    }
+
+    @Test
+    void findByName_shouldNormalizeDefaults_whenNameProvidedAndPagingInvalid() {
+        PageRequestDTO pageRequest = new PageRequestDTO(-10, 0, "   ", "   ");
+
+        List<Product> products = List.of(
+                new Product("P-1", "Steel Table", dto.price),
+                new Product("P-2", "Steel Chair", dto.price)
+        );
+        mockFindByName(products, 2L, 1);
+
+        PageResponseDTO<ProductResponseDTO> result = productService.findByName("steel", pageRequest);
+
+        assertNotNull(result);
+        assertEquals(2, result.content.size());
+        assertEquals(2L, result.totalElements);
+        assertEquals(1, result.totalPages);
+        assertEquals(0, result.page);
+        assertEquals(10, result.size);
+    }
+
+    @Test
     void findByName_shouldReturnEmptyPage_whenNameIsBlank() {
         PageRequestDTO pageRequest = new PageRequestDTO(1, 2, "name", "asc");
 
@@ -401,5 +454,19 @@ public class ProductServiceTest {
         assertEquals(0, result.totalPages);
         assertEquals(1, result.page);
         assertEquals(2, result.size);
+    }
+
+    @Test
+    void findByName_shouldReturnEmptyPage_whenNameIsNull_andNormalizePageAndSize() {
+        PageRequestDTO pageRequest = new PageRequestDTO(-10, 0, null, null);
+
+        PageResponseDTO<ProductResponseDTO> result = productService.findByName(null, pageRequest);
+
+        assertNotNull(result);
+        assertTrue(result.content.isEmpty());
+        assertEquals(0L, result.totalElements);
+        assertEquals(0, result.totalPages);
+        assertEquals(0, result.page);
+        assertEquals(10, result.size);
     }
 }

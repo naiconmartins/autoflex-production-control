@@ -7,6 +7,8 @@ import org.autoflex.application.services.UserService;
 import org.autoflex.factory.UserFactory;
 import org.autoflex.web.dto.UserRequestDTO;
 import org.autoflex.web.dto.UserResponseDTO;
+import org.autoflex.web.exceptions.ResourceNotFoundException;
+import org.autoflex.web.exceptions.UnauthorizedException;
 import org.junit.jupiter.api.Test;
 import io.quarkus.test.security.TestSecurity;
 
@@ -105,6 +107,69 @@ public class UserResourceTest {
                 .body(request)
                 .when()
                 .post("/user")
+                .then()
+                .statusCode(401);
+    }
+
+    @Test
+    void getCurrentUser_shouldReturn401_whenUserIsNotAuthenticated() {
+        given()
+                .when()
+                .get("/user/me")
+                .then()
+                .statusCode(401);
+    }
+
+    @Test
+    @TestSecurity(user = "commonUser", roles = "USER")
+    void getCurrentUser_shouldReturn200_whenUserRole() {
+        UserResponseDTO response = UserFactory.createUserResponseDTO(1L, "USER");
+        when(userService.getCurrentUser()).thenReturn(response);
+
+        given()
+                .when()
+                .get("/user/me")
+                .then()
+                .statusCode(200)
+                .body("email", is(response.email))
+                .body("active", is(true));
+    }
+
+    @Test
+    @TestSecurity(user = "admin", roles = "ADMIN")
+    void getCurrentUser_shouldReturn200_whenAdminRole() {
+        UserResponseDTO response = UserFactory.createUserResponseDTO(1L, "ADMIN");
+        when(userService.getCurrentUser()).thenReturn(response);
+
+        given()
+                .when()
+                .get("/user/me")
+                .then()
+                .statusCode(200)
+                .body("email", is(response.email))
+                .body("active", is(true));
+    }
+
+    @Test
+    @TestSecurity(user = "commonUser", roles = "USER")
+    void getCurrentUser_shouldReturn404_whenServiceThrowsNotFound() {
+        when(userService.getCurrentUser()).thenThrow(new ResourceNotFoundException("User not found"));
+
+        given()
+                .when()
+                .get("/user/me")
+                .then()
+                .statusCode(404);
+    }
+
+    @Test
+    @TestSecurity(user = "commonUser", roles = "USER")
+    void getCurrentUser_shouldReturn401_whenServiceThrowsUnauthorized() {
+        when(userService.getCurrentUser()).thenThrow(new UnauthorizedException("User is not active"));
+
+        given()
+                .when()
+                .get("/user/me")
                 .then()
                 .statusCode(401);
     }

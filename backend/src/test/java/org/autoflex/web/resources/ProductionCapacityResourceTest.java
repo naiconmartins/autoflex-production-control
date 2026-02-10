@@ -60,5 +60,22 @@ public class ProductionCapacityResourceTest {
 
         verify(service).generate();
     }
-}
 
+    @Test
+    @TestSecurity(user = "admin", roles = "ADMIN")
+    void generate_shouldReturn200_whenAdminAuthenticated() {
+        ProductionPlanResponseDTO response = new ProductionPlanResponseDTO(List.of(), BigDecimal.ZERO);
+        when(service.generate()).thenReturn(response);
+
+        given()
+                .when()
+                .get("/production-capacity")
+                .then()
+                .statusCode(200)
+                .body("items", notNullValue())
+                .body("items.size()", is(0))
+                .body("grandTotalValue", notNullValue());
+
+        verify(service).generate();
+    }
+}

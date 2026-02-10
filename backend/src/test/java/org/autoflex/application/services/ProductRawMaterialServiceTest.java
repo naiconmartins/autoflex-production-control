@@ -173,4 +173,36 @@ public class ProductRawMaterialServiceTest {
 
         assertThrows(ResourceNotFoundException.class, () -> service.remove(productId, rawMaterialId));
     }
+
+    @Test
+    void updateRequiredQuantity_shouldThrowResourceNotFoundException_whenProductNotFound() {
+        when(Product.findById(productId)).thenReturn(null);
+
+        assertThrows(ResourceNotFoundException.class,
+                () -> service.updateRequiredQuantity(productId, rawMaterialId, requestDto));
+    }
+
+    @Test
+    void updateRequiredQuantity_shouldThrowResourceNotFoundException_whenRawMaterialNotFound() {
+        when(Product.findById(productId)).thenReturn(product);
+        when(RawMaterial.findById(rawMaterialId)).thenReturn(null);
+
+        assertThrows(ResourceNotFoundException.class,
+                () -> service.updateRequiredQuantity(productId, rawMaterialId, requestDto));
+    }
+
+    @Test
+    void remove_shouldThrowResourceNotFoundException_whenProductNotFound() {
+        when(Product.findById(productId)).thenReturn(null);
+
+        assertThrows(ResourceNotFoundException.class, () -> service.remove(productId, rawMaterialId));
+    }
+
+    @Test
+    void remove_shouldThrowResourceNotFoundException_whenRawMaterialNotFound() {
+        when(Product.findById(productId)).thenReturn(product);
+        when(RawMaterial.findById(rawMaterialId)).thenReturn(null);
+
+        assertThrows(ResourceNotFoundException.class, () -> service.remove(productId, rawMaterialId));
+    }
 }

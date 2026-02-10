@@ -28,4 +28,20 @@ public class PasswordServiceTest {
         Assertions.assertTrue(passwordService.matches(RAW_PASSWORD, hash), "Should match correct password");
         Assertions.assertFalse(passwordService.matches("wrong_pass", hash), "Should not match incorrect password");
     }
+
+    @Test
+    void hash_shouldGenerateDifferentHashes_forSamePassword() {
+        String hash1 = passwordService.hash(RAW_PASSWORD);
+        String hash2 = passwordService.hash(RAW_PASSWORD);
+
+        Assertions.assertNotEquals(hash1, hash2, "Bcrypt should generate different hashes due to random salt");
+        Assertions.assertTrue(passwordService.matches(RAW_PASSWORD, hash1));
+        Assertions.assertTrue(passwordService.matches(RAW_PASSWORD, hash2));
+    }
+
+    @Test
+    void matches_shouldThrowException_whenHashIsMalformed() {
+        Assertions.assertThrows(RuntimeException.class,
+                () -> passwordService.matches(RAW_PASSWORD, "not-a-bcrypt-hash"));
+    }
 }

@@ -21,8 +21,12 @@ public class ProductFactory {
     }
 
     public static ProductRequestDTO createProductRequestDTOWithRawMaterials() {
+        return createProductRequestDTOWithRawMaterials("PROD-040");
+    }
+
+    public static ProductRequestDTO createProductRequestDTOWithRawMaterials(String code) {
         return new ProductRequestDTO(
-                "PROD-040",
+                code,
                 "Product Test",
                 new BigDecimal("100.00"),
                 List.of(
@@ -30,6 +34,10 @@ public class ProductFactory {
                         new ProductRawMaterialRequestDTO(2L, new BigDecimal("5.00"))
                 )
         );
+    }
+
+    public static ProductRequestDTO createUniqueProductRequestDTOWithRawMaterials() {
+        return createProductRequestDTOWithRawMaterials(TestData.unique("PROD-IT"));
     }
 
     public static ProductResponseDTO createProductResponseDTOWithRawMaterials() {

@@ -22,6 +22,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -60,6 +61,24 @@ public class ProductResourceTest {
                 .then()
                 .statusCode(201)
                 .header("Location", org.hamcrest.Matchers.containsString("/products/1"))
+                .body("code", is("PROD001"));
+    }
+
+    @Test
+    @TestSecurity(user = "user", roles = "USER")
+    void insert_shouldReturn201_whenAuthenticatedUserHasUserRole() {
+        ProductRequestDTO request = ProductFactory.createProductRequestDTOWithRawMaterials();
+        ProductResponseDTO response = ProductFactory.createProductResponseDTOWithRawMaterials();
+
+        when(productService.insert(any(ProductRequestDTO.class))).thenReturn(response);
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(request)
+                .when()
+                .post("/products")
+                .then()
+                .statusCode(201)
                 .body("code", is("PROD001"));
     }
 
@@ -145,6 +164,42 @@ public class ProductResourceTest {
                 .statusCode(200)
                 .body("id", is(1))
                 .body("name", is(response.name));
+    }
+
+    @Test
+    @TestSecurity(user = "user", roles = "USER")
+    void update_shouldReturn200_whenAuthenticatedUserHasUserRole() {
+        Long id = 1L;
+        ProductRequestDTO request = ProductFactory.createProductRequestDTOWithRawMaterials();
+        ProductResponseDTO response = ProductFactory.createProductResponseDTOWithRawMaterials();
+
+        when(productService.update(eq(id), any(ProductRequestDTO.class))).thenReturn(response);
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(request)
+                .when()
+                .put("/products/{id}", id)
+                .then()
+                .statusCode(200)
+                .body("id", is(1))
+                .body("name", is(response.name));
+    }
+
+    @Test
+    @TestSecurity(user = "admin", roles = "ADMIN")
+    void update_shouldReturn422_whenDataIsInvalid() {
+        ProductRequestDTO invalidRequest = new ProductRequestDTO("ERR-01", "", new BigDecimal("-1.0"), List.of());
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(invalidRequest)
+                .when()
+                .put("/products/{id}", 1L)
+                .then()
+                .statusCode(422);
+
+        verify(productService, never()).update(eq(1L), any(ProductRequestDTO.class));
     }
 
     @Test

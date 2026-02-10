@@ -331,6 +331,42 @@ public class RawMaterialServiceTest {
     }
 
     @Test
+    void findByName_shouldReturnPagedResults_whenNameProvidedWithDescendingOrder() {
+        PageRequestDTO pageRequest = new PageRequestDTO(0, 5, "code", "desc");
+
+        RawMaterial m1 = RawMaterialFactory.createRawMaterialWithCode("RM-999");
+        mockFindByName(List.of(m1), 1L, 1);
+
+        PageResponseDTO<RawMaterialResponseDTO> result = rawMaterialService.findByName("rm", pageRequest);
+
+        assertNotNull(result);
+        assertEquals(1, result.content.size());
+        assertEquals("RM-999", result.content.get(0).code);
+        assertEquals(1L, result.totalElements);
+        assertEquals(1, result.totalPages);
+        assertEquals(0, result.page);
+        assertEquals(5, result.size);
+    }
+
+    @Test
+    void findByName_shouldNormalizeDefaults_whenNameProvidedAndPagingInvalid() {
+        PageRequestDTO pageRequest = new PageRequestDTO(-10, 0, "   ", "   ");
+
+        RawMaterial m1 = new RawMaterial("RM-1", "Steel Sheet", dto.stockQuantity);
+        RawMaterial m2 = new RawMaterial("RM-2", "Steel Rod", dto.stockQuantity);
+        mockFindByName(List.of(m1, m2), 2L, 1);
+
+        PageResponseDTO<RawMaterialResponseDTO> result = rawMaterialService.findByName("steel", pageRequest);
+
+        assertNotNull(result);
+        assertEquals(2, result.content.size());
+        assertEquals(2L, result.totalElements);
+        assertEquals(1, result.totalPages);
+        assertEquals(0, result.page);
+        assertEquals(10, result.size);
+    }
+
+    @Test
     void findByName_shouldReturnEmptyList_whenNameIsBlank() {
         PageRequestDTO pageRequest = new PageRequestDTO(1, 5, "name", "asc");
         PageResponseDTO<RawMaterialResponseDTO> result = rawMaterialService.findByName("   ", pageRequest);
@@ -341,5 +377,19 @@ public class RawMaterialServiceTest {
         assertEquals(0, result.totalPages);
         assertEquals(1, result.page);
         assertEquals(5, result.size);
+    }
+
+    @Test
+    void findByName_shouldReturnEmptyPage_whenNameIsNull_andNormalizePageAndSize() {
+        PageRequestDTO pageRequest = new PageRequestDTO(-1, 0, null, null);
+
+        PageResponseDTO<RawMaterialResponseDTO> result = rawMaterialService.findByName(null, pageRequest);
+
+        assertNotNull(result);
+        assertTrue(result.content.isEmpty());
+        assertEquals(0L, result.totalElements);
+        assertEquals(0, result.totalPages);
+        assertEquals(0, result.page);
+        assertEquals(10, result.size);
     }
 }

@@ -65,7 +65,7 @@ public class ProductionCapacityServiceTest {
     }
 
     @Test
-    void generate_shouldIncludeMultipleItems_whenStockIsSufficientForBoth() {
+    void generate_shouldConsumeStockInPriceOrder_andSkipWhenNoStockRemains() {
         when(RawMaterial.listAll()).thenReturn(List.of(wood));
         when(Product.listAll(any(Sort.class))).thenReturn(List.of(table, chair));
 
@@ -122,5 +122,120 @@ public class ProductionCapacityServiceTest {
         ProductionPlanResponseDTO result = service.generate();
 
         assertTrue(result.items.isEmpty());
+    }
+
+    @Test
+    void generate_shouldSkipProduct_whenRecipeIsNull() {
+        when(RawMaterial.listAll()).thenReturn(List.of(wood));
+        when(Product.listAll(any(Sort.class))).thenReturn(List.of(table));
+
+        mockRecipe(table, null);
+
+        ProductionPlanResponseDTO result = service.generate();
+
+        assertTrue(result.items.isEmpty());
+        assertEquals(BigDecimal.ZERO, result.grandTotalValue);
+    }
+
+    @Test
+    void generate_shouldTreatNullStockAsZero() {
+        wood.setStockQuantity(null);
+        when(RawMaterial.listAll()).thenReturn(List.of(wood));
+        when(Product.listAll(any(Sort.class))).thenReturn(List.of(table));
+
+        mockRecipe(table, List.of(ProductionCapacityFactory.createLink(table, wood, "1.0")));
+
+        ProductionPlanResponseDTO result = service.generate();
+
+        assertTrue(result.items.isEmpty());
+        assertEquals(BigDecimal.ZERO, result.grandTotalValue);
+    }
+
+    @Test
+    void generate_shouldSkipProduct_whenRequiredQuantityIsNull() {
+        when(RawMaterial.listAll()).thenReturn(List.of(wood));
+        when(Product.listAll(any(Sort.class))).thenReturn(List.of(table));
+
+        ProductRawMaterial link = ProductionCapacityFactory.createLink(table, wood, "1.0");
+        link.setRequiredQuantity(null);
+        mockRecipe(table, List.of(link));
+
+        ProductionPlanResponseDTO result = service.generate();
+
+        assertTrue(result.items.isEmpty());
+        assertEquals(BigDecimal.ZERO, result.grandTotalValue);
+    }
+
+    @Test
+    void generate_shouldSkipProduct_whenRequiredQuantityIsZeroOrNegative() {
+        when(RawMaterial.listAll()).thenReturn(List.of(wood));
+        when(Product.listAll(any(Sort.class))).thenReturn(List.of(table));
+
+        mockRecipe(table, List.of(ProductionCapacityFactory.createLink(table, wood, "0.0")));
+
+        ProductionPlanResponseDTO result = service.generate();
+
+        assertTrue(result.items.isEmpty());
+        assertEquals(BigDecimal.ZERO, result.grandTotalValue);
+    }
+
+    @Test
+    void generate_shouldProduceMultipleItems_whenStockRemainsAfterFirstProduct() {
+        table.setPrice(new BigDecimal("200.00"));
+        chair.setPrice(new BigDecimal("100.00"));
+
+        when(RawMaterial.listAll()).thenReturn(List.of(wood));
+        when(Product.listAll(any(Sort.class))).thenReturn(List.of(table, chair));
+
+        mockRecipe(table, List.of(ProductionCapacityFactory.createLink(table, wood, "30.0")));
+        mockRecipe(chair, List.of(ProductionCapacityFactory.createLink(chair, wood, "2.0")));
+
+        ProductionPlanResponseDTO result = service.generate();
+
+        assertEquals(2, result.items.size());
+        assertEquals(new BigDecimal("3"), result.items.get(0).producibleQuantity);
+        assertEquals(new BigDecimal("5"), result.items.get(1).producibleQuantity);
+        assertEquals(new BigDecimal("1100.00"), result.grandTotalValue);
+    }
+
+    @Test
+    void generate_shouldReturnEmptyPlan_whenNoProductsExist() {
+        when(RawMaterial.listAll()).thenReturn(List.of(wood));
+        when(Product.listAll(any(Sort.class))).thenReturn(List.of());
+
+        ProductionPlanResponseDTO result = service.generate();
+
+        assertNotNull(result);
+        assertTrue(result.items.isEmpty());
+        assertEquals(BigDecimal.ZERO, result.grandTotalValue);
+    }
+
+    @Test
+    void generate_shouldReturnEmptyPlan_whenNoRawMaterialsExist() {
+        when(RawMaterial.listAll()).thenReturn(List.of());
+        when(Product.listAll(any(Sort.class))).thenReturn(List.of(table));
+        mockRecipe(table, List.of(ProductionCapacityFactory.createLink(table, wood, "1.0")));
+
+        ProductionPlanResponseDTO result = service.generate();
+
+        assertNotNull(result);
+        assertTrue(result.items.isEmpty());
+        assertEquals(BigDecimal.ZERO, result.grandTotalValue);
+    }
+
+    @Test
+    void generate_shouldSkipProduct_whenRecipeUsesMaterialNotPresentInStockMap() {
+        RawMaterial ghostRawMaterial = RawMaterialFactory.createRawMaterialWithCode("GHOST");
+        ghostRawMaterial.setId(999L);
+
+        when(RawMaterial.listAll()).thenReturn(List.of(wood));
+        when(Product.listAll(any(Sort.class))).thenReturn(List.of(table));
+        mockRecipe(table, List.of(ProductionCapacityFactory.createLink(table, ghostRawMaterial, "1.0")));
+
+        ProductionPlanResponseDTO result = service.generate();
+
+        assertNotNull(result);
+        assertTrue(result.items.isEmpty());
+        assertEquals(BigDecimal.ZERO, result.grandTotalValue);
     }
 }
