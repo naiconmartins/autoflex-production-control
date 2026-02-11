@@ -1,67 +1,96 @@
 # Autoflex Production Control
 
-> ⚠️ **Projeto em Desenvolvimento** - Este projeto ainda está em fase de desenvolvimento.
-> 
-> **Pendências:**
-> - Sistema de recomendação de produção
-> - Testes de integração no backend
-> - Testes unitários e de integração no frontend
+Solução do teste prático da Autoflex para controle de produção industrial, com arquitetura `API-first` separando backend e frontend.
 
-Uma aplicação web moderna para gerenciamento de estoque industrial, controle de matérias-primas e otimização do planejamento de produção baseado no estoque disponível.
+## Status
 
-## Sobre o Projeto
+Desafio concluído, incluindo:
+- CRUD de produtos (`RF001` + `RF005`)
+- CRUD de matérias-primas (`RF002` + `RF006`)
+- Associação produto x matéria-prima (`RF003` + `RF007`)
+- Cálculo de capacidade de produção priorizando maior valor (`RF004` + `RF008`)
+- Testes unitários e de integração no backend
+- Testes de componente e E2E no frontend (Cypress)
 
-Este sistema auxilia indústrias no controle de estoque de produção, gerenciando produtos, matérias-primas e suas relações. Oferece sugestões inteligentes de produção com base nos níveis de estoque atuais, priorizando produtos de maior valor para maximizar o resultado da produção.
+## Arquitetura do Monorepo
 
-## Funcionalidades
+- `backend/`: API em Java 21 + Quarkus + PostgreSQL + JWT
+- `frontend/`: aplicação web em Next.js 16 + React 19 + Redux Toolkit + Cypress
 
-- **Gerenciamento de Produtos**: Operações CRUD completas para produtos incluindo código, nome e valor
-- **Gerenciamento de Matérias-Primas**: Controle de matérias-primas com código, nome e quantidades em estoque
-- **Composição de Produtos**: Associação de matérias-primas aos produtos e definição das quantidades necessárias
-- **Planejamento de Produção**: Cálculo automático de quais produtos podem ser fabricados com o estoque disponível
-- **Otimização por Valor**: Priorização das sugestões de produção pelo valor dos produtos
-- **Autenticação de Usuários**: Acesso seguro com autenticação via Bearer token
+Documentação detalhada por módulo:
+- Backend: [`backend/README.md`](backend/README.md)
+- Frontend: [`frontend/README.md`](frontend/README.md)
 
-## Tecnologias Utilizadas
+## Requisitos não funcionais atendidos
 
-### Backend
-- **Quarkus**: Framework Java de alta performance
-- **PostgreSQL**: Banco de dados relacional robusto
-- **Autenticação JWT**: Segurança com Bearer token
-- **API RESTful**: Separação completa entre backend e frontend
-- **Testes Unitários**: Cobertura abrangente de testes
+- `RNF001`: aplicação web compatível com principais navegadores
+- `RNF002`: separação entre backend e frontend via API REST
+- `RNF003`: frontend responsivo
+- `RNF004`: persistência em banco relacional (PostgreSQL)
+- `RNF005`: backend com framework (Quarkus)
+- `RNF006`: frontend com React/Redux
+- `RNF007`: código e estrutura em inglês
 
-### Frontend
-- **Next.js**: Framework React moderno
-- **Redux**: Gerenciamento de estado
-- **Zod**: Validação de schemas
-- **shadcn/ui**: Componentes de interface bonitos e acessíveis
-- **Design Responsivo**: Funciona perfeitamente em todos os dispositivos
-
-## Como Começar
+## Como executar localmente
 
 ### Pré-requisitos
-- Java 21+
-- Node.js 18+
-- PostgreSQL
 
-### Configuração do Backend
+- Java 21+
+- Node.js 20+
+- pnpm
+- PostgreSQL disponível para o backend
+
+### 1) Backend
+
 ```bash
 cd backend
 ./mvnw quarkus:dev
 ```
 
-### Configuração do Frontend
+API padrão: `http://localhost:8080`
+
+Observações:
+- A configuração e credenciais do banco estão em `backend/src/main/resources/application.properties`.
+- Os dados iniciais são carregados por `backend/src/main/resources/import.sql`.
+
+### 2) Frontend
+
 ```bash
 cd frontend
-npm install
-npm run dev
+cp env-example .env
+pnpm install
+pnpm dev
 ```
 
-## Arquitetura
+Aplicação padrão: `http://localhost:3000`
 
-A aplicação segue uma arquitetura moderna API-first com separação completa entre backend e frontend, permitindo escalabilidade e implantação independente de cada camada.
+## Testes
 
-## Licença
+### Backend
 
-MIT
+```bash
+cd backend
+./mvnw test
+./mvnw verify -DskipITs=false
+```
+
+### Frontend
+
+```bash
+cd frontend
+npx cypress run --component
+npx cypress run --e2e
+```
+
+## Credenciais padrão (seed local)
+
+- Email: `adm@autoflex.com`
+- Senha: `adm`
+
+## Screenshots
+
+### Login
+![Login](frontend/docs/screenshots/login.png)
+
+### Production Capacity
+![Production Capacity](frontend/docs/screenshots/production-capacity.png)
