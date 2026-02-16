@@ -2,8 +2,9 @@ package org.autoflex.application.security;
 
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
-import org.autoflex.domain.entities.User;
-import org.autoflex.domain.enums.UserRole;
+import java.util.Set;
+import org.autoflex.domain.User;
+import org.autoflex.domain.UserRole;
 import org.jose4j.jwt.JwtClaims;
 import org.jose4j.jwt.consumer.JwtConsumer;
 import org.jose4j.jwt.consumer.JwtConsumerBuilder;
@@ -11,8 +12,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-
-import java.util.Set;
 
 @QuarkusTest
 public class TokenServiceTest {

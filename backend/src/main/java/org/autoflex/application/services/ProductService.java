@@ -6,142 +6,135 @@ import io.quarkus.panache.common.Sort;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.PersistenceException;
 import jakarta.transaction.Transactional;
-import org.autoflex.domain.entities.Product;
-import org.autoflex.domain.entities.ProductRawMaterial;
-import org.autoflex.domain.entities.RawMaterial;
-import org.autoflex.web.dto.PageRequestDTO;
-import org.autoflex.web.dto.PageResponseDTO;
-import org.autoflex.web.dto.ProductRequestDTO;
-import org.autoflex.web.dto.ProductResponseDTO;
-import org.autoflex.web.exceptions.ConflictException;
-import org.autoflex.web.exceptions.DatabaseException;
-import org.autoflex.web.exceptions.ResourceNotFoundException;
-
 import java.util.List;
+import org.autoflex.adapters.inbound.dto.request.PageRequestDTO;
+import org.autoflex.adapters.inbound.dto.request.ProductRequestDTO;
+import org.autoflex.adapters.inbound.dto.response.PageResponseDTO;
+import org.autoflex.adapters.inbound.dto.response.ProductResponseDTO;
+import org.autoflex.domain.Product;
+import org.autoflex.domain.ProductRawMaterial;
+import org.autoflex.domain.RawMaterial;
+import org.autoflex.common.exceptions.ConflictException;
+import org.autoflex.common.exceptions.DatabaseException;
+import org.autoflex.common.exceptions.ResourceNotFoundException;
 
 @ApplicationScoped
 public class ProductService {
 
-    @Transactional
-    public ProductResponseDTO insert(ProductRequestDTO dto) {
-        if (Product.find("code", dto.code).firstResultOptional().isPresent()) {
-            throw new ConflictException("Product code already exists");
-        }
-
-        Product product = new Product(dto.code, dto.name, dto.price);
-        if (dto.rawMaterials != null && !dto.rawMaterials.isEmpty()) {
-            for (var itemDto : dto.rawMaterials) {
-                RawMaterial rm = RawMaterial.findById(itemDto.id);
-                if (rm == null) {
-                    throw new ResourceNotFoundException("Raw Material not found with id: " + itemDto.id);
-                }
-
-                ProductRawMaterial association = new ProductRawMaterial(product, rm, itemDto.requiredQuantity);
-                product.addRawMaterial(association);
-            }
-        }
-        product.persist();
-
-        return new ProductResponseDTO(product);
+  @Transactional
+  public ProductResponseDTO insert(ProductRequestDTO dto) {
+    if (Product.find("code", dto.code).firstResultOptional().isPresent()) {
+      throw new ConflictException("Product code already exists");
     }
 
-    @Transactional
-    public ProductResponseDTO update(Long id, ProductRequestDTO dto) {
-        Product entity = Product.findById(id);
-        if (entity == null) {
-            throw new ResourceNotFoundException("Product with id " + id + " not found");
+    Product product = new Product(dto.code, dto.name, dto.price);
+    if (dto.rawMaterials != null && !dto.rawMaterials.isEmpty()) {
+      for (var itemDto : dto.rawMaterials) {
+        RawMaterial rm = RawMaterial.findById(itemDto.id);
+        if (rm == null) {
+          throw new ResourceNotFoundException("Raw Material not found with id: " + itemDto.id);
         }
 
-        Product otherEntity = Product.find("code", dto.code).firstResult();
-        if (otherEntity != null && !otherEntity.getId().equals(entity.getId())) {
-            throw new ConflictException("Product code already exists");
-        }
+        ProductRawMaterial association =
+            new ProductRawMaterial(product, rm, itemDto.requiredQuantity);
+        product.addRawMaterial(association);
+      }
+    }
+    product.persist();
 
-        entity.setCode(dto.code);
-        entity.setName(dto.name);
-        entity.setPrice(dto.price);
+    return new ProductResponseDTO(product);
+  }
 
-        entity.getRawMaterials().clear();
-        Product.getEntityManager().flush();
-
-        if (dto.rawMaterials != null && !dto.rawMaterials.isEmpty()) {
-            for (var itemDto : dto.rawMaterials) {
-                RawMaterial rm = RawMaterial.findById(itemDto.id);
-                if (rm == null) {
-                    throw new ResourceNotFoundException("Raw Material not found with id: " + itemDto.id);
-                }
-
-                ProductRawMaterial association = new ProductRawMaterial(entity, rm, itemDto.requiredQuantity);
-                entity.addRawMaterial(association);
-            }
-        }
-
-        return new ProductResponseDTO(entity);
+  @Transactional
+  public ProductResponseDTO update(Long id, ProductRequestDTO dto) {
+    Product entity = Product.findById(id);
+    if (entity == null) {
+      throw new ResourceNotFoundException("Product with id " + id + " not found");
     }
 
-    @Transactional
-    public void delete(Long id) {
-        Product entity = Product.findById(id);
-        if (entity == null) {
-            throw new ResourceNotFoundException("Product with id " + id + " not found");
-        }
-
-        try {
-            Product.deleteById(id);
-        } catch (PersistenceException e) {
-            throw new DatabaseException("Cannot delete product because it is referenced by other records");
-        }
+    Product otherEntity = Product.find("code", dto.code).firstResult();
+    if (otherEntity != null && !otherEntity.getId().equals(entity.getId())) {
+      throw new ConflictException("Product code already exists");
     }
 
-    public PageResponseDTO<ProductResponseDTO> findAll(PageRequestDTO dto) {
-        Sort sort = "desc".equalsIgnoreCase(dto.direction)
-                ? Sort.by(dto.sortBy).descending()
-                : Sort.by(dto.sortBy).ascending();
+    entity.setCode(dto.code);
+    entity.setName(dto.name);
+    entity.setPrice(dto.price);
 
-        PanacheQuery<Product> query = Product.findAll(sort).page(Page.of(dto.page, dto.size));
+    entity.getRawMaterials().clear();
+    Product.getEntityManager().flush();
 
-        return PageResponseDTO.of(
-                query,
-                query.list().stream().map(ProductResponseDTO::new).toList(),
-                dto.page,
-                dto.size
-        );
-    }
-
-    public ProductResponseDTO findById(Long id) {
-        Product entity = Product.findById(id);
-        if (entity == null) {
-            throw new ResourceNotFoundException("Product with id " + id + " not found");
-        }
-        return new ProductResponseDTO(entity);
-    }
-
-    public PageResponseDTO<ProductResponseDTO> findByName(String name, PageRequestDTO dto) {
-        String sortBy = (dto.sortBy == null || dto.sortBy.isBlank()) ? "name" : dto.sortBy;
-        String direction = (dto.direction == null || dto.direction.isBlank()) ? "asc" : dto.direction;
-        int page = Math.max(0, dto.page);
-        int size = dto.size <= 0 ? 10 : dto.size;
-
-        if (name == null || name.isBlank()) {
-            return new PageResponseDTO<>(List.of(), 0L, 0, page, size);
+    if (dto.rawMaterials != null && !dto.rawMaterials.isEmpty()) {
+      for (var itemDto : dto.rawMaterials) {
+        RawMaterial rm = RawMaterial.findById(itemDto.id);
+        if (rm == null) {
+          throw new ResourceNotFoundException("Raw Material not found with id: " + itemDto.id);
         }
 
-        Sort sort = "desc".equalsIgnoreCase(direction)
-                ? Sort.by(sortBy).descending()
-                : Sort.by(sortBy).ascending();
-
-        PanacheQuery<Product> query = Product.find(
-                        "lower(name) like concat('%', lower(?1), '%')",
-                        sort,
-                        name
-                )
-                .page(Page.of(page, size));
-
-        return PageResponseDTO.of(
-                query,
-                query.list().stream().map(ProductResponseDTO::new).toList(),
-                page,
-                size
-        );
+        ProductRawMaterial association =
+            new ProductRawMaterial(entity, rm, itemDto.requiredQuantity);
+        entity.addRawMaterial(association);
+      }
     }
+
+    return new ProductResponseDTO(entity);
+  }
+
+  @Transactional
+  public void delete(Long id) {
+    Product entity = Product.findById(id);
+    if (entity == null) {
+      throw new ResourceNotFoundException("Product with id " + id + " not found");
+    }
+
+    try {
+      Product.deleteById(id);
+    } catch (PersistenceException e) {
+      throw new DatabaseException(
+          "Cannot delete product because it is referenced by other records");
+    }
+  }
+
+  public PageResponseDTO<ProductResponseDTO> findAll(PageRequestDTO dto) {
+    Sort sort =
+        "desc".equalsIgnoreCase(dto.direction)
+            ? Sort.by(dto.sortBy).descending()
+            : Sort.by(dto.sortBy).ascending();
+
+    PanacheQuery<Product> query = Product.findAll(sort).page(Page.of(dto.page, dto.size));
+
+    return PageResponseDTO.of(
+        query, query.list().stream().map(ProductResponseDTO::new).toList(), dto.page, dto.size);
+  }
+
+  public ProductResponseDTO findById(Long id) {
+    Product entity = Product.findById(id);
+    if (entity == null) {
+      throw new ResourceNotFoundException("Product with id " + id + " not found");
+    }
+    return new ProductResponseDTO(entity);
+  }
+
+  public PageResponseDTO<ProductResponseDTO> findByName(String name, PageRequestDTO dto) {
+    String sortBy = (dto.sortBy == null || dto.sortBy.isBlank()) ? "name" : dto.sortBy;
+    String direction = (dto.direction == null || dto.direction.isBlank()) ? "asc" : dto.direction;
+    int page = Math.max(0, dto.page);
+    int size = dto.size <= 0 ? 10 : dto.size;
+
+    if (name == null || name.isBlank()) {
+      return new PageResponseDTO<>(List.of(), 0L, 0, page, size);
+    }
+
+    Sort sort =
+        "desc".equalsIgnoreCase(direction)
+            ? Sort.by(sortBy).descending()
+            : Sort.by(sortBy).ascending();
+
+    PanacheQuery<Product> query =
+        Product.find("lower(name) like concat('%', lower(?1), '%')", sort, name)
+            .page(Page.of(page, size));
+
+    return PageResponseDTO.of(
+        query, query.list().stream().map(ProductResponseDTO::new).toList(), page, size);
+  }
 }
