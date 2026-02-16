@@ -1,62 +1,62 @@
 package org.autoflex.application.services;
 
-import io.quarkus.panache.common.Sort;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.autoflex.adapters.inbound.dto.response.ProductionCapacityDTO;
-import org.autoflex.adapters.inbound.dto.response.ProductionPlanResponseDTO;
-import org.autoflex.domain.Product;
-import org.autoflex.domain.ProductRawMaterial;
-import org.autoflex.domain.RawMaterial;
+import org.autoflex.application.gateways.ProductRawMaterialRepository;
+import org.autoflex.application.gateways.ProductRepository;
+import org.autoflex.application.gateways.RawMaterialRepository;
+import org.autoflex.application.usecases.ProductionCapacityUseCase;
+import org.autoflex.domain.*;
 
 @ApplicationScoped
-public class ProductionCapacityService {
+public class ProductionCapacityImpl implements ProductionCapacityUseCase {
 
-  public ProductionPlanResponseDTO generate() {
+  @Inject ProductRepository productRepository;
+  @Inject RawMaterialRepository rawMaterialRepository;
+  @Inject ProductRawMaterialRepository productRawMaterialRepository;
+
+  public ProductionPlan generate() {
     Map<Long, BigDecimal> remainingStock = loadStock();
-    List<Product> products = Product.listAll(Sort.by("price").descending());
+    List<Product> products = productRepository.findAllOrderedByPriceDesc();
 
-    ProductionPlanResponseDTO response = new ProductionPlanResponseDTO();
+    ProductionPlan plan = new ProductionPlan();
 
     for (Product product : products) {
-      List<ProductRawMaterial> recipe = ProductRawMaterial.find("product", product).list();
+      List<ProductRawMaterial> recipe = productRawMaterialRepository.listByProduct(product.getId());
 
-      if (recipe == null || recipe.isEmpty()) {
-        continue;
-      }
+      if (recipe.isEmpty()) continue;
 
       BigDecimal maxUnits = computeMaxUnits(recipe, remainingStock);
 
-      if (maxUnits.compareTo(BigDecimal.ZERO) <= 0) {
-        continue;
-      }
+      if (maxUnits.compareTo(BigDecimal.ZERO) <= 0) continue;
 
       consumeStock(recipe, remainingStock, maxUnits);
+      BigDecimal itemTotalValue = product.getPrice().multiply(maxUnits);
 
-      BigDecimal totalValue = product.getPrice().multiply(maxUnits);
-
-      response.items.add(
-          new ProductionCapacityDTO(
+      ProductionCapacity capacity =
+          new ProductionCapacity(
               product.getId(),
               product.getCode(),
               product.getName(),
               product.getPrice(),
               maxUnits,
-              totalValue));
+              itemTotalValue);
 
-      response.grandTotalValue = response.grandTotalValue.add(totalValue);
+      plan.getItems().add(capacity);
+      plan.setGrandTotalValue(plan.getGrandTotalValue().add(itemTotalValue));
     }
 
-    return response;
+    return plan;
   }
 
   private Map<Long, BigDecimal> loadStock() {
     Map<Long, BigDecimal> stock = new HashMap<>();
-    List<RawMaterial> materials = RawMaterial.listAll();
+    List<RawMaterial> materials = rawMaterialRepository.listAllRawMaterials();
     for (RawMaterial rm : materials) {
       BigDecimal qty = rm.getStockQuantity() == null ? BigDecimal.ZERO : rm.getStockQuantity();
       stock.put(rm.getId(), qty);

@@ -13,13 +13,13 @@ import java.math.BigDecimal;
 import java.util.List;
 import org.autoflex.adapters.inbound.dto.response.ProductionCapacityDTO;
 import org.autoflex.adapters.inbound.dto.response.ProductionPlanResponseDTO;
-import org.autoflex.application.services.ProductionCapacityService;
+import org.autoflex.application.services.ProductionCapacityImpl;
 import org.junit.jupiter.api.Test;
 
 @QuarkusTest
 public class ProductionCapacityResourceTest {
 
-  @InjectMock ProductionCapacityService service;
+  @InjectMock ProductionCapacityImpl service;
 
   @Test
   void generate_shouldReturn401_whenUserIsNotAuthenticated() {

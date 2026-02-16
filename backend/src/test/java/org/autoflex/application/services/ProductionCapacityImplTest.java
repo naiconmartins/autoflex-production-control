@@ -24,9 +24,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 @QuarkusTest
-public class ProductionCapacityServiceTest {
+public class ProductionCapacityImplTest {
 
-  @Inject ProductionCapacityService service;
+  @Inject ProductionCapacityImpl service;
 
   @InjectMock EntityManager entityManager;
 

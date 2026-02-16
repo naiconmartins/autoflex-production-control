@@ -1,5 +1,6 @@
 package org.autoflex.application.gateways;
 
+import java.util.List;
 import java.util.Optional;
 import org.autoflex.application.dto.PagedModel;
 import org.autoflex.application.dto.SearchQuery;
@@ -17,4 +18,6 @@ public interface ProductRepository {
   PagedModel<Product> findAll(SearchQuery query);
 
   PagedModel<Product> findByName(String name, SearchQuery query);
+
+  List<Product> findAllOrderedByPriceDesc();
 }

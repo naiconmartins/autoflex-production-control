@@ -72,4 +72,11 @@ public class ProductPersistenceAdapter implements ProductRepository, JpaSortable
 
     return new PagedModel<>(items, panacheQuery.count(), panacheQuery.pageCount());
   }
+
+  @Override
+  public List<Product> findAllOrderedByPriceDesc() {
+    return jpaProductRepository.listAll(Sort.by("price").descending()).stream()
+        .map(mapper::toDomain)
+        .toList();
+  }
 }

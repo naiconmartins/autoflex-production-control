@@ -72,4 +72,9 @@ public class RawMaterialPersistenceAdapter implements RawMaterialRepository, Jpa
 
     return new PagedModel<>(items, panacheQuery.count(), panacheQuery.pageCount());
   }
+
+  @Override
+  public List<RawMaterial> listAllRawMaterials() {
+    return jpaRawMaterialRepository.listAll().stream().map(mapper::toDomain).toList();
+  }
 }

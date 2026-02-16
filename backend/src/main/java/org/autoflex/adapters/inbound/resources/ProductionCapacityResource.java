@@ -7,13 +7,13 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import org.autoflex.adapters.inbound.dto.response.ProductionPlanResponseDTO;
-import org.autoflex.application.services.ProductionCapacityService;
+import org.autoflex.application.services.ProductionCapacityImpl;
 
 @Path("/production-capacity")
 @Produces(MediaType.APPLICATION_JSON)
 public class ProductionCapacityResource {
 
-  @Inject ProductionCapacityService productionPlanService;
+  @Inject ProductionCapacityImpl productionPlanService;
 
   @GET
   @RolesAllowed({"ADMIN", "USER"})
