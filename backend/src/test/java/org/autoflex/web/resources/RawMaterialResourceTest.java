@@ -19,7 +19,7 @@ import org.autoflex.adapters.inbound.dto.request.PageRequestDTO;
 import org.autoflex.adapters.inbound.dto.request.RawMaterialRequestDTO;
 import org.autoflex.adapters.inbound.dto.response.PageResponseDTO;
 import org.autoflex.adapters.inbound.dto.response.RawMaterialResponseDTO;
-import org.autoflex.application.services.RawMaterialService;
+import org.autoflex.application.services.RawMaterialServiceImpl;
 import org.autoflex.factory.RawMaterialFactory;
 import org.autoflex.common.exceptions.ConflictException;
 import org.autoflex.common.exceptions.DatabaseException;
@@ -29,7 +29,7 @@ import org.junit.jupiter.api.Test;
 @QuarkusTest
 public class RawMaterialResourceTest {
 
-  @InjectMock RawMaterialService rawMaterialService;
+  @InjectMock RawMaterialServiceImpl rawMaterialServiceImpl;
 
   @Test
   void insert_shouldReturn401_whenUserIsNotAuthenticated() {
@@ -48,7 +48,7 @@ public class RawMaterialResourceTest {
     RawMaterialRequestDTO request = RawMaterialFactory.createRawMaterialRequestDTO();
     RawMaterialResponseDTO response = RawMaterialFactory.createRawMaterialResponseDTO();
 
-    when(rawMaterialService.insert(any(RawMaterialRequestDTO.class))).thenReturn(response);
+    when(rawMaterialServiceImpl.insert(any(RawMaterialRequestDTO.class))).thenReturn(response);
 
     given()
         .contentType(ContentType.JSON)
@@ -67,7 +67,7 @@ public class RawMaterialResourceTest {
     RawMaterialRequestDTO request = RawMaterialFactory.createRawMaterialRequestDTO();
     RawMaterialResponseDTO response = RawMaterialFactory.createRawMaterialResponseDTO();
 
-    when(rawMaterialService.insert(any(RawMaterialRequestDTO.class))).thenReturn(response);
+    when(rawMaterialServiceImpl.insert(any(RawMaterialRequestDTO.class))).thenReturn(response);
 
     given()
         .contentType(ContentType.JSON)
@@ -96,7 +96,7 @@ public class RawMaterialResourceTest {
   @Test
   @TestSecurity(user = "admin", roles = "ADMIN")
   void insert_shouldReturn409_whenCodeAlreadyExists() {
-    when(rawMaterialService.insert(any())).thenThrow(new ConflictException("Code exists"));
+    when(rawMaterialServiceImpl.insert(any())).thenThrow(new ConflictException("Code exists"));
 
     given()
         .contentType(ContentType.JSON)
@@ -121,7 +121,7 @@ public class RawMaterialResourceTest {
   @Test
   @TestSecurity(user = "user", roles = "USER")
   void update_shouldReturn404_whenIdDoesNotExist() {
-    when(rawMaterialService.update(eq(99L), any()))
+    when(rawMaterialServiceImpl.update(eq(99L), any()))
         .thenThrow(new ResourceNotFoundException("Not found"));
 
     given()
@@ -154,7 +154,8 @@ public class RawMaterialResourceTest {
     RawMaterialRequestDTO request = RawMaterialFactory.createRawMaterialRequestDTO();
     RawMaterialResponseDTO response = RawMaterialFactory.createRawMaterialResponseDTO();
 
-    when(rawMaterialService.update(eq(id), any(RawMaterialRequestDTO.class))).thenReturn(response);
+    when(rawMaterialServiceImpl.update(eq(id), any(RawMaterialRequestDTO.class)))
+        .thenReturn(response);
 
     given()
         .contentType(ContentType.JSON)
@@ -166,7 +167,7 @@ public class RawMaterialResourceTest {
         .body("id", is(1))
         .body("name", is(response.getName()));
 
-    verify(rawMaterialService).update(eq(id), any(RawMaterialRequestDTO.class));
+    verify(rawMaterialServiceImpl).update(eq(id), any(RawMaterialRequestDTO.class));
   }
 
   @Test
@@ -182,7 +183,7 @@ public class RawMaterialResourceTest {
         .then()
         .statusCode(422);
 
-    verify(rawMaterialService, never()).update(eq(1L), any(RawMaterialRequestDTO.class));
+    verify(rawMaterialServiceImpl, never()).update(eq(1L), any(RawMaterialRequestDTO.class));
   }
 
   @Test
@@ -191,7 +192,7 @@ public class RawMaterialResourceTest {
     Long id = 1L;
     RawMaterialRequestDTO request = RawMaterialFactory.createRawMaterialRequestDTO();
 
-    when(rawMaterialService.update(eq(id), any(RawMaterialRequestDTO.class)))
+    when(rawMaterialServiceImpl.update(eq(id), any(RawMaterialRequestDTO.class)))
         .thenThrow(new ConflictException("Raw material code already exists"));
 
     given()
@@ -219,13 +220,13 @@ public class RawMaterialResourceTest {
   void delete_shouldReturn204_whenIdExists() {
     given().when().delete("/raw-materials/1").then().statusCode(204);
 
-    verify(rawMaterialService).delete(1L);
+    verify(rawMaterialServiceImpl).delete(1L);
   }
 
   @Test
   @TestSecurity(user = "admin", roles = "ADMIN")
   void delete_shouldReturn400_whenDatabaseConflict() {
-    doThrow(new DatabaseException("Constraint violation")).when(rawMaterialService).delete(1L);
+    doThrow(new DatabaseException("Constraint violation")).when(rawMaterialServiceImpl).delete(1L);
 
     given().when().delete("/raw-materials/1").then().statusCode(400);
   }
@@ -236,7 +237,7 @@ public class RawMaterialResourceTest {
     Long invalidId = 99L;
 
     doThrow(new ResourceNotFoundException("Raw material not found"))
-        .when(rawMaterialService)
+        .when(rawMaterialServiceImpl)
         .delete(invalidId);
 
     given().when().delete("/raw-materials/{id}", invalidId).then().statusCode(404);
@@ -251,11 +252,11 @@ public class RawMaterialResourceTest {
   @TestSecurity(user = "user", roles = "USER")
   void findById_shouldReturn200_whenIdExists() {
     RawMaterialResponseDTO response = RawMaterialFactory.createRawMaterialResponseDTO();
-    when(rawMaterialService.findById(1L)).thenReturn(response);
+    when(rawMaterialServiceImpl.findById(1L)).thenReturn(response);
 
     given().when().get("/raw-materials/1").then().statusCode(200).body("code", is("RAW001"));
 
-    verify(rawMaterialService).findById(1L);
+    verify(rawMaterialServiceImpl).findById(1L);
   }
 
   @Test
@@ -263,7 +264,7 @@ public class RawMaterialResourceTest {
   void findById_shouldReturn404_whenIdDoesNotExist() {
     Long invalidId = 99L;
 
-    when(rawMaterialService.findById(invalidId))
+    when(rawMaterialServiceImpl.findById(invalidId))
         .thenThrow(new ResourceNotFoundException("Raw material not found"));
 
     given().when().get("/raw-materials/{id}", invalidId).then().statusCode(404);
@@ -281,7 +282,7 @@ public class RawMaterialResourceTest {
     PageResponseDTO<RawMaterialResponseDTO> pageResponse =
         new PageResponseDTO<>(List.of(r1), 1L, 1, 0, 10);
 
-    when(rawMaterialService.findAll(any(PageRequestDTO.class))).thenReturn(pageResponse);
+    when(rawMaterialServiceImpl.findAll(any(PageRequestDTO.class))).thenReturn(pageResponse);
 
     given()
         .queryParam("page", 0)
@@ -301,7 +302,7 @@ public class RawMaterialResourceTest {
     PageResponseDTO<RawMaterialResponseDTO> pageResponse =
         new PageResponseDTO<>(List.of(r1), 1L, 1, 1, 5);
 
-    when(rawMaterialService.findAll(any(PageRequestDTO.class))).thenReturn(pageResponse);
+    when(rawMaterialServiceImpl.findAll(any(PageRequestDTO.class))).thenReturn(pageResponse);
 
     given()
         .queryParam("page", 1)
@@ -315,7 +316,7 @@ public class RawMaterialResourceTest {
         .body("page", is(1))
         .body("size", is(5));
 
-    verify(rawMaterialService)
+    verify(rawMaterialServiceImpl)
         .findAll(
             argThat(
                 dto ->
@@ -336,7 +337,7 @@ public class RawMaterialResourceTest {
     RawMaterialResponseDTO r1 = RawMaterialFactory.createRawMaterialResponseDTO();
     PageResponseDTO<RawMaterialResponseDTO> pageResponse =
         new PageResponseDTO<>(List.of(r1), 1L, 1, 1, 5);
-    when(rawMaterialService.findByName(eq("steel"), any(PageRequestDTO.class)))
+    when(rawMaterialServiceImpl.findByName(eq("steel"), any(PageRequestDTO.class)))
         .thenReturn(pageResponse);
 
     given()
@@ -352,7 +353,7 @@ public class RawMaterialResourceTest {
         .body("totalElements", is(1))
         .body("content[0].code", is("RAW001"));
 
-    verify(rawMaterialService)
+    verify(rawMaterialServiceImpl)
         .findByName(
             eq("steel"),
             argThat(
@@ -368,7 +369,8 @@ public class RawMaterialResourceTest {
   void findByName_shouldReturn200AndEmptyList_whenNameIsBlank() {
     PageResponseDTO<RawMaterialResponseDTO> emptyPage =
         new PageResponseDTO<>(List.of(), 0L, 0, 0, 10);
-    when(rawMaterialService.findByName(eq("   "), any(PageRequestDTO.class))).thenReturn(emptyPage);
+    when(rawMaterialServiceImpl.findByName(eq("   "), any(PageRequestDTO.class)))
+        .thenReturn(emptyPage);
 
     given()
         .queryParam("name", "   ")
@@ -379,6 +381,6 @@ public class RawMaterialResourceTest {
         .body("content.size()", is(0))
         .body("totalElements", is(0));
 
-    verify(rawMaterialService).findByName(eq("   "), any(PageRequestDTO.class));
+    verify(rawMaterialServiceImpl).findByName(eq("   "), any(PageRequestDTO.class));
   }
 }

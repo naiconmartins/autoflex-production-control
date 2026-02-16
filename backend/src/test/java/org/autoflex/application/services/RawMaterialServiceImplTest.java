@@ -29,9 +29,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 @QuarkusTest
-public class RawMaterialServiceTest {
+public class RawMaterialServiceImplTest {
 
-  @Inject RawMaterialService rawMaterialService;
+  @Inject RawMaterialServiceImpl rawMaterialServiceImpl;
 
   @InjectMock EntityManager entityManager;
 
@@ -90,7 +90,7 @@ public class RawMaterialServiceTest {
     mockFindByCode(null);
     doNothing().when(entityManager).persist(any(RawMaterial.class));
 
-    RawMaterialResponseDTO result = rawMaterialService.insert(dto);
+    RawMaterialResponseDTO result = rawMaterialServiceImpl.insert(dto);
 
     assertRawMaterialEquals(result, dto);
     verify(entityManager, times(1)).persist(any(RawMaterial.class));
@@ -100,7 +100,7 @@ public class RawMaterialServiceTest {
   void insert_shouldThrowConflictException_whenCodeAlreadyExists() {
     mockFindByCode(existingRawMaterial);
 
-    assertThrows(ConflictException.class, () -> rawMaterialService.insert(dto));
+    assertThrows(ConflictException.class, () -> rawMaterialServiceImpl.insert(dto));
     verify(entityManager, never()).persist(any());
   }
 
@@ -110,7 +110,7 @@ public class RawMaterialServiceTest {
     mockFindById(id, existingRawMaterial);
     mockFindByCode(null);
 
-    RawMaterialResponseDTO result = rawMaterialService.update(id, dto);
+    RawMaterialResponseDTO result = rawMaterialServiceImpl.update(id, dto);
 
     assertRawMaterialEquals(result, dto);
 
@@ -123,7 +123,7 @@ public class RawMaterialServiceTest {
   void update_shouldThrowResourceNotFoundException_whenIdNotFound() {
     mockFindById(id, null);
 
-    assertThrows(ResourceNotFoundException.class, () -> rawMaterialService.update(id, dto));
+    assertThrows(ResourceNotFoundException.class, () -> rawMaterialServiceImpl.update(id, dto));
   }
 
   @Test
@@ -136,7 +136,7 @@ public class RawMaterialServiceTest {
     mockFindById(id, existingRawMaterial);
     mockFindByCode(otherEntity);
 
-    assertThrows(ConflictException.class, () -> rawMaterialService.update(id, dto));
+    assertThrows(ConflictException.class, () -> rawMaterialServiceImpl.update(id, dto));
   }
 
   @Test
@@ -146,7 +146,7 @@ public class RawMaterialServiceTest {
     mockFindById(id, existingRawMaterial);
     mockFindByCode(existingRawMaterial);
 
-    RawMaterialResponseDTO result = rawMaterialService.update(id, dto);
+    RawMaterialResponseDTO result = rawMaterialServiceImpl.update(id, dto);
 
     assertNotNull(result);
     assertEquals(dto.code, result.code);
@@ -158,7 +158,7 @@ public class RawMaterialServiceTest {
     mockFindById(id, existingRawMaterial);
     when(PanacheMock.getMock(RawMaterial.class).deleteById(id)).thenReturn(true);
 
-    assertDoesNotThrow(() -> rawMaterialService.delete(id));
+    assertDoesNotThrow(() -> rawMaterialServiceImpl.delete(id));
     verify(entityManager, times(1)).flush();
   }
 
@@ -166,7 +166,7 @@ public class RawMaterialServiceTest {
   void delete_shouldThrowResourceNotFoundException_whenIdNotFound() {
     mockFindById(id, null);
 
-    assertThrows(ResourceNotFoundException.class, () -> rawMaterialService.delete(id));
+    assertThrows(ResourceNotFoundException.class, () -> rawMaterialServiceImpl.delete(id));
   }
 
   @Test
@@ -179,7 +179,7 @@ public class RawMaterialServiceTest {
         .deleteById(id);
 
     DatabaseException exception =
-        assertThrows(DatabaseException.class, () -> rawMaterialService.delete(id));
+        assertThrows(DatabaseException.class, () -> rawMaterialServiceImpl.delete(id));
 
     assertEquals(
         "Cannot delete raw material because it is referenced by other records",
@@ -192,7 +192,7 @@ public class RawMaterialServiceTest {
     existingRawMaterial.setId(id);
     mockFindById(id, existingRawMaterial);
 
-    RawMaterialResponseDTO result = rawMaterialService.findById(id);
+    RawMaterialResponseDTO result = rawMaterialServiceImpl.findById(id);
 
     assertNotNull(result);
     assertEquals(existingRawMaterial.getCode(), result.code);
@@ -204,7 +204,7 @@ public class RawMaterialServiceTest {
   void findById_shouldThrowResourceNotFoundException_whenIdNotFound() {
     mockFindById(id, null);
 
-    assertThrows(ResourceNotFoundException.class, () -> rawMaterialService.findById(id));
+    assertThrows(ResourceNotFoundException.class, () -> rawMaterialServiceImpl.findById(id));
   }
 
   @Test
@@ -219,7 +219,7 @@ public class RawMaterialServiceTest {
 
     mockFindAll(materials, 3L, 1);
 
-    PageResponseDTO<RawMaterialResponseDTO> result = rawMaterialService.findAll(pageRequest);
+    PageResponseDTO<RawMaterialResponseDTO> result = rawMaterialServiceImpl.findAll(pageRequest);
 
     assertNotNull(result);
     assertEquals(3, result.content.size());
@@ -241,7 +241,7 @@ public class RawMaterialServiceTest {
 
     mockFindAll(materials, 3L, 1);
 
-    PageResponseDTO<RawMaterialResponseDTO> result = rawMaterialService.findAll(pageRequest);
+    PageResponseDTO<RawMaterialResponseDTO> result = rawMaterialServiceImpl.findAll(pageRequest);
 
     assertNotNull(result);
     assertEquals(3, result.content.size());
@@ -254,7 +254,7 @@ public class RawMaterialServiceTest {
 
     mockFindAll(List.of(), 0L, 0);
 
-    PageResponseDTO<RawMaterialResponseDTO> result = rawMaterialService.findAll(pageRequest);
+    PageResponseDTO<RawMaterialResponseDTO> result = rawMaterialServiceImpl.findAll(pageRequest);
 
     assertNotNull(result);
     assertEquals(0, result.content.size());
@@ -273,7 +273,7 @@ public class RawMaterialServiceTest {
 
     mockFindAll(materials, 5L, 3);
 
-    PageResponseDTO<RawMaterialResponseDTO> result = rawMaterialService.findAll(pageRequest);
+    PageResponseDTO<RawMaterialResponseDTO> result = rawMaterialServiceImpl.findAll(pageRequest);
 
     assertNotNull(result);
     assertEquals(2, result.content.size());
@@ -304,7 +304,7 @@ public class RawMaterialServiceTest {
     mockFindByName(List.of(m1, m2), 2L, 1);
 
     PageResponseDTO<RawMaterialResponseDTO> result =
-        rawMaterialService.findByName("steel", pageRequest);
+        rawMaterialServiceImpl.findByName("steel", pageRequest);
 
     assertNotNull(result);
     assertEquals(2, result.content.size());
@@ -322,7 +322,7 @@ public class RawMaterialServiceTest {
     mockFindByName(List.of(m1), 1L, 1);
 
     PageResponseDTO<RawMaterialResponseDTO> result =
-        rawMaterialService.findByName("StEeL", pageRequest);
+        rawMaterialServiceImpl.findByName("StEeL", pageRequest);
 
     assertEquals(1, result.content.size());
     assertEquals("RM-1", result.content.getFirst().code);
@@ -336,7 +336,7 @@ public class RawMaterialServiceTest {
     mockFindByName(List.of(m1), 1L, 1);
 
     PageResponseDTO<RawMaterialResponseDTO> result =
-        rawMaterialService.findByName("rm", pageRequest);
+        rawMaterialServiceImpl.findByName("rm", pageRequest);
 
     assertNotNull(result);
     assertEquals(1, result.content.size());
@@ -356,7 +356,7 @@ public class RawMaterialServiceTest {
     mockFindByName(List.of(m1, m2), 2L, 1);
 
     PageResponseDTO<RawMaterialResponseDTO> result =
-        rawMaterialService.findByName("steel", pageRequest);
+        rawMaterialServiceImpl.findByName("steel", pageRequest);
 
     assertNotNull(result);
     assertEquals(2, result.content.size());
@@ -370,7 +370,7 @@ public class RawMaterialServiceTest {
   void findByName_shouldReturnEmptyList_whenNameIsBlank() {
     PageRequestDTO pageRequest = new PageRequestDTO(1, 5, "name", "asc");
     PageResponseDTO<RawMaterialResponseDTO> result =
-        rawMaterialService.findByName("   ", pageRequest);
+        rawMaterialServiceImpl.findByName("   ", pageRequest);
 
     assertNotNull(result);
     assertTrue(result.content.isEmpty());
@@ -385,7 +385,7 @@ public class RawMaterialServiceTest {
     PageRequestDTO pageRequest = new PageRequestDTO(-1, 0, null, null);
 
     PageResponseDTO<RawMaterialResponseDTO> result =
-        rawMaterialService.findByName(null, pageRequest);
+        rawMaterialServiceImpl.findByName(null, pageRequest);
 
     assertNotNull(result);
     assertTrue(result.content.isEmpty());

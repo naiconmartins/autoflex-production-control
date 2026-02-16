@@ -3,7 +3,6 @@ package org.autoflex.application.services;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
-import java.util.List;
 import org.autoflex.application.commands.ProductCommand;
 import org.autoflex.application.dto.PagedModel;
 import org.autoflex.application.dto.SearchQuery;
@@ -25,9 +24,12 @@ public class ProductServiceImpl implements ProductUseCase {
   @Override
   @Transactional
   public Product insert(ProductCommand cmd) {
-    if (productRepository.findByCode(cmd.code()).isPresent()) {
-      throw new ConflictException("Product code already exists");
-    }
+    productRepository
+        .findByCode(cmd.code())
+        .ifPresent(
+            e -> {
+              throw new ConflictException("Product code already exists");
+            });
 
     Product product = new Product(cmd.code(), cmd.name(), cmd.price());
 
@@ -115,9 +117,6 @@ public class ProductServiceImpl implements ProductUseCase {
 
   @Override
   public PagedModel<Product> findByName(String name, SearchQuery query) {
-    if (name == null || name.isBlank()) {
-      return new PagedModel<>(List.of(), 0, 0);
-    }
     return productRepository.findByName(name, query);
   }
 }

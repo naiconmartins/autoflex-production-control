@@ -13,6 +13,7 @@ import lombok.*;
     name = "raw_materials",
     uniqueConstraints = {@UniqueConstraint(name = "uk_raw_material_code", columnNames = "code")})
 public class JpaRawMaterialEntity {
+
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;

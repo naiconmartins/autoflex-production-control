@@ -40,7 +40,7 @@ public class ProductResource {
   @POST
   @RolesAllowed({"ADMIN", "USER"})
   public Response insert(@Valid ProductRequestDTO dto) {
-    ProductCommand cmd = mapper.toInsertCommand(dto);
+    ProductCommand cmd = mapper.toCommand(dto);
     Product created = productUseCase.insert(cmd);
     ProductResponseDTO response = new ProductResponseDTO(created);
 
@@ -53,7 +53,7 @@ public class ProductResource {
   @Path("/{id}")
   @RolesAllowed({"ADMIN", "USER"})
   public Response update(@PathParam("id") Long id, @Valid ProductRequestDTO dto) {
-    ProductCommand cmd = mapper.toInsertCommand(dto);
+    ProductCommand cmd = mapper.toCommand(dto);
     Product product = productUseCase.update(id, cmd);
     ProductResponseDTO response = new ProductResponseDTO(product);
     return Response.ok(response).build();

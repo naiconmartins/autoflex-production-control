@@ -1,19 +1,19 @@
-package org.autoflex.application.gateways;
+package org.autoflex.application.usecases;
 
-import java.util.Optional;
+import org.autoflex.application.commands.RawMaterialCommand;
 import org.autoflex.application.dto.PagedModel;
 import org.autoflex.application.dto.SearchQuery;
 import org.autoflex.domain.RawMaterial;
 
-public interface RawMaterialRepository {
+public interface RawMaterialUseCase {
 
-  RawMaterial save(RawMaterial rawMaterial);
+  RawMaterial insert(RawMaterialCommand cmd);
 
-  Optional<RawMaterial> findById(Long id);
-
-  Optional<RawMaterial> findByCode(String code);
+  RawMaterial update(Long id, RawMaterialCommand cmd);
 
   void delete(Long id);
+
+  RawMaterial findById(Long id);
 
   PagedModel<RawMaterial> findAll(SearchQuery query);
 

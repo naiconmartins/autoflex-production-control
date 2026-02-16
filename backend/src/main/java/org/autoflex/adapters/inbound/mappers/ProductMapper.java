@@ -13,7 +13,7 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "cdi")
 public interface ProductMapper {
 
-  ProductCommand toInsertCommand(ProductRequestDTO dto);
+  ProductCommand toCommand(ProductRequestDTO dto);
 
   @Mapping(source = "id", target = "rawMaterialId")
   @Mapping(source = "requiredQuantity", target = "requiredQuantity")
