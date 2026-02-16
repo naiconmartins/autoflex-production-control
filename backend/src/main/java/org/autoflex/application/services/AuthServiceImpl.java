@@ -10,12 +10,13 @@ import org.autoflex.application.dto.TokenData;
 import org.autoflex.application.gateways.PasswordEncoder;
 import org.autoflex.application.gateways.TokenIssuer;
 import org.autoflex.application.gateways.UserRepository;
+import org.autoflex.application.usecases.AuthUseCase;
 import org.autoflex.common.exceptions.UnauthorizedException;
 import org.autoflex.domain.User;
 import org.autoflex.domain.UserRole;
 
 @ApplicationScoped
-public class AuthServiceImpl {
+public class AuthServiceImpl implements AuthUseCase {
 
   @Inject PasswordEncoder passwordEncoder;
   @Inject TokenIssuer tokenIssuer;

@@ -35,7 +35,7 @@ public class ProductRawMaterialResource {
       @PathParam("productId") Long productId, @Valid ProductRawMaterialRequestDTO dto) {
     ProductRawMaterialCommand cmd = mapper.toCommand(dto);
     ProductRawMaterial created = service.add(productId, cmd);
-    ProductRawMaterialResponseDTO response = mapper.toResponse(created);
+    ProductRawMaterialResponseDTO response = new ProductRawMaterialResponseDTO(created);
     return Response.status(Response.Status.CREATED).entity(response).build();
   }
 
@@ -56,7 +56,7 @@ public class ProductRawMaterialResource {
       @Valid ProductRawMaterialRequestDTO dto) {
     ProductRawMaterialCommand cmd = mapper.toCommand(dto);
     ProductRawMaterial updated = service.updateRequiredQuantity(productId, rawMaterialId, cmd);
-    ProductRawMaterialResponseDTO response = mapper.toResponse(updated);
+    ProductRawMaterialResponseDTO response = new ProductRawMaterialResponseDTO(updated);
     return Response.ok(response).build();
   }
 

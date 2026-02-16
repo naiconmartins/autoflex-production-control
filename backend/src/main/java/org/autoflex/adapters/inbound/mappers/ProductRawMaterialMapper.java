@@ -15,8 +15,6 @@ public interface ProductRawMaterialMapper {
   @Mapping(source = "requiredQuantity", target = "requiredQuantity")
   ProductRawMaterialCommand toCommand(ProductRawMaterialRequestDTO dto);
 
-  ProductRawMaterialResponseDTO toResponse(ProductRawMaterial dto);
-
   List<ProductRawMaterialResponseDTO> toList(List<ProductRawMaterial> list);
 
   default ProductRawMaterialResponseDTO map(ProductRawMaterial prm) {

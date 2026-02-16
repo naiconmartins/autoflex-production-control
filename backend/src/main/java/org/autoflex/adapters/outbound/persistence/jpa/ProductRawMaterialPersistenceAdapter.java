@@ -1,5 +1,6 @@
 package org.autoflex.adapters.outbound.persistence.jpa;
 
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import java.util.List;
 import java.util.Optional;
@@ -9,6 +10,7 @@ import org.autoflex.adapters.outbound.persistence.jpa.repositories.JpaProductRaw
 import org.autoflex.application.gateways.ProductRawMaterialRepository;
 import org.autoflex.domain.ProductRawMaterial;
 
+@ApplicationScoped
 public class ProductRawMaterialPersistenceAdapter implements ProductRawMaterialRepository {
 
   @Inject JpaProductRawMaterialRepository jpaProductRawMaterialRepository;

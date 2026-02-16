@@ -14,6 +14,5 @@ public interface RawMaterialPersistenceMapper {
   JpaRawMaterialEntity toEntity(RawMaterial dto);
 
   @Mapping(target = "id", ignore = true)
-  @Mapping(target = "createdAt", ignore = true)
   void updateEntityFromDomain(RawMaterial domain, @MappingTarget JpaRawMaterialEntity entity);
 }

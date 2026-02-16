@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-import io.quarkus.test.Mock;
 import java.util.Optional;
 import org.autoflex.application.commands.LoginCommand;
 import org.autoflex.application.dto.TokenData;
@@ -15,9 +14,11 @@ import org.autoflex.application.gateways.UserRepository;
 import org.autoflex.common.exceptions.UnauthorizedException;
 import org.autoflex.fixtures.UserFixture;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
@@ -31,6 +32,7 @@ public class AuthServiceImplTest {
 
   private LoginCommand cmd;
 
+  @BeforeEach
   void setUp() {
     cmd = new LoginCommand("email@test.com", "1234");
   }
@@ -73,9 +75,13 @@ public class AuthServiceImplTest {
 
   @Test
   void authenticate_shouldThrowUnauthorized_whenPasswordDoesNotMatch() {
-    when(passwordEncoder.matches(anyString(), anyString())).thenReturn(false);
+    var validUser = UserFixture.createValidUser();
+
+    when(userRepository.findByEmail(cmd.email())).thenReturn(Optional.of(validUser));
+    when(passwordEncoder.matches(eq(cmd.password()), anyString())).thenReturn(false);
 
     Assertions.assertThrows(UnauthorizedException.class, () -> authService.authenticate(cmd));
+
     verifyNoInteractions(tokenIssuer);
   }
 

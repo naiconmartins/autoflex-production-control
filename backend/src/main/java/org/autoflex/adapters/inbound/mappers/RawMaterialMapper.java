@@ -6,8 +6,10 @@ import org.autoflex.adapters.inbound.dto.response.RawMaterialResponseDTO;
 import org.autoflex.application.commands.RawMaterialCommand;
 import org.autoflex.application.dto.PagedModel;
 import org.autoflex.domain.RawMaterial;
+import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
+@Mapper(componentModel = "cdi")
 public interface RawMaterialMapper {
 
   RawMaterialCommand toCommand(RawMaterialRequestDTO dto);

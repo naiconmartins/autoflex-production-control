@@ -22,7 +22,10 @@ public class JpaUserEntity {
   @Column(unique = true, nullable = false, length = 255)
   private String email;
 
+  @Column(name = "first_name", length = 100)
   private String firstName;
+
+  @Column(name = "last_name", length = 100)
   private String lastName;
 
   @Column(name = "password_hash", nullable = false, length = 255)

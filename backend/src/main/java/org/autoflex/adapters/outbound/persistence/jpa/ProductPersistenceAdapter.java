@@ -3,6 +3,7 @@ package org.autoflex.adapters.outbound.persistence.jpa;
 import io.quarkus.hibernate.orm.panache.PanacheQuery;
 import io.quarkus.panache.common.Page;
 import io.quarkus.panache.common.Sort;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import java.util.List;
 import java.util.Optional;
@@ -14,6 +15,7 @@ import org.autoflex.application.dto.SearchQuery;
 import org.autoflex.application.gateways.ProductRepository;
 import org.autoflex.domain.Product;
 
+@ApplicationScoped
 public class ProductPersistenceAdapter implements ProductRepository, JpaSortable {
 
   @Inject JpaProductRepository jpaProductRepository;

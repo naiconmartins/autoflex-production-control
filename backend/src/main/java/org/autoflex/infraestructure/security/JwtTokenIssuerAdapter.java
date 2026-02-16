@@ -1,12 +1,14 @@
 package org.autoflex.infraestructure.security;
 
 import io.smallrye.jwt.build.Jwt;
+import jakarta.enterprise.context.ApplicationScoped;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Set;
 import org.autoflex.application.dto.TokenData;
 import org.autoflex.application.gateways.TokenIssuer;
 
+@ApplicationScoped
 public class JwtTokenIssuerAdapter implements TokenIssuer {
 
   private static final Duration TOKEN_DURATION = Duration.ofHours(2);
