@@ -16,27 +16,35 @@ import jakarta.ws.rs.core.Response;
 import java.util.List;
 import org.autoflex.adapters.inbound.dto.request.ProductRawMaterialRequestDTO;
 import org.autoflex.adapters.inbound.dto.response.ProductRawMaterialResponseDTO;
-import org.autoflex.application.services.ProductRawMaterialService;
+import org.autoflex.adapters.inbound.mappers.ProductRawMaterialMapper;
+import org.autoflex.application.commands.ProductRawMaterialCommand;
+import org.autoflex.application.usecases.ProductRawMaterialUseCase;
+import org.autoflex.domain.ProductRawMaterial;
 
 @Path("/products/{productId}/raw-materials")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class ProductRawMaterialResource {
 
-  @Inject ProductRawMaterialService service;
+  @Inject ProductRawMaterialUseCase service;
+  @Inject ProductRawMaterialMapper mapper;
 
   @POST
   @RolesAllowed({"ADMIN", "USER"})
   public Response add(
       @PathParam("productId") Long productId, @Valid ProductRawMaterialRequestDTO dto) {
-    ProductRawMaterialResponseDTO created = service.add(productId, dto);
-    return Response.status(Response.Status.CREATED).entity(created).build();
+    ProductRawMaterialCommand cmd = mapper.toCommand(dto);
+    ProductRawMaterial created = service.add(productId, cmd);
+    ProductRawMaterialResponseDTO response = mapper.toResponse(created);
+    return Response.status(Response.Status.CREATED).entity(response).build();
   }
 
   @GET
   @RolesAllowed({"ADMIN", "USER"})
-  public List<ProductRawMaterialResponseDTO> list(@PathParam("productId") Long productId) {
-    return service.listByProduct(productId);
+  public Response list(@PathParam("productId") Long productId) {
+    List<ProductRawMaterial> list = service.listByProduct(productId);
+    List<ProductRawMaterialResponseDTO> response = mapper.toList(list);
+    return Response.ok().entity(response).build();
   }
 
   @PUT
@@ -46,9 +54,10 @@ public class ProductRawMaterialResource {
       @PathParam("productId") Long productId,
       @PathParam("rawMaterialId") Long rawMaterialId,
       @Valid ProductRawMaterialRequestDTO dto) {
-    ProductRawMaterialResponseDTO updated =
-        service.updateRequiredQuantity(productId, rawMaterialId, dto);
-    return Response.ok(updated).build();
+    ProductRawMaterialCommand cmd = mapper.toCommand(dto);
+    ProductRawMaterial updated = service.updateRequiredQuantity(productId, rawMaterialId, cmd);
+    ProductRawMaterialResponseDTO response = mapper.toResponse(updated);
+    return Response.ok(response).build();
   }
 
   @DELETE

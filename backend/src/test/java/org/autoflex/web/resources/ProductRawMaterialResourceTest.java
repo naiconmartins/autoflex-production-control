@@ -18,16 +18,17 @@ import java.math.BigDecimal;
 import java.util.List;
 import org.autoflex.adapters.inbound.dto.request.ProductRawMaterialRequestDTO;
 import org.autoflex.adapters.inbound.dto.response.ProductRawMaterialResponseDTO;
-import org.autoflex.application.services.ProductRawMaterialService;
-import org.autoflex.factory.ProductRawMaterialFactory;
+import org.autoflex.application.services.ProductRawMaterialServiceImpl;
 import org.autoflex.common.exceptions.ConflictException;
 import org.autoflex.common.exceptions.ResourceNotFoundException;
+import org.autoflex.factory.ProductRawMaterialFactory;
 import org.junit.jupiter.api.Test;
 
 @QuarkusTest
 public class ProductRawMaterialResourceTest {
 
-  @InjectMock ProductRawMaterialService service;
+  @InjectMock
+  ProductRawMaterialServiceImpl service;
 
   @Test
   void add_shouldReturn401_whenUserIsNotAuthenticated() {
