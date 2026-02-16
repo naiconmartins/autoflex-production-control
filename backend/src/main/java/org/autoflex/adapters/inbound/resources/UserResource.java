@@ -12,7 +12,7 @@ import org.autoflex.adapters.inbound.dto.request.UserRequestDTO;
 import org.autoflex.adapters.inbound.dto.response.UserResponseDTO;
 import org.autoflex.adapters.inbound.mappers.UserMapper;
 import org.autoflex.application.commands.InsertUserCommand;
-import org.autoflex.application.usecases.UserUseCases;
+import org.autoflex.application.usecases.UserUseCase;
 import org.autoflex.domain.User;
 
 @Path("/user")
@@ -20,7 +20,7 @@ import org.autoflex.domain.User;
 @Produces(MediaType.APPLICATION_JSON)
 public class UserResource {
 
-  @Inject UserUseCases userService;
+  @Inject UserUseCase userService;
   @Inject UserMapper userMapper;
   @Inject SecurityIdentity securityIdentity;
 

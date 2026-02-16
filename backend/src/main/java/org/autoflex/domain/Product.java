@@ -20,6 +20,21 @@ public class Product {
     this.price = price;
   }
 
+  public void addRawMaterial(RawMaterial material, BigDecimal quantity) {
+    ProductRawMaterial association = new ProductRawMaterial(this, material, quantity);
+    this.rawMaterials.add(association);
+  }
+
+  public void updateData(String code, String name, BigDecimal price) {
+    this.code = code;
+    this.name = name;
+    this.price = price;
+  }
+
+  public void clearRawMaterials() {
+    this.rawMaterials.clear();
+  }
+
   public Long getId() {
     return id;
   }

@@ -21,10 +21,10 @@ import org.autoflex.adapters.inbound.dto.request.ProductRawMaterialRequestDTO;
 import org.autoflex.adapters.inbound.dto.request.ProductRequestDTO;
 import org.autoflex.adapters.inbound.dto.response.PageResponseDTO;
 import org.autoflex.adapters.inbound.dto.response.ProductResponseDTO;
+import org.autoflex.application.services.ProductServiceImpl;
 import org.autoflex.common.exceptions.ConflictException;
 import org.autoflex.common.exceptions.DatabaseException;
 import org.autoflex.common.exceptions.ResourceNotFoundException;
-import org.autoflex.application.services.ProductService;
 import org.autoflex.factory.ProductFactory;
 import org.autoflex.factory.ProductRawMaterialFactory;
 import org.junit.jupiter.api.Test;
@@ -32,7 +32,8 @@ import org.junit.jupiter.api.Test;
 @QuarkusTest
 public class ProductResourceTest {
 
-  @InjectMock ProductService productService;
+  @InjectMock
+  ProductServiceImpl productServiceImpl;
 
   @Test
   void insert_shouldReturn401_whenUserIsNotAuthenticated() {
@@ -53,7 +54,7 @@ public class ProductResourceTest {
     ProductRequestDTO request = ProductFactory.createProductRequestDTOWithRawMaterials();
     ProductResponseDTO response = ProductFactory.createProductResponseDTOWithRawMaterials();
 
-    when(productService.insert(any(ProductRequestDTO.class))).thenReturn(response);
+    when(productServiceImpl.insert(any(ProductRequestDTO.class))).thenReturn(response);
 
     given()
         .contentType(ContentType.JSON)
@@ -72,7 +73,7 @@ public class ProductResourceTest {
     ProductRequestDTO request = ProductFactory.createProductRequestDTOWithRawMaterials();
     ProductResponseDTO response = ProductFactory.createProductResponseDTOWithRawMaterials();
 
-    when(productService.insert(any(ProductRequestDTO.class))).thenReturn(response);
+    when(productServiceImpl.insert(any(ProductRequestDTO.class))).thenReturn(response);
 
     given()
         .contentType(ContentType.JSON)
@@ -121,7 +122,7 @@ public class ProductResourceTest {
   void insert_shouldReturn409_whenCodeAlreadyExists() {
     ProductRequestDTO request = ProductFactory.createProductRequestDTOWithRawMaterials();
 
-    when(productService.insert(any(ProductRequestDTO.class)))
+    when(productServiceImpl.insert(any(ProductRequestDTO.class)))
         .thenThrow(new ConflictException("Product code already exists"));
 
     given()
@@ -138,7 +139,7 @@ public class ProductResourceTest {
   void insert_shouldReturn404_whenRawMaterialNotFound() {
     ProductRequestDTO request = ProductFactory.createProductRequestDTOWithRawMaterials();
 
-    when(productService.insert(any(ProductRequestDTO.class)))
+    when(productServiceImpl.insert(any(ProductRequestDTO.class)))
         .thenThrow(new ResourceNotFoundException("Raw material not found"));
 
     given()
@@ -157,7 +158,7 @@ public class ProductResourceTest {
     ProductRequestDTO request = ProductFactory.createProductRequestDTOWithRawMaterials();
     ProductResponseDTO response = ProductFactory.createProductResponseDTOWithRawMaterials();
 
-    when(productService.update(eq(id), any(ProductRequestDTO.class))).thenReturn(response);
+    when(productServiceImpl.update(eq(id), any(ProductRequestDTO.class))).thenReturn(response);
 
     given()
         .contentType(ContentType.JSON)
@@ -177,7 +178,7 @@ public class ProductResourceTest {
     ProductRequestDTO request = ProductFactory.createProductRequestDTOWithRawMaterials();
     ProductResponseDTO response = ProductFactory.createProductResponseDTOWithRawMaterials();
 
-    when(productService.update(eq(id), any(ProductRequestDTO.class))).thenReturn(response);
+    when(productServiceImpl.update(eq(id), any(ProductRequestDTO.class))).thenReturn(response);
 
     given()
         .contentType(ContentType.JSON)
@@ -204,7 +205,7 @@ public class ProductResourceTest {
         .then()
         .statusCode(422);
 
-    verify(productService, never()).update(eq(1L), any(ProductRequestDTO.class));
+    verify(productServiceImpl, never()).update(eq(1L), any(ProductRequestDTO.class));
   }
 
   @Test
@@ -213,7 +214,7 @@ public class ProductResourceTest {
     Long id = 1L;
     ProductRequestDTO request = ProductFactory.createProductRequestDTOWithRawMaterials();
 
-    when(productService.update(eq(id), any(ProductRequestDTO.class)))
+    when(productServiceImpl.update(eq(id), any(ProductRequestDTO.class)))
         .thenThrow(new ConflictException("Product code already exists"));
 
     given()
@@ -231,7 +232,7 @@ public class ProductResourceTest {
     Long id = 1L;
     ProductRequestDTO request = ProductFactory.createProductRequestDTOWithRawMaterials();
 
-    when(productService.update(eq(id), any(ProductRequestDTO.class)))
+    when(productServiceImpl.update(eq(id), any(ProductRequestDTO.class)))
         .thenThrow(new ResourceNotFoundException("Raw material not found"));
 
     given()
@@ -249,7 +250,7 @@ public class ProductResourceTest {
     Long invalidId = 99L;
     ProductRequestDTO request = ProductFactory.createProductRequestDTOWithRawMaterials();
 
-    when(productService.update(eq(invalidId), any(ProductRequestDTO.class)))
+    when(productServiceImpl.update(eq(invalidId), any(ProductRequestDTO.class)))
         .thenThrow(new ResourceNotFoundException("Product not found"));
 
     given()
@@ -280,7 +281,7 @@ public class ProductResourceTest {
   void delete_shouldReturn400_whenDatabaseExceptionOccurs() {
     Long id = 1L;
 
-    doThrow(new DatabaseException("Cannot delete product...")).when(productService).delete(id);
+    doThrow(new DatabaseException("Cannot delete product...")).when(productServiceImpl).delete(id);
 
     given().when().delete("/products/{id}", id).then().statusCode(400);
   }
@@ -291,7 +292,7 @@ public class ProductResourceTest {
     Long id = 1L;
     ProductResponseDTO response = ProductFactory.createProductResponseDTOWithRawMaterials();
 
-    when(productService.findById(id)).thenReturn(response);
+    when(productServiceImpl.findById(id)).thenReturn(response);
 
     given()
         .when()
@@ -307,7 +308,7 @@ public class ProductResourceTest {
   void findById_shouldReturn404_whenIdDoesNotExist() {
     Long invalidId = 99L;
 
-    when(productService.findById(invalidId))
+    when(productServiceImpl.findById(invalidId))
         .thenThrow(new ResourceNotFoundException("Product with id " + invalidId + " not found"));
 
     given().when().get("/products/{id}", invalidId).then().statusCode(404);
@@ -321,7 +322,7 @@ public class ProductResourceTest {
     PageResponseDTO<ProductResponseDTO> pageResponse =
         new PageResponseDTO<>(List.of(p1), 1L, 1, 0, 10);
 
-    when(productService.findAll(any(PageRequestDTO.class))).thenReturn(pageResponse);
+    when(productServiceImpl.findAll(any(PageRequestDTO.class))).thenReturn(pageResponse);
 
     given()
         .queryParam("page", 0)
@@ -376,7 +377,7 @@ public class ProductResourceTest {
     PageResponseDTO<ProductResponseDTO> pageResponse =
         new PageResponseDTO<>(List.of(p1), 1L, 1, 1, 5);
 
-    when(productService.findByName(eq("steel"), any(PageRequestDTO.class)))
+    when(productServiceImpl.findByName(eq("steel"), any(PageRequestDTO.class)))
         .thenReturn(pageResponse);
 
     given()
@@ -394,7 +395,7 @@ public class ProductResourceTest {
         .body("page", is(1))
         .body("size", is(5));
 
-    verify(productService)
+    verify(productServiceImpl)
         .findByName(
             eq("steel"),
             argThat(

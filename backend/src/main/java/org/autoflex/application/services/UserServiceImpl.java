@@ -7,17 +7,18 @@ import java.util.Optional;
 import org.autoflex.application.commands.InsertUserCommand;
 import org.autoflex.application.gateways.PasswordEncoder;
 import org.autoflex.application.gateways.UserRepository;
-import org.autoflex.application.usecases.UserUseCases;
+import org.autoflex.application.usecases.UserUseCase;
 import org.autoflex.common.exceptions.*;
 import org.autoflex.domain.User;
 import org.autoflex.domain.UserRole;
 
 @ApplicationScoped
-public class UserServiceImpl implements UserUseCases {
+public class UserServiceImpl implements UserUseCase {
 
   @Inject PasswordEncoder hasher;
   @Inject UserRepository userRepository;
 
+  @Override
   @Transactional
   public User insert(InsertUserCommand dto) {
 
@@ -53,6 +54,7 @@ public class UserServiceImpl implements UserUseCases {
     return user;
   }
 
+  @Override
   @Transactional
   public User findByEmail(String email) {
     return userRepository

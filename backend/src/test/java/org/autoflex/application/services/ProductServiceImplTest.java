@@ -30,9 +30,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 @QuarkusTest
-public class ProductServiceTest {
+public class ProductServiceImplTest {
 
-  @Inject ProductService productService;
+  @Inject ProductServiceImpl productServiceImpl;
 
   @InjectMock EntityManager entityManager;
 
@@ -105,7 +105,7 @@ public class ProductServiceTest {
     mockFindByCode(null);
     doNothing().when(entityManager).persist(any(Product.class));
 
-    ProductResponseDTO result = productService.insert(dto);
+    ProductResponseDTO result = productServiceImpl.insert(dto);
 
     assertProductEquals(result, dto);
     verify(entityManager, times(1)).persist(any(Product.class));
@@ -125,7 +125,7 @@ public class ProductServiceTest {
     mockRawMaterialFindById(2L, rm2);
     doNothing().when(entityManager).persist(any(Product.class));
 
-    ProductResponseDTO result = productService.insert(request);
+    ProductResponseDTO result = productServiceImpl.insert(request);
 
     assertNotNull(result);
     assertEquals(2, result.rawMaterials.size());
@@ -144,7 +144,7 @@ public class ProductServiceTest {
     mockFindByCode(null);
     mockRawMaterialFindById(1L, null);
 
-    assertThrows(ResourceNotFoundException.class, () -> productService.insert(request));
+    assertThrows(ResourceNotFoundException.class, () -> productServiceImpl.insert(request));
     verify(entityManager, never()).persist(any());
   }
 
@@ -155,7 +155,7 @@ public class ProductServiceTest {
 
     PanacheMock.doReturn(mockQuery).when(Product.class).find(eq("code"), any(Object[].class));
 
-    assertThrows(ConflictException.class, () -> productService.insert(dto));
+    assertThrows(ConflictException.class, () -> productServiceImpl.insert(dto));
     verify(entityManager, never()).persist(any());
   }
 
@@ -164,7 +164,7 @@ public class ProductServiceTest {
     mockFindById(id, existingProduct);
     mockFindByCode(null);
 
-    ProductResponseDTO result = productService.update(id, dto);
+    ProductResponseDTO result = productServiceImpl.update(id, dto);
 
     assertProductEquals(result, dto);
     assertEquals(dto.code, existingProduct.getCode());
@@ -190,7 +190,7 @@ public class ProductServiceTest {
     mockRawMaterialFindById(1L, rm1);
     mockRawMaterialFindById(2L, rm2);
 
-    ProductResponseDTO result = productService.update(id, request);
+    ProductResponseDTO result = productServiceImpl.update(id, request);
 
     assertNotNull(result);
     assertEquals(2, result.rawMaterials.size());
@@ -212,7 +212,7 @@ public class ProductServiceTest {
     mockFindByCode(null);
     mockRawMaterialFindById(1L, null);
 
-    assertThrows(ResourceNotFoundException.class, () -> productService.update(id, request));
+    assertThrows(ResourceNotFoundException.class, () -> productServiceImpl.update(id, request));
     verify(entityManager, times(1)).flush();
   }
 
@@ -225,7 +225,7 @@ public class ProductServiceTest {
     mockFindByCode(null);
     dto.rawMaterials = null;
 
-    ProductResponseDTO result = productService.update(id, dto);
+    ProductResponseDTO result = productServiceImpl.update(id, dto);
 
     assertNotNull(result);
     assertTrue(existingProduct.getRawMaterials().isEmpty());
@@ -241,7 +241,7 @@ public class ProductServiceTest {
     mockFindById(id, existingProduct);
     mockFindByCode(null);
 
-    ProductResponseDTO result = productService.update(id, request);
+    ProductResponseDTO result = productServiceImpl.update(id, request);
 
     assertNotNull(result);
     assertTrue(existingProduct.getRawMaterials().isEmpty());
@@ -252,7 +252,7 @@ public class ProductServiceTest {
   void update_shouldThrowResourceNotFoundException_whenIdNotFound() {
     mockFindById(id, null);
 
-    assertThrows(ResourceNotFoundException.class, () -> productService.update(id, dto));
+    assertThrows(ResourceNotFoundException.class, () -> productServiceImpl.update(id, dto));
   }
 
   @Test
@@ -263,7 +263,7 @@ public class ProductServiceTest {
     mockFindById(id, existingProduct);
     mockFindByCode(otherProduct);
 
-    assertThrows(ConflictException.class, () -> productService.update(id, dto));
+    assertThrows(ConflictException.class, () -> productServiceImpl.update(id, dto));
   }
 
   @Test
@@ -271,7 +271,7 @@ public class ProductServiceTest {
     mockFindById(id, existingProduct);
     mockFindByCode(existingProduct);
 
-    ProductResponseDTO result = productService.update(id, dto);
+    ProductResponseDTO result = productServiceImpl.update(id, dto);
 
     assertNotNull(result);
     assertEquals(dto.code, result.code);
@@ -282,14 +282,14 @@ public class ProductServiceTest {
     mockFindById(id, existingProduct);
     when(PanacheMock.getMock(Product.class).deleteById(id)).thenReturn(true);
 
-    assertDoesNotThrow(() -> productService.delete(id));
+    assertDoesNotThrow(() -> productServiceImpl.delete(id));
   }
 
   @Test
   void delete_shouldThrowResourceNotFoundException_whenIdNotFound() {
     mockFindById(id, null);
 
-    assertThrows(ResourceNotFoundException.class, () -> productService.delete(id));
+    assertThrows(ResourceNotFoundException.class, () -> productServiceImpl.delete(id));
   }
 
   @Test
@@ -301,7 +301,7 @@ public class ProductServiceTest {
         .deleteById(id);
 
     DatabaseException exception =
-        assertThrows(DatabaseException.class, () -> productService.delete(id));
+        assertThrows(DatabaseException.class, () -> productServiceImpl.delete(id));
     assertEquals(
         "Cannot delete product because it is referenced by other records", exception.getMessage());
   }
@@ -310,7 +310,7 @@ public class ProductServiceTest {
   void findById_shouldReturnProduct_whenIdExists() {
     mockFindById(id, existingProduct);
 
-    ProductResponseDTO result = productService.findById(id);
+    ProductResponseDTO result = productServiceImpl.findById(id);
 
     assertNotNull(result);
     assertEquals(existingProduct.getCode(), result.code);
@@ -320,7 +320,7 @@ public class ProductServiceTest {
   void findById_shouldThrowResourceNotFoundException_whenIdNotFound() {
     mockFindById(id, null);
 
-    assertThrows(ResourceNotFoundException.class, () -> productService.findById(id));
+    assertThrows(ResourceNotFoundException.class, () -> productServiceImpl.findById(id));
   }
 
   @Test
@@ -335,7 +335,7 @@ public class ProductServiceTest {
 
     mockFindAll(products, 3L, 1);
 
-    PageResponseDTO<ProductResponseDTO> result = productService.findAll(pageRequest);
+    PageResponseDTO<ProductResponseDTO> result = productServiceImpl.findAll(pageRequest);
 
     assertNotNull(result);
     assertEquals(3, result.content.size());
@@ -350,7 +350,7 @@ public class ProductServiceTest {
     List<Product> products = List.of(ProductFactory.createProductWithCode("PROD003"));
     mockFindAll(products, 1L, 1);
 
-    PageResponseDTO<ProductResponseDTO> result = productService.findAll(pageRequest);
+    PageResponseDTO<ProductResponseDTO> result = productServiceImpl.findAll(pageRequest);
 
     assertNotNull(result);
     assertEquals(1, result.content.size());
@@ -362,7 +362,7 @@ public class ProductServiceTest {
     PageRequestDTO pageRequest = new PageRequestDTO(0, 10, "name", "asc");
     mockFindAll(List.of(), 0L, 0);
 
-    PageResponseDTO<ProductResponseDTO> result = productService.findAll(pageRequest);
+    PageResponseDTO<ProductResponseDTO> result = productServiceImpl.findAll(pageRequest);
 
     assertNotNull(result);
     assertEquals(0, result.content.size());
@@ -380,7 +380,7 @@ public class ProductServiceTest {
 
     mockFindAll(products, 5L, 3);
 
-    PageResponseDTO<ProductResponseDTO> result = productService.findAll(pageRequest);
+    PageResponseDTO<ProductResponseDTO> result = productServiceImpl.findAll(pageRequest);
 
     assertNotNull(result);
     assertEquals(2, result.content.size());
@@ -400,7 +400,8 @@ public class ProductServiceTest {
             new Product("P-2", "Steel Chair", dto.price));
     mockFindByName(products, 4L, 2);
 
-    PageResponseDTO<ProductResponseDTO> result = productService.findByName("steel", pageRequest);
+    PageResponseDTO<ProductResponseDTO> result =
+        productServiceImpl.findByName("steel", pageRequest);
 
     assertNotNull(result);
     assertEquals(2, result.content.size());
@@ -417,7 +418,7 @@ public class ProductServiceTest {
     List<Product> products = List.of(ProductFactory.createProductWithCode("PROD999"));
     mockFindByName(products, 1L, 1);
 
-    PageResponseDTO<ProductResponseDTO> result = productService.findByName("prod", pageRequest);
+    PageResponseDTO<ProductResponseDTO> result = productServiceImpl.findByName("prod", pageRequest);
 
     assertNotNull(result);
     assertEquals(1, result.content.size());
@@ -438,7 +439,8 @@ public class ProductServiceTest {
             new Product("P-2", "Steel Chair", dto.price));
     mockFindByName(products, 2L, 1);
 
-    PageResponseDTO<ProductResponseDTO> result = productService.findByName("steel", pageRequest);
+    PageResponseDTO<ProductResponseDTO> result =
+        productServiceImpl.findByName("steel", pageRequest);
 
     assertNotNull(result);
     assertEquals(2, result.content.size());
@@ -452,7 +454,7 @@ public class ProductServiceTest {
   void findByName_shouldReturnEmptyPage_whenNameIsBlank() {
     PageRequestDTO pageRequest = new PageRequestDTO(1, 2, "name", "asc");
 
-    PageResponseDTO<ProductResponseDTO> result = productService.findByName("   ", pageRequest);
+    PageResponseDTO<ProductResponseDTO> result = productServiceImpl.findByName("   ", pageRequest);
 
     assertNotNull(result);
     assertTrue(result.content.isEmpty());
@@ -466,7 +468,7 @@ public class ProductServiceTest {
   void findByName_shouldReturnEmptyPage_whenNameIsNull_andNormalizePageAndSize() {
     PageRequestDTO pageRequest = new PageRequestDTO(-10, 0, null, null);
 
-    PageResponseDTO<ProductResponseDTO> result = productService.findByName(null, pageRequest);
+    PageResponseDTO<ProductResponseDTO> result = productServiceImpl.findByName(null, pageRequest);
 
     assertNotNull(result);
     assertTrue(result.content.isEmpty());
