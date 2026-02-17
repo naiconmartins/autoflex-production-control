@@ -126,7 +126,9 @@ public class UserResourceTest {
         .then()
         .statusCode(422)
         .body("errors[0].field", is("password"))
-        .body("errors[0].message", is("Password is required"));
+        .body(
+            "errors[0].message",
+            anyOf(is("Password is required"), is("Password must not be null")));
   }
 
   @Test

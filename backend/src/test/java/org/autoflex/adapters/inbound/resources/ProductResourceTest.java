@@ -4,7 +4,6 @@ import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
@@ -479,7 +478,9 @@ public class ProductResourceTest {
         .statusCode(200)
         .body("totalElements", is(1))
         .body("totalPages", is(1))
-        .body("content", nullValue());
+        .body("content", hasSize(1))
+        .body("content[0].id", is(1))
+        .body("content[0].code", is(dto.code));
   }
 
   @Test
@@ -497,7 +498,7 @@ public class ProductResourceTest {
         .statusCode(200)
         .body("totalElements", is(0))
         .body("totalPages", is(0))
-        .body("content", nullValue());
+        .body("content", hasSize(0));
   }
 
   @Test
@@ -554,7 +555,8 @@ public class ProductResourceTest {
         .statusCode(200)
         .body("totalElements", is(1))
         .body("totalPages", is(1))
-        .body("content", nullValue());
+        .body("content", hasSize(1))
+        .body("content[0].name", is(dto.name));
   }
 
   @Test
@@ -574,7 +576,7 @@ public class ProductResourceTest {
         .statusCode(200)
         .body("totalElements", is(0))
         .body("totalPages", is(0))
-        .body("content", nullValue());
+        .body("content", hasSize(0));
   }
 
   @Test
