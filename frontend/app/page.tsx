@@ -1,6 +1,7 @@
 "use client";
 
 import KPICard from "@/components/KPICard";
+import Loading from "@/components/loading";
 import ProductionPieChart, {
   type ProductItem as PieItem,
 } from "@/components/production-pie-chart";
@@ -61,7 +62,7 @@ export default function Dashboard() {
   if (!user || loading || !data) {
     return (
       <div className="flex h-screen items-center justify-center">
-        <div className="text-muted-foreground">Loading...</div>
+        <Loading />
       </div>
     );
   }

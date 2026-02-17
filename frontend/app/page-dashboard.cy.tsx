@@ -12,6 +12,7 @@ describe("<Dashboard />", () => {
       </ComponentProviders>,
     );
 
-    cy.contains("Loading...").should("exist");
+    cy.contains("Loading").should("exist");
+    cy.get('[role="status"][aria-label="Loading"]').should("exist");
   });
 });
