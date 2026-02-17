@@ -464,7 +464,14 @@ public class ProductResourceIT {
 
   @Test
   @TestSecurity(user = "admin", roles = "ADMIN")
-  void delete_shouldReturn400_whenDeleteFails() {}
+  void delete_shouldDeleteProductAndAssociations_whenProductHasRawMaterials() {
+    Long id = createProductAndReturnId(createValidRequest(uniqueCode(), VALID_RAW_MATERIAL_ID));
+
+    given().when().delete("/products/{id}", id).then().statusCode(204);
+
+    given().when().get("/products/{id}", id).then().statusCode(404);
+    given().when().get("/products/{productId}/raw-materials", id).then().statusCode(404);
+  }
 
   @Test
   @TestSecurity(user = "user", roles = "USER")
