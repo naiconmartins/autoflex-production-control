@@ -148,7 +148,7 @@ public class AuthResourceTest {
         .when()
         .post("/auth/login")
         .then()
-        .statusCode(400)
+        .statusCode(401)
         .body("error", is("Invalid credentials"));
   }
 }

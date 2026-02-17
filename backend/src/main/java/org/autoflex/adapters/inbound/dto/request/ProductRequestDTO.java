@@ -1,5 +1,6 @@
 package org.autoflex.adapters.inbound.dto.request;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
@@ -22,7 +23,7 @@ public class ProductRequestDTO {
   public BigDecimal price;
 
   @NotEmpty(message = "At least one raw material is required")
-  public List<ProductRawMaterialRequestDTO> rawMaterials;
+  public List<@Valid ProductRawMaterialRequestDTO> rawMaterials;
 
   ProductRequestDTO() {}
 
