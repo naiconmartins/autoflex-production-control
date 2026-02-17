@@ -86,6 +86,18 @@ public class AuthServiceImplTest {
   }
 
   @Test
+  void authenticate_shouldThrowException_whenUserRolesIsNull() {
+    var validUser = UserFixture.createValidUser();
+    validUser.setRoles(null);
+
+    when(userRepository.findByEmail(cmd.email())).thenReturn(Optional.of(validUser));
+    when(passwordEncoder.matches(cmd.password(), validUser.getPasswordHash())).thenReturn(true);
+
+    Assertions.assertThrows(NullPointerException.class, () -> authService.authenticate(cmd));
+    verifyNoInteractions(tokenIssuer);
+  }
+
+  @Test
   void authenticate_shouldThrowException_whenDtoIsNull() {
     Assertions.assertThrows(NullPointerException.class, () -> authService.authenticate(null));
   }

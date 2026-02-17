@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.List;
 import org.autoflex.application.commands.ProductCommand;
 import org.autoflex.common.exceptions.InvalidDataException;
@@ -19,39 +20,52 @@ public class ProductCommandTest {
 
   @Test
   void shouldThrowInvalidDataException_whenCodeIsNull() {
-    assertInvalidCommand(null, VALID_NAME, VALID_PRICE, validRawMaterials(), "Product code is required");
+    assertInvalidCommand(
+        null, VALID_NAME, VALID_PRICE, validRawMaterials(), "Product code is required");
   }
 
   @Test
   void shouldThrowInvalidDataException_whenCodeIsEmpty() {
-    assertInvalidCommand("", VALID_NAME, VALID_PRICE, validRawMaterials(), "Product code is required");
+    assertInvalidCommand(
+        "", VALID_NAME, VALID_PRICE, validRawMaterials(), "Product code is required");
   }
 
   @Test
   void shouldThrowInvalidDataException_whenNameIsNull() {
-    assertInvalidCommand(VALID_CODE, null, VALID_PRICE, validRawMaterials(), "Product name is required");
+    assertInvalidCommand(
+        VALID_CODE, null, VALID_PRICE, validRawMaterials(), "Product name is required");
   }
 
   @Test
   void shouldThrowInvalidDataException_whenNameIsEmpty() {
-    assertInvalidCommand(VALID_CODE, "", VALID_PRICE, validRawMaterials(), "Product name is required");
+    assertInvalidCommand(
+        VALID_CODE, "", VALID_PRICE, validRawMaterials(), "Product name is required");
   }
 
   @Test
   void shouldThrowInvalidDataException_whenPriceIsNull() {
-    assertInvalidCommand(VALID_CODE, VALID_NAME, null, validRawMaterials(), "Product price is required");
+    assertInvalidCommand(
+        VALID_CODE, VALID_NAME, null, validRawMaterials(), "Product price is required");
   }
 
   @Test
   void shouldThrowInvalidDataException_whenPriceIsZero() {
     assertInvalidCommand(
-        VALID_CODE, VALID_NAME, BigDecimal.ZERO, validRawMaterials(), "Price must be greater than zero");
+        VALID_CODE,
+        VALID_NAME,
+        BigDecimal.ZERO,
+        validRawMaterials(),
+        "Price must be greater than zero");
   }
 
   @Test
   void shouldThrowInvalidDataException_whenPriceIsNegative() {
     assertInvalidCommand(
-        VALID_CODE, VALID_NAME, new BigDecimal("-1"), validRawMaterials(), "Price must be greater than zero");
+        VALID_CODE,
+        VALID_NAME,
+        new BigDecimal("-1"),
+        validRawMaterials(),
+        "Price must be greater than zero");
   }
 
   @Test
@@ -104,6 +118,16 @@ public class ProductCommandTest {
         "Required quantity must be greater than zero");
   }
 
+  @Test
+  void shouldThrowInvalidDataException_whenRawMaterialItemIsNull() {
+    assertInvalidCommand(
+        VALID_CODE,
+        VALID_NAME,
+        VALID_PRICE,
+        Collections.singletonList(null),
+        "Raw material item is required");
+  }
+
   private static void assertInvalidCommand(
       String code,
       String name,
@@ -111,7 +135,8 @@ public class ProductCommandTest {
       List<ProductCommand.RawMaterialItem> rawMaterials,
       String expectedMessage) {
     InvalidDataException ex =
-        assertThrows(InvalidDataException.class, () -> createCommand(code, name, price, rawMaterials));
+        assertThrows(
+            InvalidDataException.class, () -> createCommand(code, name, price, rawMaterials));
 
     assertEquals(expectedMessage, ex.getMessage());
   }

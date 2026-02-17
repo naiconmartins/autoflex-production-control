@@ -116,6 +116,17 @@ public class UserServiceImplTest {
   }
 
   @Test
+  void insert_shouldThrowException_whenHashFails() {
+    when(userRepository.findByEmail(validCommand.email())).thenReturn(Optional.empty());
+    when(hasher.hash(validCommand.password())).thenThrow(new RuntimeException("hash error"));
+
+    RuntimeException ex = assertThrows(RuntimeException.class, () -> userService.insert(validCommand));
+
+    assertEquals("hash error", ex.getMessage());
+    verify(userRepository, never()).save(any(User.class));
+  }
+
+  @Test
   void findByEmail_shouldReturnUser_whenUserExistsAndIsActive() {
     User activeUser = UserFixture.createValidUser();
     when(userRepository.findByEmail("email@test.com")).thenReturn(Optional.of(activeUser));
