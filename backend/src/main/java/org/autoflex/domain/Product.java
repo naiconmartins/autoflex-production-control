@@ -3,6 +3,7 @@ package org.autoflex.domain;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import org.autoflex.common.exceptions.InvalidDataException;
 
 public class Product {
 
@@ -17,7 +18,7 @@ public class Product {
   public Product(String code, String name, BigDecimal price) {
     this.code = code;
     this.name = name;
-    this.price = price;
+    setPrice(price);
   }
 
   public void addRawMaterial(RawMaterial material, BigDecimal quantity) {
@@ -28,7 +29,7 @@ public class Product {
   public void updateData(String code, String name, BigDecimal price) {
     this.code = code;
     this.name = name;
-    this.price = price;
+    setPrice(price);
   }
 
   public void clearRawMaterials() {
@@ -64,6 +65,7 @@ public class Product {
   }
 
   public void setPrice(BigDecimal price) {
+    validatePrice(price);
     this.price = price;
   }
 
@@ -73,5 +75,14 @@ public class Product {
 
   public void setRawMaterials(List<ProductRawMaterial> rawMaterials) {
     this.rawMaterials = rawMaterials;
+  }
+
+  private static void validatePrice(BigDecimal price) {
+    if (price == null) {
+      throw new InvalidDataException("Product price is required");
+    }
+    if (price.compareTo(new BigDecimal("0.01")) < 0) {
+      throw new InvalidDataException("Price must be greater than zero");
+    }
   }
 }
