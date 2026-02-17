@@ -46,7 +46,7 @@ public class UserServiceImpl implements UserUseCase {
     user.getRoles().add(role);
 
     try {
-      userRepository.save(user);
+      user = userRepository.save(user);
     } catch (Exception ex) {
       throw new DatabaseException("Database constraint violation");
     }
