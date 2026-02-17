@@ -4,7 +4,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import java.util.Optional;
-import org.autoflex.application.commands.InsertUserCommand;
+import org.autoflex.application.commands.UserCommand;
 import org.autoflex.application.gateways.PasswordEncoder;
 import org.autoflex.application.gateways.UserRepository;
 import org.autoflex.application.usecases.UserUseCase;
@@ -20,7 +20,7 @@ public class UserServiceImpl implements UserUseCase {
 
   @Override
   @Transactional
-  public User insert(InsertUserCommand dto) {
+  public User insert(UserCommand dto) {
 
     Optional<User> userOpt = userRepository.findByEmail(dto.email());
 

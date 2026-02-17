@@ -11,7 +11,7 @@ import jakarta.ws.rs.core.UriBuilder;
 import org.autoflex.adapters.inbound.dto.request.UserRequestDTO;
 import org.autoflex.adapters.inbound.dto.response.UserResponseDTO;
 import org.autoflex.adapters.inbound.mappers.UserMapper;
-import org.autoflex.application.commands.InsertUserCommand;
+import org.autoflex.application.commands.UserCommand;
 import org.autoflex.application.usecases.UserUseCase;
 import org.autoflex.domain.User;
 
@@ -27,7 +27,7 @@ public class UserResource {
   @POST
   @RolesAllowed("ADMIN")
   public Response insert(@Valid UserRequestDTO dto) {
-    InsertUserCommand user = userMapper.toInsertUserCommand(dto);
+    UserCommand user = userMapper.toInsertUserCommand(dto);
     User created = userService.insert(user);
     UserResponseDTO responseDTO = new UserResponseDTO(created);
 
