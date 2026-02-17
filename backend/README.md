@@ -20,6 +20,36 @@ Este serviço gerencia:
 - Maven
 - Testes unitários e de integração com JUnit + RestAssured
 
+## Arquitetura
+
+O backend segue **Arquitetura Hexagonal (Ports and Adapters)** para separar regra de negócio de detalhes de entrada/saída.
+
+### Núcleo da aplicação
+
+- `org.autoflex.domain`: entidades e comportamentos de domínio
+- `org.autoflex.application.commands`: contratos de entrada dos casos de uso com validações
+- `org.autoflex.application.usecases`: portas de entrada (contratos da aplicação)
+- `org.autoflex.application.services`: implementação dos casos de uso
+- `org.autoflex.application.gateways`: portas de saída (contratos para persistência, segurança e infraestrutura)
+
+### Adaptadores
+
+- `org.autoflex.adapters.inbound`:
+  - `resources`: endpoints REST
+  - `dto`: contratos HTTP (request/response)
+  - `mappers`: conversão entre HTTP e aplicação
+- `org.autoflex.adapters.outbound`:
+  - `persistence.jpa`: implementação dos gateways com JPA/Panache
+
+### Tratamento de erros
+
+- `org.autoflex.common.exceptions`: exceções de negócio/aplicação
+- `org.autoflex.common.mappers`: mapeamento de exceções para respostas HTTP padronizadas
+
+### Fluxo resumido
+
+`Resource -> Mapper -> UseCase(Service) -> Gateway -> Adapter Outbound (JPA) -> Banco`
+
 ## Requisitos funcionais (Backend)
 
 - `RF001` CRUD de produtos: implementado em `ProductResource`
