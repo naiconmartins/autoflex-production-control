@@ -20,6 +20,14 @@ public interface ProductPersistenceMapper {
   @Mapping(target = "rawMaterials", qualifiedByName = "toEntityRawMaterialList")
   void updateEntityFromDomain(Product domain, @MappingTarget JpaProductEntity entity);
 
+  @BeforeMapping
+  default void clearRawMaterialsBeforeUpdate(
+      Product domain, @MappingTarget JpaProductEntity entity) {
+    if (entity.getRawMaterials() != null) {
+      entity.getRawMaterials().clear();
+    }
+  }
+
   @Named("toDomainRawMaterial")
   @Mapping(target = "product", ignore = true)
   ProductRawMaterial toDomainRawMaterial(JpaProductRawMaterialEntity entity);

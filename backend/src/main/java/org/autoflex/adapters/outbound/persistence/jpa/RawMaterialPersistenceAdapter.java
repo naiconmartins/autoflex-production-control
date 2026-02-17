@@ -47,7 +47,9 @@ public class RawMaterialPersistenceAdapter implements RawMaterialRepository, Jpa
   }
 
   @Override
-  public void delete(Long id) {}
+  public void delete(Long id) {
+    jpaRawMaterialRepository.deleteById(id);
+  }
 
   @Override
   public PagedModel<RawMaterial> findAll(SearchQuery query) {

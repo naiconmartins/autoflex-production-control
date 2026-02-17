@@ -18,8 +18,10 @@ import org.autoflex.domain.Product;
 @ApplicationScoped
 public class ProductPersistenceAdapter implements ProductRepository, JpaSortable {
 
-  @Inject JpaProductRepository jpaProductRepository;
-  @Inject ProductPersistenceMapper mapper;
+  @Inject
+  JpaProductRepository jpaProductRepository;
+  @Inject
+  ProductPersistenceMapper mapper;
 
   @Override
   public Product save(Product domain) {
@@ -27,7 +29,18 @@ public class ProductPersistenceAdapter implements ProductRepository, JpaSortable
 
     if (domain.getId() != null) {
       entity = jpaProductRepository.findById(domain.getId());
-      mapper.updateEntityFromDomain(domain, entity);
+      entity.setCode(domain.getCode());
+      entity.setName(domain.getName());
+      entity.setPrice(domain.getPrice());
+
+      // Remove old associations first to avoid unique constraint violations when reusing raw material IDs.
+      entity.getRawMaterials().clear();
+      jpaProductRepository.flush();
+
+      if (domain.getRawMaterials() != null) {
+        entity.getRawMaterials().addAll(mapper.toEntityRawMaterialList(domain.getRawMaterials()));
+      }
+      mapper.linkParentInEntity(entity);
     } else {
       entity = mapper.toEntity(domain);
     }
@@ -47,7 +60,9 @@ public class ProductPersistenceAdapter implements ProductRepository, JpaSortable
   }
 
   @Override
-  public void delete(Long id) {}
+  public void delete(Long id) {
+    jpaProductRepository.deleteById(id);
+  }
 
   @Override
   public PagedModel<Product> findAll(SearchQuery query) {
