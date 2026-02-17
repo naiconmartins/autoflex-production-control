@@ -49,6 +49,7 @@ public class RawMaterialPersistenceAdapter implements RawMaterialRepository, Jpa
   @Override
   public void delete(Long id) {
     jpaRawMaterialRepository.deleteById(id);
+    jpaRawMaterialRepository.flush();
   }
 
   @Override

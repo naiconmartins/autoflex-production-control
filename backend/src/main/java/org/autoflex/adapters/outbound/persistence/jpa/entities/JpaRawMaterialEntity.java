@@ -18,7 +18,7 @@ public class JpaRawMaterialEntity {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Column(nullable = false, length = 50, updatable = false)
+  @Column(nullable = false, length = 50)
   private String code;
 
   @Column(nullable = false, length = 100)

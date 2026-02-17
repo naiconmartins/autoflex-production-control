@@ -34,10 +34,11 @@ public class RawMaterialServiceImpl implements RawMaterialUseCase {
 
   @Transactional
   public RawMaterial update(Long id, RawMaterialCommand cmd) {
-    rawMaterialRepository
-        .findById(id)
-        .orElseThrow(
-            () -> new ResourceNotFoundException("Raw material with id " + id + " not found"));
+    RawMaterial existing =
+        rawMaterialRepository
+            .findById(id)
+            .orElseThrow(
+                () -> new ResourceNotFoundException("Raw material with id " + id + " not found"));
 
     rawMaterialRepository
         .findByCode(cmd.code())
@@ -47,8 +48,11 @@ public class RawMaterialServiceImpl implements RawMaterialUseCase {
               throw new ConflictException("Raw material code already exists");
             });
 
-    RawMaterial rm = new RawMaterial(cmd.code(), cmd.name(), cmd.stockQuantity());
-    return rawMaterialRepository.save(rm);
+    existing.setCode(cmd.code());
+    existing.setName(cmd.name());
+    existing.setStockQuantity(cmd.stockQuantity());
+
+    return rawMaterialRepository.save(existing);
   }
 
   @Transactional
