@@ -1,5 +1,6 @@
 package org.autoflex.adapters.inbound.mappers;
 
+import java.util.List;
 import org.autoflex.adapters.inbound.dto.request.RawMaterialRequestDTO;
 import org.autoflex.adapters.inbound.dto.response.PageResponseDTO;
 import org.autoflex.adapters.inbound.dto.response.RawMaterialResponseDTO;
@@ -14,13 +15,12 @@ public interface RawMaterialMapper {
 
   RawMaterialCommand toCommand(RawMaterialRequestDTO dto);
 
-  @Mapping(target = "content", source = "model.items")
-  @Mapping(target = "totalElements", source = "model.totalElements")
-  @Mapping(target = "totalPages", source = "model.totalPages")
-  @Mapping(target = "page", source = "page")
-  @Mapping(target = "size", source = "size")
-  PageResponseDTO<RawMaterialResponseDTO> toResponse(
-      PagedModel<RawMaterial> model, int page, int size);
+  default PageResponseDTO<RawMaterialResponseDTO> toResponse(
+      PagedModel<RawMaterial> model, int page, int size) {
+    List<RawMaterialResponseDTO> content =
+        model.items() == null ? List.of() : model.items().stream().map(this::map).toList();
+    return new PageResponseDTO<>(content, model.totalElements(), model.totalPages(), page, size);
+  }
 
   default RawMaterialResponseDTO map(RawMaterial rawMaterial) {
     return new RawMaterialResponseDTO(rawMaterial);

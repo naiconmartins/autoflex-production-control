@@ -3,8 +3,9 @@ package org.autoflex.adapters.inbound.resources;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.nullValue;
 
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.security.TestSecurity;
@@ -335,7 +336,9 @@ public class RawMaterialResourceIT {
         .statusCode(200)
         .body("totalElements", greaterThan(0))
         .body("totalPages", greaterThan(0))
-        .body("content", nullValue());
+        .body("content", hasSize(greaterThan(0)))
+        .body("content.id", hasItem(1))
+        .body("content.code", hasItem("MAD-001"));
   }
 
   @Test
@@ -351,7 +354,7 @@ public class RawMaterialResourceIT {
         .then()
         .statusCode(200)
         .body("totalPages", greaterThan(0))
-        .body("content", nullValue());
+        .body("content", hasSize(0));
   }
 
   @Test
@@ -404,7 +407,8 @@ public class RawMaterialResourceIT {
         .statusCode(200)
         .body("totalElements", greaterThan(0))
         .body("totalPages", greaterThan(0))
-        .body("content", nullValue());
+        .body("content", hasSize(greaterThan(0)))
+        .body("content[0].name", is("Pine Wood Board 2.5x30x200cm"));
   }
 
   @Test
@@ -422,7 +426,7 @@ public class RawMaterialResourceIT {
         .statusCode(200)
         .body("totalElements", is(0))
         .body("totalPages", is(1))
-        .body("content", nullValue());
+        .body("content", hasSize(0));
   }
 
   @Test
