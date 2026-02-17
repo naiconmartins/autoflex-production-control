@@ -14,7 +14,7 @@ Desafio concluído, incluindo:
 
 ## Arquitetura do Monorepo
 
-- `backend/`: API em Java 21 + Quarkus + PostgreSQL + JWT
+- `backend/`: API em Java 21 + Quarkus + PostgreSQL + JWT, seguindo arquitetura hexagonal
 - `frontend/`: aplicação web em Next.js 16 + React 19 + Redux Toolkit + Cypress
 
 Documentação detalhada por módulo:
